@@ -1,1 +1,107 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
 
+body {
+  background: linear-gradient(180deg, #0b132b, #000814);
+  color: #fff;
+  text-align: center;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+/* HEADER */
+header h1 {
+  font-size: 26px;
+}
+.subtitle {
+  color: #7dd3fc;
+  margin-top: 5px;
+}
+
+/* BALANCE */
+.balance-box {
+  margin: 25px auto;
+  padding: 15px;
+  max-width: 320px;
+  background: #111827;
+  border-radius: 12px;
+}
+.balance-box .label {
+  font-size: 14px;
+  color: #9ca3af;
+}
+.balance-box h2 {
+  font-size: 28px;
+  margin: 8px 0;
+}
+.progress {
+  width: 100%;
+  height: 10px;
+  background: #1f2937;
+  border-radius: 10px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #22c55e, #4ade80);
+}
+.balance-box small {
+  display: block;
+  margin-top: 6px;
+  color: #9ca3af;
+}
+
+/* TAP */
+.tap-container {
+  margin: 30px 0;
+}
+.tap-btn {
+  width: 220px;
+  height: 220px;
+  margin: 0 auto;
+  border-radius: 50%;
+  background: radial-gradient(circle, #22c55e, #16a34a);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 45px rgba(34,197,94,0.8);
+}
+.tap-btn img {
+  width: 120px;
+}
+.tap-text {
+  margin-top: 12px;
+  color: #a7f3d0;
+}
+
+/* BUTTONS */
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 320px;
+  margin: 0 auto;
+}
+.btn {
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  background: #1f2937;
+  color: #fff;
+  font-size: 15px;
+}
+.btn.primary {
+  background: #374151;
+  color: #9ca3af;
+}
+
+/* FOOTER */
+footer {
+  margin-top: 30px;
+  font-size: 13px;
+  color: #9ca3af;
+}
