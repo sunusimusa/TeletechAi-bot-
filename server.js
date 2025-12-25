@@ -45,7 +45,56 @@ app.post("/tap", (req, res) => {
   const db = readDB();
   const user = db[userId];
   if (!user) return res.status(400).json({ error: "User not found" });
+// sauran app.use(...)
 
+// USER
+app.post("/user", ...);
+
+// TAP
+app.post("/tap", ...);
+
+// 👉 A NAN KA SAKA SHI 👇
+
+// WITHDRAW (MIN 1000 TT)
+app.post("/withdraw", (req, res) => {
+  const { userId, wallet } = req.body;
+
+  let users = readJSON(USERS_FILE);
+  let withdraws = readJSON(WITHDRAWS_FILE);
+
+  if (!users[userId]) {
+    return res.status(400).json({ error: "User not found" });
+  }
+
+  if (users[userId].balance < 1000) {
+    return res.status(400).json({ error: "Minimum withdraw is 1000 TT" });
+  }
+
+  if (!wallet || wallet.length < 10) {
+    return res.status(400).json({ error: "Invalid wallet address" });
+  }
+
+  withdraws.push({
+    userId: userId,
+    wallet: wallet,
+    amount: users[userId].balance,
+    status: "pending",
+    time: Date.now()
+  });
+
+  users[userId].balance = 0;
+
+  writeJSON(USERS_FILE, users);
+  writeJSON(WITHDRAWS_FILE, withdraws);
+
+  res.json({ success: true, msg: "Withdraw request sent" });
+});
+
+// 👉 KADA KA SA KOMAI A KASA DA WANNAN
+app.listen(PORT, () => {
+  console.log("Server running on port " + PORT);
+});
+  
   // Anti-cheat: 1 tap per second
   if (now - user.lastTap < 1000) {
     return res.status(429).json({ error: "Too fast" });
