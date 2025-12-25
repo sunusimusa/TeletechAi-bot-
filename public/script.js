@@ -70,3 +70,41 @@ withdrawBtn.addEventListener("click", () => {
     "Complete tasks & wait for launch."
   );
 });
+// ===== TASK SYSTEM (DEMO) =====
+const TASK_KEY = "teletech_tasks";
+let tasks = JSON.parse(localStorage.getItem(TASK_KEY)) || {};
+
+function completeTask(task) {
+  if (tasks[task]) {
+    alert("✅ Task already completed");
+    return;
+  }
+
+  let reward = 0;
+
+  if (task === "join") reward = 50;
+  if (task === "invite") reward = 100;
+  if (task === "daily") reward = 20;
+
+  balance += reward;
+  localStorage.setItem(STORAGE_KEY, balance);
+
+  tasks[task] = true;
+  localStorage.setItem(TASK_KEY, JSON.stringify(tasks));
+
+  updateBalance(balance);
+  alert(`🎉 Task completed! +${reward} TT`);
+
+  disableCompletedTasks();
+}
+
+function disableCompletedTasks() {
+  document.querySelectorAll(".taskBtn").forEach(btn => {
+    if (btn.innerText.toLowerCase().includes("join") && tasks.join) btn.disabled = true;
+    if (btn.innerText.toLowerCase().includes("invite") && tasks.invite) btn.disabled = true;
+    if (btn.innerText.toLowerCase().includes("daily") && tasks.daily) btn.disabled = true;
+  });
+}
+
+// run on load
+disableCompletedTasks();
