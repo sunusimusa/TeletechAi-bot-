@@ -1,5 +1,8 @@
-// TELEGRAM USER ID (KA CANZA DAGA MINI APP)
-const userId = "1248500925"; // naka
+let userId = "guest";
+
+if (window.Telegram && Telegram.WebApp && Telegram.WebApp.initDataUnsafe) {
+  userId = Telegram.WebApp.initDataUnsafe.user.id.toString();
+}
 
 const balanceEl = document.getElementById("balance");
 const withdrawBtn = document.getElementById("withdrawBtn");
