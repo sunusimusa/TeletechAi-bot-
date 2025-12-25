@@ -183,3 +183,84 @@ if (incomingRef && !refData.used && incomingRef !== myRef) {
 
   alert(`🎉 Welcome bonus! +${REF_NEWUSER_REWARD} TT`);
 }
+/**************
+ * ENERGY SYSTEM (DEMO)
+ **************/
+const ENERGY_KEY = "teletech_energy";
+const ENERGY_MAX = 100;
+const REFILL_INTERVAL = 60 * 1000; // 1 minute
+
+let energyData = JSON.parse(localStorage.getItem(ENERGY_KEY)) || {
+  energy: ENERGY_MAX,
+  lastRefill: Date.now()
+};
+
+const energyValEl = document.getElementById("energyVal");
+const energyFillEl = document.getElementById("energyFill");
+const refillBtn = document.getElementById("refillBtn");
+
+// auto refill handler
+function autoRefill() {
+  const now = Date.now();
+  const elapsed = now - energyData.lastRefill;
+
+  const refillPoints = Math.floor(elapsed / REFILL_INTERVAL);
+  if (refillPoints > 0) {
+    energyData.energy = Math.min(
+      ENERGY_MAX,
+      energyData.energy + refillPoints
+    );
+    energyData.lastRefill += refillPoints * REFILL_INTERVAL;
+    saveEnergy();
+  }
+  updateEnergyUI();
+}
+
+// save
+function saveEnergy() {
+  localStorage.setItem(ENERGY_KEY, JSON.stringify(energyData));
+}
+
+// update UI
+function updateEnergyUI() {
+  energyValEl.innerText = energyData.energy;
+  energyFillEl.style.width =
+    (energyData.energy / ENERGY_MAX) * 100 + "%";
+}
+
+// hook into TAP (MODIFY tap handler)
+const originalTap = tap;
+tap = function () {
+  autoRefill();
+
+  if (energyData.energy <= 0) {
+    alert("⛔ Energy empty. Refill to continue.");
+    return;
+  }
+
+  energyData.energy -= 1;
+  saveEnergy();
+  updateEnergyUI();
+
+  // call original tap logic
+  originalTap();
+};
+
+// refill by ad (DEMO)
+refillBtn.addEventListener("click", () => {
+  // reuse rewarded ad flow
+  playAdForEnergy();
+});
+
+function playAdForEnergy() {
+  // simple demo: instant refill
+  energyData.energy = ENERGY_MAX;
+  energyData.lastRefill = Date.now();
+  saveEnergy();
+  updateEnergyUI();
+  alert("🔋 Energy refilled!");
+}
+
+// init
+autoRefill();
+setInterval(autoRefill, 10000);
