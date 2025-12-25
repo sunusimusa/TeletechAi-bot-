@@ -229,3 +229,24 @@ footer {
   background: #374151;
   color: #aaa;
 }
+.card {
+  background: #111827;
+  padding: 15px;
+  border-radius: 12px;
+  margin: 25px auto;
+  max-width: 320px;
+}
+
+#refLink {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  margin: 10px 0;
+  font-size: 13px;
+}
+
+.small {
+  font-size: 13px;
+  color: #9ca3af;
+}
