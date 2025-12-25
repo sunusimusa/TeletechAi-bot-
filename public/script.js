@@ -1,102 +1,85 @@
-/* ===============================
-   TELETECH AI – FRONTEND SCRIPT
-   =============================== */
+// 🔹 TELEGRAM USER
+const tg = window.Telegram.WebApp;
+tg.ready();
 
-/*
-  👉 A NAN NE ZAKA SA TELEGRAM USER ID
-  Idan Mini App ne daga Telegram:
-  window.Telegram.WebApp.initDataUnsafe.user.id
-*/
+// KARBAR TELEGRAM ID KAI TSAYE
+const userId = tg.initDataUnsafe?.user?.id;
 
-let userId = "demo-user"; // DEFAULT (idan ba Telegram ba)
-
-// ====== TELEGRAM AUTO DETECT ======
-if (window.Telegram && window.Telegram.WebApp) {
-  const tg = window.Telegram.WebApp;
-  tg.ready();
-
-  if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-    userId = tg.initDataUnsafe.user.id.toString();
-  }
+if (!userId) {
+  alert("Telegram user not detected");
 }
 
-// ====== INIT USER ======
-async function init() {
-  try {
-    const res = await fetch("/user", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId })
-    });
+// ELEMENTS
+const balanceEl = document.getElementById("balance");
+const tapBtn = document.getElementById("tapBtn");
+const withdrawBtn = document.getElementById("withdrawBtn");
 
-    const data = await res.json();
-    updateBalance(data.balance);
-  } catch (e) {
-    console.error("Init error", e);
-  }
+// INIT USER
+async function initUser() {
+  const res = await fetch("/start", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId })
+  });
+  const data = await res.json();
+  updateBalance(data.balance);
 }
 
-// ====== TAP ======
+// TAP
 async function tap() {
-  try {
-    const res = await fetch("/tap", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId })
-    });
+  const res = await fetch("/tap", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId })
+  });
+  const data = await res.json();
 
-    const data = await res.json();
-
-    if (data.error) {
-      alert(data.error);
-      return;
-    }
-
+  if (data.error) {
+    alert(data.error);
+  } else {
     updateBalance(data.balance);
-  } catch (e) {
-    console.error("Tap error", e);
   }
 }
 
-// ====== WITHDRAW ======
+// WITHDRAW
 async function withdraw() {
-  const wallet = prompt("Enter your wallet address:");
+  const wallet = prompt("Enter your USDT TRC20 wallet:");
 
-  if (!wallet) {
-    alert("Wallet is required");
+  if (!wallet || wallet.length < 10) {
+    alert("Invalid wallet");
     return;
   }
 
-  try {
-    const res = await fetch("/withdraw", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        userId: userId,
-        wallet: wallet
-      })
-    });
+  const res = await fetch("/withdraw", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId, wallet })
+  });
 
-    const data = await res.json();
+  const data = await res.json();
 
-    if (data.error) {
-      alert(data.error);
-    } else {
-      alert("Withdraw request sent!");
-      updateBalance(0);
-    }
-  } catch (e) {
-    console.error("Withdraw error", e);
+  if (data.error) {
+    alert(data.error);
+  } else {
+    alert("Withdraw request sent!");
+    updateBalance(0);
   }
 }
 
-// ====== UPDATE BALANCE UI ======
+// UPDATE UI
 function updateBalance(amount) {
-  const el = document.getElementById("balance");
-  if (el) {
-    el.innerText = amount + " TT";
+  balanceEl.innerText = amount + " TT";
+
+  if (amount >= 1000) {
+    withdrawBtn.style.display = "block";
+  } else {
+    withdrawBtn.style.display = "none";
   }
 }
 
-// ====== START ======
-init();
+// EVENTS
+tapBtn.addEventListener("click", tap);
+withdrawBtn.addEventListener("click", withdraw);
+
+// START
+initUser();
