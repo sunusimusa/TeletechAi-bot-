@@ -135,8 +135,3 @@ function giveReferralBonus() {
   }
 }
 giveReferralBonus();
-// ==========================
-// REFERRAL LINK GENERATOR
-// ==========================
-document.getElementById("refLink").value =
-  window.location.origin + "?ref=" + userId;
