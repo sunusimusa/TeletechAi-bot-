@@ -27,12 +27,13 @@ app.post("/user", (req, res) => {
   const { userId, ref } = req.body;
 
   if (!users[userId]) {
-    users[userId] = {
-      balance: 0,
-      energy: MAX_ENERGY,
-      lastEnergy: Date.now(),
-      refs: []
-    };
+  users[userId] = {
+    balance: 0,
+    energy: 100,
+    lastEnergy: Date.now(),
+    lastDaily: 0,
+    refs: []
+  };
   }
 
   // ENERGY REGEN
