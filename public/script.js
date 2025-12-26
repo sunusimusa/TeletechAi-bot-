@@ -1,6 +1,3 @@
-// ==========================
-// CREATE OR GET USER ID
-// ==========================
 let userId = localStorage.getItem("uid");
 
 if (!userId) {
@@ -8,15 +5,10 @@ if (!userId) {
   localStorage.setItem("uid", userId);
 }
 
-// ==========================
-// LOAD USER DATA
-// ==========================
 async function loadUser() {
   const res = await fetch("/user", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ userId })
   });
 
@@ -24,15 +16,10 @@ async function loadUser() {
   document.getElementById("balance").innerText = data.balance;
 }
 
-// ==========================
-// TAP FUNCTION
-// ==========================
 async function tap() {
   const res = await fetch("/tap", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ userId })
   });
 
@@ -40,7 +27,4 @@ async function tap() {
   document.getElementById("balance").innerText = data.balance;
 }
 
-// ==========================
-// LOAD ON PAGE OPEN
-// ==========================
 loadUser();
