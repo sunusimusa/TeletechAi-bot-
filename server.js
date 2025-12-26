@@ -72,6 +72,11 @@ app.post("/tap", (req, res) => {
     energy: users[userId].energy
   });
 });
+app.post("/ref-count", (req, res) => {
+  const { userId } = req.body;
+  const count = users[userId]?.refs?.length || 0;
+  res.json({ count });
+});
 
 // ===============================
 app.listen(PORT, () => {
