@@ -17,6 +17,11 @@
   <p>⚡ Energy: <span id="energy">0</span></p>
   <p>💰 Balance: <span id="balance">0</span></p>
 
+  <input id="refLink" readonly />
+<button onclick="navigator.clipboard.writeText(refLink.value)">
+  Copy Invite Link
+</button>
+
   <script src="script.js"></script>
 </body>
 </html>
