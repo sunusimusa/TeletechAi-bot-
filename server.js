@@ -60,19 +60,28 @@ app.post("/tap", (req, res) => {
 
   if (!users[userId]) return res.json({ error: "User not found" });
 
-  if (tapCooldown[userId] && now - tapCooldown[userId] < 500) {
-    return res.json(users[userId]);
+  // ENERGY REGEN
+  const regenRate = 10000; // 10 seconds
+  const passed = Math.floor((now - users[userId].lastEnergy) / regenRate);
+
+  if (passed > 0) {
+    users[userId].energy = Math.min(100, users[userId].energy + passed);
+    users[userId].lastEnergy = now;
   }
 
-  tapCooldown[userId] = now;
-
-  if (users[userId].energy <= 0) return res.json(users[userId]);
+  if (users[userId].energy <= 0) {
+    return res.json({ error: "No energy" });
+  }
 
   users[userId].energy -= 1;
   users[userId].balance += 1;
 
   saveUsers();
-  res.json(users[userId]);
+
+  res.json({
+    balance: users[userId].balance,
+    energy: users[userId].energy
+  });
 });
 
 // DAILY REWARD
