@@ -1,3 +1,6 @@
+// ==========================
+// USER ID
+// ==========================
 let userId = localStorage.getItem("uid");
 
 if (!userId) {
@@ -5,6 +8,15 @@ if (!userId) {
   localStorage.setItem("uid", userId);
 }
 
+// ==========================
+// ENERGY CONFIG
+// ==========================
+const MAX_ENERGY = 100;
+const ENERGY_REGEN_TIME = 30000; // 30 seconds
+
+// ==========================
+// LOAD USER
+// ==========================
 async function loadUser() {
   const res = await fetch("/user", {
     method: "POST",
@@ -16,9 +28,22 @@ async function loadUser() {
 
   document.getElementById("balance").innerText = data.balance;
   document.getElementById("energy").innerText = data.energy;
+
+  localStorage.setItem("energy", data.energy);
+  localStorage.setItem("lastEnergy", Date.now());
 }
 
+// ==========================
+// TAP FUNCTION
+// ==========================
 async function tap() {
+  let energy = parseInt(localStorage.getItem("energy") || 0);
+
+  if (energy <= 0) {
+    alert("⚡ Energy ya ƙare!");
+    return;
+  }
+
   const res = await fetch("/tap", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -27,13 +52,25 @@ async function tap() {
 
   const data = await res.json();
 
-  if (data.error) {
-    alert("⚡ Energy ya ƙare!");
-    return;
-  }
-
   document.getElementById("balance").innerText = data.balance;
-  document.getElementById("energy").innerText = data.energy;
+
+  energy--;
+  localStorage.setItem("energy", energy);
+  document.getElementById("energy").innerText = energy;
 }
 
+// ==========================
+// ENERGY AUTO REFILL
+// ==========================
+setInterval(() => {
+  let energy = parseInt(localStorage.getItem("energy") || 0);
+
+  if (energy < MAX_ENERGY) {
+    energy++;
+    localStorage.setItem("energy", energy);
+    document.getElementById("energy").innerText = energy;
+  }
+}, ENERGY_REGEN_TIME);
+
+// ==========================
 loadUser();
