@@ -84,6 +84,43 @@ app.post("/tap", (req, res) => {
     energy: users[userId].energy
   });
 });
+// ==========================
+// TASK REWARD SYSTEM
+// ==========================
+app.post("/task", (req, res) => {
+  const { userId, type } = req.body;
+
+  if (!users[userId]) {
+    return res.json({ error: "User not found" });
+  }
+
+  // prevent duplicate reward
+  if (!users[userId].tasks) {
+    users[userId].tasks = {};
+  }
+
+  if (users[userId].tasks[type]) {
+    return res.json({ error: "Task already completed" });
+  }
+
+  // reward logic
+  let reward = 0;
+
+  if (type === "tg") reward = 5;
+  if (type === "yt") reward = 5;
+  if (type === "chat") reward = 5;
+
+  users[userId].balance += reward;
+  users[userId].tasks[type] = true;
+
+  saveUsers();
+
+  res.json({
+    success: true,
+    reward,
+    balance: users[userId].balance
+  });
+});
 
 // DAILY REWARD
 app.post("/daily", (req, res) => {
