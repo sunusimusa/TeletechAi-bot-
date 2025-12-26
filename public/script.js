@@ -1,10 +1,16 @@
+// ==========================
+// USER ID
+// ==========================
 let userId = localStorage.getItem("uid");
 
 if (!userId) {
-  userId = Math.floor(Math.random() * 999999);
+  userId = Math.floor(Math.random() * 1000000);
   localStorage.setItem("uid", userId);
 }
 
+// ==========================
+// LOAD USER
+// ==========================
 async function loadUser() {
   const res = await fetch("/user", {
     method: "POST",
@@ -13,23 +19,15 @@ async function loadUser() {
   });
 
   const data = await res.json();
+
   document.getElementById("balance").innerText = data.balance;
   document.getElementById("energy").innerText = data.energy;
-
-  document.getElementById("refLink").value =
-    window.location.origin + "?ref=" + userId;
 }
 
+// ==========================
+// TAP FUNCTION
+// ==========================
 async function tap() {
-  const circle = document.getElementById("tapBtn");
-
-  // animation start
-  circle.classList.add("active");
-
-  setTimeout(() => {
-    circle.classList.remove("active");
-  }, 150);
-
   const res = await fetch("/tap", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -41,10 +39,22 @@ async function tap() {
   document.getElementById("balance").innerText = data.balance;
   document.getElementById("energy").innerText = data.energy;
 }
+
+// ==========================
+// REF LINK
+// ==========================
+document.getElementById("refLink").value =
+  window.location.origin + "?ref=" + userId;
+
+// ==========================
+// COPY LINK
+// ==========================
 function copyLink() {
   navigator.clipboard.writeText(
     window.location.origin + "?ref=" + userId
   );
-  alert("Link copied!");
+  alert("Copied!");
 }
+
+// ==========================
 loadUser();
