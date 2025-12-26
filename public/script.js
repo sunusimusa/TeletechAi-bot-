@@ -4,6 +4,12 @@ tg.expand();
 const user = tg.initDataUnsafe.user;
 const userId = user.id;
 
+const userId = localStorage.getItem("userId") || Math.floor(Math.random() * 1000000);
+localStorage.setItem("userId", userId);
+
+const refLink = `${window.location.origin}?ref=${userId}`;
+document.getElementById("refLink").value = refLink;
+
 // get ref id
 const params = new URLSearchParams(window.location.search);
 const ref = params.get("ref");
