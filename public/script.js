@@ -23,6 +23,19 @@ async function loadUser() {
 
 // TAP
 async function tap() {
+  const tapBtn = document.getElementById("tap");
+
+  // vibration (Telegram & mobile)
+  if (navigator.vibrate) {
+    navigator.vibrate(30);
+  }
+
+  // animation
+  tapBtn.style.transform = "scale(0.9)";
+  setTimeout(() => {
+    tapBtn.style.transform = "scale(1)";
+  }, 100);
+
   const res = await fetch("/tap", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -30,6 +43,9 @@ async function tap() {
   });
 
   const data = await res.json();
+
+  if (data.error) return;
+
   document.getElementById("balance").innerText = data.balance;
   document.getElementById("energy").innerText = data.energy;
 }
