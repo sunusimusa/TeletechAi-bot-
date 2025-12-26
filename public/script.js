@@ -25,9 +25,16 @@ async function loadUser() {
 }
 
 // ==========================
-// TAP FUNCTION
+// TAP
 // ==========================
 async function tap() {
+  let energy = parseInt(document.getElementById("energy").innerText);
+
+  if (energy <= 0) {
+    alert("⚡ Energy ya ƙare!");
+    return;
+  }
+
   const res = await fetch("/tap", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -61,6 +68,9 @@ async function loadRefCount() {
     "Referrals: " + data.count;
 }
 
+// ==========================
+// AUTO ADS ROTATION
+// ==========================
 async function loadAd() {
   const res = await fetch("/ads");
   const ad = await res.json();
@@ -70,6 +80,8 @@ async function loadAd() {
 }
 
 loadAd();
+setInterval(loadAd, 10000);
+
 // ==========================
 // ON LOAD
 // ==========================
