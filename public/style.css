@@ -1,96 +1,58 @@
 body {
   margin: 0;
   font-family: Arial, sans-serif;
-  background: radial-gradient(circle at top, #0f172a, #020617);
+  background: radial-gradient(circle at top, #0f2027, #203a43, #2c5364);
   color: white;
   text-align: center;
 }
 
-.app {
-  padding: 30px;
+.container {
+  padding-top: 40px;
 }
 
-.sub {
-  opacity: 0.8;
-  margin-bottom: 20px;
-}
-
-.balance {
+h1 {
   font-size: 28px;
-  font-weight: bold;
-  margin-bottom: 20px;
 }
 
-.tap-container {
-  display: flex;
-  justify-content: center;
-  margin: 30px 0;
+.subtitle {
+  opacity: 0.7;
 }
 
-.tap-btn {
-  width: 220px;
-  height: 220px;
-  border-radius: 50%;
-  background: radial-gradient(circle, #22c55e, #15803d);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 0 40px #22c55e;
-  animation: pulse 2s infinite;
-}
-
-.tap-btn img {
-  width: 90px;
-}
-
-@keyframes pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-  100% { transform: scale(1); }
-}
-
-.energy {
-  margin-top: 10px;
-  font-size: 18px;
-}
-
-.ref-box {
-  margin-top: 20px;
-}
-
-.ref-box input {
-  width: 80%;
-  padding: 10px;
-  border-radius: 6px;
-  border: none;
-}
-
-.ref-box button {
-  margin-top: 10px;
-  padding: 10px 20px;
-  background: #22c55e;
-  border: none;
-  border-radius: 6px;
-  color: black;
-  font-weight: bold;
-}
 .tap-circle {
   width: 260px;
   height: 260px;
   border-radius: 50%;
-  background: radial-gradient(circle, #32ff7e, #1e9e57);
+  background: radial-gradient(circle, #38ef7d, #11998e);
+  margin: 30px auto;
   display: flex;
-  justify-content: center;
   align-items: center;
-  transition: transform 0.15s ease;
+  justify-content: center;
+  transition: 0.15s;
 }
 
-.tap-circle.active {
-  transform: scale(0.9);
-  box-shadow: 0 0 40px #00ff99;
+.tap-circle:active {
+  transform: scale(0.92);
 }
-#tapImg {
-  width: 120px;
-  height: 120px;
-  pointer-events: none;
+
+.tap-circle img {
+  width: 90px;
+}
+
+button {
+  background: #22c55e;
+  border: none;
+  padding: 12px 25px;
+  color: black;
+  font-weight: bold;
+  border-radius: 8px;
+  margin-top: 10px;
+}
+
+input {
+  margin-top: 15px;
+  padding: 10px;
+  width: 80%;
+  border-radius: 8px;
+  border: none;
+  text-align: center;
 }
