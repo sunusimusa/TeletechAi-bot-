@@ -1,38 +1,32 @@
 const express = require("express");
-const cors = require("cors");
 const fs = require("fs");
 const path = require("path");
+const cors = require("cors");
 
 const app = express();
 app.use(cors());
 app.use(express.json());
-app.use(express.static("public"));
 
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
-});
-
-const PORT = process.env.PORT || 3000;
 const DB_FILE = "./users.json";
 
-// =======================
+// ==========================
 // LOAD USERS
-// =======================
+// ==========================
 let users = {};
 if (fs.existsSync(DB_FILE)) {
   users = JSON.parse(fs.readFileSync(DB_FILE));
 }
 
-// =======================
+// ==========================
 // SAVE USERS
-// =======================
+// ==========================
 function saveUsers() {
   fs.writeFileSync(DB_FILE, JSON.stringify(users, null, 2));
 }
 
-// =======================
-// CREATE / GET USER
-// =======================
+// ==========================
+// GET / CREATE USER
+// ==========================
 app.post("/user", (req, res) => {
   const { userId } = req.body;
 
@@ -46,71 +40,73 @@ app.post("/user", (req, res) => {
     saveUsers();
   }
 
+  // Energy regen
+  const now = Date.now();
+  const diff = Math.floor((now - users[userId].lastEnergyUpdate) / 30000);
+
+  if (diff > 0) {
+    users[userId].energy = Math.min(100, users[userId].energy + diff);
+    users[userId].lastEnergyUpdate = now;
+    saveUsers();
+  }
+
   res.json(users[userId]);
 });
 
-// =======================
-// TAP ROUTE
-// =======================
+// ==========================
+// TAP
+// ==========================
 app.post("/tap", (req, res) => {
   const { userId } = req.body;
 
   if (!users[userId]) {
-    users[userId] = {
-      balance: 0,
-      energy: 100,
-      lastEnergyUpdate: Date.now(),
-      refs: []
-    };
+    return res.json({ error: "User not found" });
   }
 
   if (users[userId].energy <= 0) {
-    return res.json({
-      balance: users[userId].balance,
-      energy: users[userId].energy
-    });
+    return res.json(users[userId]);
   }
 
-  users[userId].balance += 1;
   users[userId].energy -= 1;
+  users[userId].balance += 1;
 
   saveUsers();
-
-  res.json({
-    balance: users[userId].balance,
-    energy: users[userId].energy
-  });
+  res.json(users[userId]);
 });
+
 // ==========================
-// ADS SYSTEM
+// REFERRAL COUNT
 // ==========================
-const ads = [
-  {
-    title: "Join Crypto Airdrop",
-    link: "https://t.me/yourchannel",
-    image: "https://i.imgur.com/9QZ4FQh.png"
-  },
-  {
-    title: "Earn with Surveys",
-    link: "https://example.com",
-    image: "https://i.imgur.com/3Y1kX9F.png"
+app.post("/ref-count", (req, res) => {
+  const { userId } = req.body;
+  const count = users[userId]?.refs?.length || 0;
+  res.json({ count });
+});
+
+// ==========================
+// ADD REFERRAL
+// ==========================
+app.post("/referral", (req, res) => {
+  const { referrerId } = req.body;
+
+  if (users[referrerId]) {
+    users[referrerId].refs.push(Date.now());
+    users[referrerId].balance += 10;
+    saveUsers();
   }
-];
 
-app.get("/ads", (req, res) => {
-  const ad = ads[Math.floor(Math.random() * ads.length)];
-  res.json(ad);
-});
-// ==========================
-// ADMIN DASHBOARD
-// ==========================
-app.get("/admin", (req, res) => {
-  res.json(users);
+  res.json({ ok: true });
 });
 
-// =======================
-// START SERVER
-// =======================
+// ==========================
+// HOME
+// ==========================
+app.get("/", (req, res) => {
+  res.send("TeleTech AI Server Running");
+});
+
+// ==========================
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log("Server running on port " + PORT);
 });
