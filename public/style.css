@@ -1,70 +1,25 @@
 body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: linear-gradient(180deg, #0b1c26, #0f2e2e);
+  background: #0f172a;
   color: white;
   text-align: center;
+  font-family: Arial;
 }
 
-.app {
-  padding: 30px 15px;
-}
-
-h1 {
-  font-size: 32px;
-}
-
-.subtitle {
-  opacity: 0.7;
-  margin-bottom: 10px;
-}
-
-.tap-wrapper {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin: 40px 0;
-}
-
-.tap-btn {
-  width: 240px;
-  height: 240px;
+#tap {
+  width: 200px;
+  height: 200px;
+  margin: 40px auto;
   border-radius: 50%;
-  background: radial-gradient(circle, #00ff9c, #00c97a);
+  background: radial-gradient(circle, #22c55e, #15803d);
   display: flex;
-  align-items: center;
   justify-content: center;
-  font-size: 48px;
+  align-items: center;
+  font-size: 32px;
   font-weight: bold;
-  color: #003d2b;
   cursor: pointer;
-  box-shadow: 0 0 40px #00ff9c;
-  transition: transform 0.1s ease;
+  box-shadow: 0 0 40px #22c55e;
 }
 
-.tap-btn:active {
-  transform: scale(0.92);
-}
-
-.energy {
-  margin-top: 15px;
-  font-size: 18px;
-}
-
-input {
-  width: 90%;
-  padding: 10px;
-  margin-top: 15px;
-  border-radius: 8px;
-  border: none;
-}
-
-button {
-  margin-top: 10px;
-  padding: 12px 25px;
-  border: none;
-  border-radius: 8px;
-  background: #00c97a;
-  color: black;
-  font-weight: bold;
+#tap:active {
+  transform: scale(0.95);
 }
