@@ -1,31 +1,30 @@
-let balance = 0;
-let energy = 100;
+const tg = window.Telegram.WebApp;
+tg.expand();
 
-const balanceEl = document.getElementById("balance");
-const energyEl = document.getElementById("energy");
-const tapBtn = document.getElementById("tapBtn");
+const userId = tg.initDataUnsafe.user?.id;
 
-function updateUI() {
-  balanceEl.innerText = balance + " TT";
-  energyEl.innerText = energy;
+async function loadUser() {
+  const res = await fetch("/user", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId })
+  });
+
+  const data = await res.json();
+  document.getElementById("energy").innerText = data.energy;
+  document.getElementById("balance").innerText = data.balance;
 }
 
-tapBtn.onclick = () => {
-  if (energy <= 0) return;
+async function tap() {
+  const res = await fetch("/tap", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId })
+  });
 
-  energy--;
-  balance++;
-
-  tapBtn.style.transform = "scale(0.9)";
-  setTimeout(() => tapBtn.style.transform = "scale(1)", 100);
-
-  updateUI();
-};
-
-function copyLink() {
-  const link = window.location.origin + "?ref=12345";
-  navigator.clipboard.writeText(link);
-  alert("Invite link copied!");
+  const data = await res.json();
+  document.getElementById("energy").innerText = data.energy;
+  document.getElementById("balance").innerText = data.balance;
 }
 
-updateUI();
+loadUser();
