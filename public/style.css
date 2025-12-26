@@ -1,34 +1,76 @@
 body {
-  background: #0b1220;
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: radial-gradient(circle at top, #0f172a, #020617);
   color: white;
   text-align: center;
-  font-family: Arial, sans-serif;
 }
 
-#tapBtn {
+.app {
+  padding: 30px;
+}
+
+.sub {
+  opacity: 0.8;
+  margin-bottom: 20px;
+}
+
+.balance {
+  font-size: 28px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.tap-container {
+  display: flex;
+  justify-content: center;
+  margin: 30px 0;
+}
+
+.tap-btn {
   width: 220px;
   height: 220px;
-  margin: 40px auto;
   border-radius: 50%;
-  background: radial-gradient(circle, #2ecc71, #1e8449);
+  background: radial-gradient(circle, #22c55e, #15803d);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 0 40px rgba(46, 204, 113, 0.9);
-  cursor: pointer;
-  transition: transform 0.1s;
+  box-shadow: 0 0 40px #22c55e;
+  animation: pulse 2s infinite;
 }
 
-#tapBtn:active {
-  transform: scale(0.95);
+.tap-btn img {
+  width: 90px;
 }
 
-#tapBtn img {
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
 }
 
-.hint {
-  opacity: 0.7;
+.energy {
+  margin-top: 10px;
+  font-size: 18px;
+}
+
+.ref-box {
+  margin-top: 20px;
+}
+
+.ref-box input {
+  width: 80%;
+  padding: 10px;
+  border-radius: 6px;
+  border: none;
+}
+
+.ref-box button {
+  margin-top: 10px;
+  padding: 10px 20px;
+  background: #22c55e;
+  border: none;
+  border-radius: 6px;
+  color: black;
+  font-weight: bold;
 }
