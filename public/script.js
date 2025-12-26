@@ -1,9 +1,8 @@
 const tg = window.Telegram.WebApp;
 tg.expand();
-
 const user = tg.initDataUnsafe.user;
-const userId = user.id;
 
+const userId = user.id;
 const userId = localStorage.getItem("userId") || Math.floor(Math.random() * 1000000);
 localStorage.setItem("userId", userId);
 
