@@ -43,11 +43,24 @@ app.post("/user", (req, res) => {
 // ==========================
 app.post("/tap", (req, res) => {
   const { userId } = req.body;
-  if (!users[userId]) return res.json({});
-  if (users[userId].energy > 0) {
-    users[userId].energy -= 1;
-    users[userId].balance += 1;
+  if (!users[userId]) return res.json({ error: "User not found" });
+
+  const now = Date.now();
+  const last = users[userId].lastEnergy || now;
+  const regen = Math.floor((now - last) / 30000); // every 30s
+
+  if (regen > 0) {
+    users[userId].energy = Math.min(100, users[userId].energy + regen);
+    users[userId].lastEnergy = now;
   }
+
+  if (users[userId].energy <= 0) {
+    return res.json(users[userId]);
+  }
+
+  users[userId].energy -= 1;
+  users[userId].balance += 1;
+
   saveUsers();
   res.json(users[userId]);
 });
