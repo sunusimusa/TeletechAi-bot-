@@ -38,7 +38,8 @@ app.post("/user", (req, res) => {
     refs: []
   };
   }
-
+  saveUsers();
+  
   // Energy auto refill (1 energy / 10 sec)
   const now = Date.now();
   const diff = Math.floor((now - users[userId].lastEnergyUpdate) / 10000);
