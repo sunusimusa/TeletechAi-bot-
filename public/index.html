@@ -1,47 +1,55 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>TeleTech AI</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Telegram WebApp -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <link rel="stylesheet" href="style.css">
+
+  <link rel="stylesheet" href="style.css" />
 </head>
 
 <body>
+
   <h1>🚀 TeleTech AI</h1>
   <h3>Tap & Earn</h3>
 
+  <!-- TAP BUTTON -->
   <div id="tap" onclick="tap()">TAP</div>
 
+  <!-- STATS -->
   <p>⚡ Energy: <span id="energy">0</span></p>
   <p>💰 Balance: <span id="balance">0</span></p>
 
+  <!-- REFERRAL -->
   <input id="refLink" readonly />
-<button onclick="copyLink()">Copy Invite Link</button>
+  <button onclick="copyLink()">Copy Invite Link</button>
 
-<script>
-function copyLink() {
-  navigator.clipboard.writeText(document.getElementById("refLink").value);
-  alert("Copied!");
-}
-</script>
+  <!-- DAILY -->
+  <button id="dailyBtn" onclick="claimDaily()">🎁 Daily Reward</button>
+  <p id="dailyMsg"></p>
 
-  <input id="refLink" readonly />
-<button onclick="navigator.clipboard.writeText(refLink.value)">
-  Copy Invite Link
-</button>
-  
- <button id="dailyBtn" onclick="claimDaily()">🎁 Daily Reward</button>
-<p id="dailyMsg"></p> 
+  <!-- WITHDRAW -->
+  <h3>Withdraw</h3>
+  <input id="wallet" placeholder="Enter wallet address" />
+  <button onclick="withdraw()">Withdraw</button>
+  <p id="withdrawMsg"></p>
 
- <h3>Withdraw</h3>
+  <!-- SCRIPT -->
+  <script src="script.js"></script>
 
-<input id="wallet" placeholder="Enter wallet address" />
-<button onclick="withdraw()">Withdraw</button>
+  <script>
+    const tg = window.Telegram?.WebApp;
+    if (tg) tg.expand();
 
-<p id="withdrawMsg"></p> 
+    function copyLink() {
+      const link = document.getElementById("refLink").value;
+      navigator.clipboard.writeText(link);
+      alert("Copied!");
+    }
+  </script>
 
-<script src="script.js"></script>
 </body>
 </html>
