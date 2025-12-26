@@ -1,18 +1,23 @@
 const tg = window.Telegram.WebApp;
 tg.expand();
 
-const userId = tg.initDataUnsafe.user?.id;
+const user = tg.initDataUnsafe.user;
+const userId = user.id;
+
+// get ref id
+const params = new URLSearchParams(window.location.search);
+const ref = params.get("ref");
 
 async function loadUser() {
   const res = await fetch("/user", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ userId })
+    body: JSON.stringify({ userId, ref })
   });
 
   const data = await res.json();
-  document.getElementById("energy").innerText = data.energy;
   document.getElementById("balance").innerText = data.balance;
+  document.getElementById("energy").innerText = data.energy;
 }
 
 async function tap() {
@@ -23,8 +28,11 @@ async function tap() {
   });
 
   const data = await res.json();
-  document.getElementById("energy").innerText = data.energy;
   document.getElementById("balance").innerText = data.balance;
+  document.getElementById("energy").innerText = data.energy;
 }
+
+document.getElementById("refLink").value =
+  `https://t.me/YOUR_BOT_USERNAME?start=${userId}`;
 
 loadUser();
