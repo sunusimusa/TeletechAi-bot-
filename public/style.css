@@ -23,3 +23,13 @@ body {
 #tap:active {
   transform: scale(0.95);
 }
+#dailyBtn {
+  margin-top: 15px;
+  padding: 12px 25px;
+  border: none;
+  border-radius: 10px;
+  background: gold;
+  color: black;
+  font-weight: bold;
+  cursor: pointer;
+}
