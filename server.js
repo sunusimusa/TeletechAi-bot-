@@ -26,39 +26,26 @@ function saveUsers() {
 app.post("/user", (req, res) => {
   const { userId, ref } = req.body;
 
-  // Create user if not exists
   if (!users[userId]) {
     users[userId] = {
       balance: 0,
       energy: 100,
-      lastEnergy: Date.now(),
-      refs: [],
-      daily: 0
+      refs: []
     };
   }
 
-  // ===== REFERRAL SYSTEM (ANTI-CHEAT) =====
+  // ✅ REFERRAL ANTI-CHEAT
   if (
-    ref && 
-    ref !== userId && 
-    users[ref] && 
+    ref &&
+    ref !== userId &&
+    users[ref] &&
     !users[ref].refs.includes(userId)
   ) {
     users[ref].balance += 10;
     users[ref].refs.push(userId);
   }
 
-  // ===== ENERGY REGEN =====
-  const now = Date.now();
-  const diff = Math.floor((now - users[userId].lastEnergy) / 30000);
-
-  if (diff > 0) {
-    users[userId].energy = Math.min(100, users[userId].energy + diff);
-    users[userId].lastEnergy = now;
-  }
-
-  save();
-
+  saveUsers();
   res.json(users[userId]);
 });
 
