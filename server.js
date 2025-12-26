@@ -57,5 +57,29 @@ app.post("/tap", (req, res) => {
   save();
   res.json(users[userId]);
 });
+app.post("/daily", (req, res) => {
+  const { userId } = req.body;
+
+  if (!users[userId]) return res.json({ error: "User not found" });
+
+  const now = Date.now();
+  const lastClaim = users[userId].lastDaily || 0;
+  const diff = now - lastClaim;
+
+  if (diff < 24 * 60 * 60 * 1000) {
+    const hours = Math.ceil((24*60*60*1000 - diff) / 3600000);
+    return res.json({ error: `Come back in ${hours} hours` });
+  }
+
+  users[userId].balance += DAILY_REWARD;
+  users[userId].lastDaily = now;
+
+  save();
+  res.json({
+    success: true,
+    reward: DAILY_REWARD,
+    balance: users[userId].balance
+  });
+});
 
 app.listen(3000, () => console.log("Running..."));
