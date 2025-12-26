@@ -1,28 +1,64 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <title>TeleTech AI – Admin</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Admin Panel</title>
+  <style>
+    body {
+      background: #0f172a;
+      color: white;
+      font-family: Arial;
+      padding: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      border: 1px solid #444;
+      padding: 8px;
+      text-align: center;
+    }
+    th {
+      background: #22c55e;
+      color: black;
+    }
+  </style>
 </head>
 <body>
 
-<h1>🧑‍💼 Admin Dashboard</h1>
-<p>Withdraw Requests (DEMO)</p>
-
-<table style="width:100%; color:white;">
-  <thead>
-    <tr>
-      <th>User</th>
-      <th>Wallet</th>
-      <th>Amount</th>
-      <th>Status</th>
-      <th>Action</th>
-    </tr>
-  </thead>
-  <tbody id="withdrawList"></tbody>
+<h2>👑 Admin Dashboard</h2>
+<table id="usersTable">
+  <tr>
+    <th>User ID</th>
+    <th>Balance</th>
+    <th>Energy</th>
+    <th>Referrals</th>
+  </tr>
 </table>
 
-<script src="admin.js"></script>
+<script>
+async function loadUsers() {
+  const res = await fetch("/admin");
+  const data = await res.json();
+
+  const table = document.getElementById("usersTable");
+
+  Object.keys(data).forEach(id => {
+    const u = data[id];
+    const row = `
+      <tr>
+        <td>${id}</td>
+        <td>${u.balance}</td>
+        <td>${u.energy}</td>
+        <td>${u.refs ? u.refs.length : 0}</td>
+      </tr>
+    `;
+    table.innerHTML += row;
+  });
+}
+
+loadUsers();
+</script>
+
 </body>
 </html>
