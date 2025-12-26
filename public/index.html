@@ -5,10 +5,11 @@
   <title>TeleTech AI</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<script src="https://unpkg.com/@tonconnect/sdk@2.2.0/dist/tonconnect.min.js"></script>
-  
-  <!-- Telegram -->
+  <!-- Telegram WebApp -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <!-- TON Connect -->
+  <script src="https://unpkg.com/@tonconnect/sdk@2.2.0/dist/tonconnect.min.js"></script>
 
   <!-- CSS -->
   <link rel="stylesheet" href="style.css" />
@@ -20,6 +21,7 @@
 
     <h1>⚡ TeleTech AI</h1>
 
+    <!-- STATS -->
     <div class="stats">
       <div class="box">
         <span>Balance</span>
@@ -32,7 +34,7 @@
       </div>
     </div>
 
-    <!-- TAP BUTTON -->
+    <!-- TAP -->
     <div id="tap" onclick="tap()">
       <span>TAP</span>
     </div>
@@ -64,19 +66,19 @@
       <button onclick="copyLink()">Copy Invite</button>
     </div>
 
-    <!-- WITHDRAW -->
+    <!-- WALLET -->
     <div class="withdraw">
+      <button id="connectWalletBtn">🔗 Connect Wallet</button>
+      <p id="walletAddress"></p>
+
       <input id="wallet" placeholder="Wallet Address" />
       <button onclick="withdraw()">Withdraw</button>
       <p id="withdrawMsg"></p>
     </div>
 
-    <button id="connectWalletBtn">🔗 Connect Wallet</button>
-<p id="walletAddress"></p>
-
   </div>
 
-  <!-- JS MUST BE LAST -->
+  <!-- MAIN SCRIPT -->
   <script src="script.js"></script>
 </body>
 </html>
