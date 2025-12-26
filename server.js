@@ -28,6 +28,8 @@ function saveUsers() {
 // ANTI-SPAM MEMORY
 // =======================
 const tapCooldown = {};
+const MAX_ENERGY = 100;
+const ENERGY_REGEN_TIME = 30 * 1000; // 30 seconds
 
 // =======================
 // CREATE / GET USER
@@ -39,12 +41,25 @@ app.post("/user", (req, res) => {
   if (!users[userId]) {
     users[userId] = {
       balance: 0,
-      energy: 100,
+      energy: MAX_ENERGY,
+      lastEnergy: Date.now(),
       refs: []
     };
   }
 
-  // ✅ REFERRAL PROTECTION
+  // ✅ ENERGY REGEN
+  const now = Date.now();
+  const passed = Math.floor((now - users[userId].lastEnergy) / ENERGY_REGEN_TIME);
+
+  if (passed > 0) {
+    users[userId].energy = Math.min(
+      MAX_ENERGY,
+      users[userId].energy + passed
+    );
+    users[userId].lastEnergy = now;
+  }
+
+  // ✅ REFERRAL
   if (
     ref &&
     ref !== userId &&
@@ -68,11 +83,15 @@ app.post("/tap", (req, res) => {
 
   const now = Date.now();
 
-  if (tapCooldown[userId] && now - tapCooldown[userId] < 800) {
-    return res.json({ error: "Too fast" });
+  // regen before tap
+  const passed = Math.floor((now - users[userId].lastEnergy) / ENERGY_REGEN_TIME);
+  if (passed > 0) {
+    users[userId].energy = Math.min(
+      MAX_ENERGY,
+      users[userId].energy + passed
+    );
+    users[userId].lastEnergy = now;
   }
-
-  tapCooldown[userId] = now;
 
   if (users[userId].energy <= 0) {
     return res.json(users[userId]);
