@@ -31,11 +31,12 @@ app.post("/user", (req, res) => {
   const { userId } = req.body;
 
   if (!users[userId]) {
-    users[userId] = {
-      balance: 0,
-      energy: 100,
-      lastEnergyUpdate: Date.now()
-    };
+  users[userId] = {
+    balance: 0,
+    energy: 100,
+    lastEnergyUpdate: Date.now(),
+    refs: []
+  };
   }
 
   // Energy auto refill (1 energy / 10 sec)
