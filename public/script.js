@@ -100,3 +100,37 @@ function giveDailyBonus() {
   alert("🎁 Daily Bonus: +" + BONUS_AMOUNT + " TT");
 }
 checkDailyBonus();
+// ==========================
+// REFERRAL SYSTEM
+// ==========================
+
+const REF_BONUS = 20;
+
+// Get referral from URL
+const urlParams = new URLSearchParams(window.location.search);
+const refId = urlParams.get("ref");
+
+// Save referrer once
+if (refId && !localStorage.getItem("referredBy")) {
+  localStorage.setItem("referredBy", refId);
+}
+
+// Give bonus to referrer
+function giveReferralBonus() {
+  const referredBy = localStorage.getItem("referredBy");
+  const bonusGiven = localStorage.getItem("bonusGiven");
+
+  if (referredBy && !bonusGiven) {
+    fetch("/referral", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        referrerId: referredBy
+      })
+    });
+
+    localStorage.setItem("bonusGiven", "true");
+  }
+}
