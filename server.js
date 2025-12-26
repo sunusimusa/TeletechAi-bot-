@@ -15,10 +15,22 @@ function save() {
 }
 
 app.post("/user", (req, res) => {
-  const { userId } = req.body;
+  const { userId, ref } = req.body;
 
   if (!users[userId]) {
-    users[userId] = { balance: 0, energy: 100, last: Date.now() };
+    users[userId] = {
+      balance: 0,
+      energy: 100,
+      last: Date.now(),
+      referredBy: ref || null,
+      rewarded: false
+    };
+
+    // give referral reward
+    if (ref && users[ref] && !users[userId].rewarded) {
+      users[ref].balance += REF_BONUS;
+      users[userId].rewarded = true;
+    }
   }
 
   const now = Date.now();
