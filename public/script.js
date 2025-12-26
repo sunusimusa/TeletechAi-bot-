@@ -4,6 +4,10 @@
 const tg = window.Telegram.WebApp;
 tg.expand();
 
+const tonConnect = new TON_CONNECT_UI.TonConnectUI({
+  manifestUrl: 'https://your-domain.com/tonconnect-manifest.json'
+});
+
 // USER ID
 let userId = localStorage.getItem("userId");
 
