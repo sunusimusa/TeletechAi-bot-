@@ -1,6 +1,8 @@
 const express = require("express");
 const fs = require("fs");
 const path = require("path");
+// anti spam memory
+const tapCooldown = {};
 
 const app = express();
 app.use(express.json());
