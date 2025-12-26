@@ -41,6 +41,17 @@ async function loadUser() {
 
 loadUser();
 
+document.getElementById("connectWalletBtn").onclick = async () => {
+  const wallet = await tonConnect.connectWallet();
+
+  if (wallet) {
+    document.getElementById("walletAddress").innerText =
+      wallet.account.address;
+
+    await saveWallet(wallet.account.address);
+  }
+};
+
 // ===============================
 // TAP SYSTEM
 // ===============================
@@ -64,6 +75,14 @@ async function tap() {
 
   document.getElementById("balance").innerText = data.balance;
   document.getElementById("energy").innerText = data.energy;
+}
+
+async function saveWallet(address) {
+  await fetch("/wallet", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId, address })
+  });
 }
 
 // ===============================
