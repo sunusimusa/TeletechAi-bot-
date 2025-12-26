@@ -1,18 +1,28 @@
-const tg = window.Telegram.WebApp;
-tg.expand();
-const user = tg.initDataUnsafe.user;
+// Telegram Init
+let tg = window.Telegram?.WebApp;
+if (tg) tg.expand();
 
-const userId = user.id;
-const userId = localStorage.getItem("userId") || Math.floor(Math.random() * 1000000);
-localStorage.setItem("userId", userId);
+// USER ID
+let userId = localStorage.getItem("userId");
 
-const refLink = `${window.location.origin}?ref=${userId}`;
-document.getElementById("refLink").value = refLink;
+if (!userId) {
+  if (tg && tg.initDataUnsafe?.user) {
+    userId = tg.initDataUnsafe.user.id;
+  } else {
+    userId = Math.floor(Math.random() * 1000000);
+  }
+  localStorage.setItem("userId", userId);
+}
 
-// get ref id
+// Referral link
+document.getElementById("refLink").value =
+  window.location.origin + "?ref=" + userId;
+
+// Get ref param
 const params = new URLSearchParams(window.location.search);
 const ref = params.get("ref");
 
+// Load user
 async function loadUser() {
   const res = await fetch("/user", {
     method: "POST",
@@ -25,6 +35,7 @@ async function loadUser() {
   document.getElementById("energy").innerText = data.energy;
 }
 
+// TAP
 async function tap() {
   const res = await fetch("/tap", {
     method: "POST",
@@ -37,9 +48,13 @@ async function tap() {
   document.getElementById("energy").innerText = data.energy;
 }
 
-document.getElementById("refLink").value =
-  `https://t.me/YOUR_BOT_USERNAME?start=${userId}`;
+// COPY LINK
+function copyLink() {
+  navigator.clipboard.writeText(document.getElementById("refLink").value);
+  alert("Copied!");
+}
 
+// DAILY REWARD
 async function claimDaily() {
   const res = await fetch("/daily", {
     method: "POST",
@@ -48,22 +63,14 @@ async function claimDaily() {
   });
 
   const data = await res.json();
-
-  if (data.error) {
-    document.getElementById("dailyMsg").innerText = data.error;
-  } else {
-    document.getElementById("dailyMsg").innerText =
-      `🎉 You got +${data.reward} TT!`;
-    document.getElementById("balance").innerText = data.balance;
-  }
+  document.getElementById("dailyMsg").innerText =
+    data.error || `🎉 You got +${data.reward}`;
 }
+
+// WITHDRAW
 async function withdraw() {
   const wallet = document.getElementById("wallet").value;
-
-  if (!wallet) {
-    alert("Enter wallet address");
-    return;
-  }
+  if (!wallet) return alert("Enter wallet address");
 
   const res = await fetch("/withdraw", {
     method: "POST",
@@ -72,27 +79,9 @@ async function withdraw() {
   });
 
   const data = await res.json();
-
-  if (data.error) {
-    document.getElementById("withdrawMsg").innerText = data.error;
-  } else {
-    document.getElementById("withdrawMsg").innerText =
-      "✅ Withdraw request sent!";
-    document.getElementById("balance").innerText = "0 TT";
-  }
+  document.getElementById("withdrawMsg").innerText =
+    data.error || "✅ Withdraw request sent!";
 }
-app.get("/approve", (req, res) => {
-  const { uid, i, pass } = req.query;
 
-  if (pass !== ADMIN_PASSWORD) return res.send("Unauthorized");
-
-  if (!users[uid] || !users[uid].withdraws[i])
-    return res.send("Invalid request");
-
-  users[uid].withdraws[i].status = "approved";
-  save();
-
-  res.send("✅ Withdrawal Approved!");
-});
-
+// START
 loadUser();
