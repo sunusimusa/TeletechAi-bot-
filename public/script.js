@@ -1,18 +1,23 @@
 // ===============================
-// TELEGRAM WEB APP INIT
+// TELEGRAM INIT
 // ===============================
 const tg = window.Telegram.WebApp;
 tg.expand();
 
+// ===============================
+// TON CONNECT
+// ===============================
 const tonConnect = new TON_CONNECT_UI.TonConnectUI({
-  manifestUrl: 'https://your-domain.com/tonconnect-manifest.json'
+  manifestUrl: "https://your-domain.com/tonconnect-manifest.json"
 });
 
-// USER ID
+// ===============================
+// USER INIT
+// ===============================
 let userId = localStorage.getItem("userId");
 
 if (!userId) {
-  userId = tg?.initDataUnsafe?.user?.id || Math.floor(Math.random() * 1000000);
+  userId = tg?.initDataUnsafe?.user?.id || Math.floor(Math.random() * 1000000000);
   localStorage.setItem("userId", userId);
 }
 
@@ -41,22 +46,10 @@ async function loadUser() {
 
 loadUser();
 
-document.getElementById("connectWalletBtn").onclick = async () => {
-  const wallet = await tonConnect.connectWallet();
-
-  if (wallet) {
-    document.getElementById("walletAddress").innerText =
-      wallet.account.address;
-
-    await saveWallet(wallet.account.address);
-  }
-};
-
 // ===============================
 // TAP SYSTEM
 // ===============================
 async function tap() {
-  // vibration
   if (navigator.vibrate) navigator.vibrate(30);
 
   const btn = document.getElementById("tap");
@@ -77,22 +70,24 @@ async function tap() {
   document.getElementById("energy").innerText = data.energy;
 }
 
-async function saveWallet(address) {
-  await fetch("/wallet", {
+// ===============================
+// DAILY REWARD
+// ===============================
+async function claimDaily() {
+  const res = await fetch("/daily", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ userId, address })
+    body: JSON.stringify({ userId })
   });
-}
 
-// ===============================
-// COPY REF LINK
-// ===============================
-function copyLink() {
-  navigator.clipboard.writeText(
-    window.location.origin + "?ref=" + userId
-  );
-  alert("Invite link copied!");
+  const data = await res.json();
+
+  document.getElementById("dailyMsg").innerText =
+    data.error || `🎁 You got ${data.reward} TT`;
+
+  if (!data.error) {
+    document.getElementById("balance").innerText = data.balance;
+  }
 }
 
 // ===============================
@@ -101,23 +96,13 @@ function copyLink() {
 function openTask(type) {
   let url = "";
 
-  if (type === "tg") {
-    url = "https://t.me/TeleAIupdates";
-  }
-
-  if (type === "yt") {
-    url = "https://youtube.com/@Sunusicrypto";
-  }
-
-  if (type === "chat") {
-    url = "https://t.me/tele_tap_ai";
-  }
+  if (type === "tg") url = "https://t.me/TeleAIupdates";
+  if (type === "yt") url = "https://youtube.com/@Sunusicrypto";
+  if (type === "chat") url = "https://t.me/tele_tap_ai";
 
   window.open(url, "_blank");
 
-  setTimeout(() => {
-    completeTask(type);
-  }, 5000);
+  setTimeout(() => completeTask(type), 5000);
 }
 
 async function completeTask(type) {
@@ -138,41 +123,33 @@ async function completeTask(type) {
 }
 
 // ===============================
-// DAILY REWARD
+// WALLET CONNECT
 // ===============================
-async function claimDaily() {
-  const res = await fetch("/daily", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ userId })
-  });
+document.getElementById("connectWalletBtn")?.addEventListener("click", async () => {
+  const wallet = await tonConnect.connectWallet();
 
-  const data = await res.json();
+  if (wallet) {
+    document.getElementById("walletAddress").innerText =
+      wallet.account.address;
 
-  if (data.error) {
-    document.getElementById("dailyMsg").innerText = data.error;
-  } else {
-    document.getElementById("dailyMsg").innerText =
-      "🎁 You got +" + data.reward + " TT";
-    document.getElementById("balance").innerText = data.balance;
+    await saveWallet(wallet.account.address);
   }
-}
+});
 
-// ===============================
-// WITHDRAW
-// ===============================
-async function withdraw() {
-  const wallet = document.getElementById("wallet").value;
-  if (!wallet) return alert("Enter wallet address");
-
-  const res = await fetch("/withdraw", {
+async function saveWallet(address) {
+  await fetch("/wallet", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ userId, wallet })
+    body: JSON.stringify({ userId, address })
   });
-
-  const data = await res.json();
-
-  document.getElementById("withdrawMsg").innerText =
-    data.error || "Withdrawal sent!";
 }
+
+// ===============================
+// COPY REF LINK
+// ===============================
+function copyLink() {
+  navigator.clipboard.writeText(
+    window.location.origin + "?ref=" + userId
+  );
+  alert("Invite link copied!");
+    }
