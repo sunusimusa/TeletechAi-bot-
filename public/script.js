@@ -34,6 +34,14 @@ async function tap() {
   document.getElementById("energy").innerText = data.energy;
 }
 
+// SET REF LINK
+function setRefLink() {
+  const link = `${window.location.origin}?ref=${userId}`;
+  document.getElementById("refLink").value = link;
+}
+
+setRefLink();
+
 // COPY REF
 function copyLink() {
   const link = `${location.origin}?ref=${userId}`;
