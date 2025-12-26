@@ -35,4 +35,22 @@ async function tap() {
 document.getElementById("refLink").value =
   `https://t.me/YOUR_BOT_USERNAME?start=${userId}`;
 
+async function claimDaily() {
+  const res = await fetch("/daily", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId })
+  });
+
+  const data = await res.json();
+
+  if (data.error) {
+    document.getElementById("dailyMsg").innerText = data.error;
+  } else {
+    document.getElementById("dailyMsg").innerText =
+      `🎉 You got +${data.reward} TT!`;
+    document.getElementById("balance").innerText = data.balance;
+  }
+}
+
 loadUser();
