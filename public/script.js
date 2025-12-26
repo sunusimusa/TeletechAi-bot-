@@ -140,3 +140,27 @@ function giveReferralBonus() {
   }
 }
 giveReferralBonus();
+// COPY REF LINK
+function copyLink() {
+  const link = document.getElementById("refLink");
+  link.select();
+  link.setSelectionRange(0, 99999);
+  document.execCommand("copy");
+  alert("Referral link copied!");
+}
+
+// LOAD REF COUNT
+async function loadRefCount() {
+  const res = await fetch("/ref-count", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId })
+  });
+
+  const data = await res.json();
+  document.getElementById("refCount").innerText =
+    "Referrals: " + data.count;
+}
+
+// kira shi bayan load
+loadRefCount();
