@@ -76,5 +76,18 @@ async function withdraw() {
     document.getElementById("balance").innerText = "0 TT";
   }
 }
+app.get("/approve", (req, res) => {
+  const { uid, i, pass } = req.query;
+
+  if (pass !== ADMIN_PASSWORD) return res.send("Unauthorized");
+
+  if (!users[uid] || !users[uid].withdraws[i])
+    return res.send("Invalid request");
+
+  users[uid].withdraws[i].status = "approved";
+  save();
+
+  res.send("✅ Withdrawal Approved!");
+});
 
 loadUser();
