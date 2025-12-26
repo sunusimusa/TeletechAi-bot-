@@ -1,5 +1,4 @@
 let userId = localStorage.getItem("uid");
-
 if (!userId) {
   userId = Math.floor(Math.random() * 1000000);
   localStorage.setItem("uid", userId);
@@ -13,7 +12,6 @@ async function loadUser() {
   });
 
   const data = await res.json();
-
   document.getElementById("balance").innerText = data.balance + " TT";
   document.getElementById("energy").innerText = data.energy;
 }
@@ -26,7 +24,6 @@ async function tap() {
   });
 
   const data = await res.json();
-
   document.getElementById("balance").innerText = data.balance + " TT";
   document.getElementById("energy").innerText = data.energy;
 }
@@ -36,9 +33,9 @@ document.getElementById("refLink").value =
 
 function copyLink() {
   navigator.clipboard.writeText(
-    window.location.origin + "?ref=" + userId
+    document.getElementById("refLink").value
   );
-  alert("Invite link copied!");
+  alert("Link copied!");
 }
 
 loadUser();
