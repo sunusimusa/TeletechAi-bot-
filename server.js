@@ -7,12 +7,12 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const DB_FILE = "./users.json";
+// SERVE FRONTEND
+app.use(express.static("public"));
 
-// ==========================
-// LOAD USERS
-// ==========================
+const DB_FILE = "./users.json";
 let users = {};
+
 if (fs.existsSync(DB_FILE)) {
   users = JSON.parse(fs.readFileSync(DB_FILE));
 }
