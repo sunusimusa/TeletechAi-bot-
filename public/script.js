@@ -7,6 +7,11 @@ if (!userId) {
   userId = Math.floor(Math.random() * 1000000);
   localStorage.setItem("uid", userId);
 }
+// ==========================
+// REFERRAL LINK GENERATOR
+// ==========================
+document.getElementById("refLink").value =
+  window.location.origin + "?ref=" + userId;
 
 // ==========================
 // ENERGY CONFIG
