@@ -1,174 +1,113 @@
 const express = require("express");
 const fs = require("fs");
 const path = require("path");
-const REF_BONUS = 10;
-const DAILY_REWARD = 50; // zaka iya canza
-const MIN_WITHDRAW = 100; // zaka iya canzawa
-const ADMIN_PASSWORD = "admin123"; // canza idan kana so
 
 const app = express();
 app.use(express.json());
-app.use(express.static("public"));
 
-const DB = "./users.json";
-let users = fs.existsSync(DB) ? JSON.parse(fs.readFileSync(DB)) : {};
+// serve frontend
+app.use(express.static(path.join(__dirname, "public")));
 
-function save() {
-  fs.writeFileSync(DB, JSON.stringify(users, null, 2));
+// DATABASE
+const DB_FILE = "./users.json";
+let users = {};
+if (fs.existsSync(DB_FILE)) {
+  users = JSON.parse(fs.readFileSync(DB_FILE));
+}
+function saveUsers() {
+  fs.writeFileSync(DB_FILE, JSON.stringify(users, null, 2));
 }
 
+// ==========================
+// GET/CREATE USER
+// ==========================
 app.post("/user", (req, res) => {
   const { userId, ref } = req.body;
-
   if (!users[userId]) {
     users[userId] = {
       balance: 0,
       energy: 100,
-      last: Date.now(),
-      referredBy: ref || null,
-      rewarded: false
+      refs: []
     };
-
-    // give referral reward
-    if (ref && users[ref] && !users[userId].rewarded) {
-      users[ref].balance += REF_BONUS;
-      users[userId].rewarded = true;
+    if (ref && users[ref]) {
+      users[ref].balance += 10;
+      users[userId].refs.push(ref);
     }
   }
-
-  const now = Date.now();
-  const diff = Math.floor((now - users[userId].last) / 5000);
-  if (diff > 0) {
-    users[userId].energy = Math.min(100, users[userId].energy + diff);
-    users[userId].last = now;
-  }
-
-  save();
+  saveUsers();
   res.json(users[userId]);
 });
 
+// ==========================
+// TAP
+// ==========================
 app.post("/tap", (req, res) => {
   const { userId } = req.body;
   if (!users[userId]) return res.json({});
-
   if (users[userId].energy > 0) {
-    users[userId].energy--;
-    users[userId].balance++;
+    users[userId].energy -= 1;
+    users[userId].balance += 1;
   }
-
-  save();
+  saveUsers();
   res.json(users[userId]);
 });
-app.post("/daily", (req, res) => {
+
+// ==========================
+// REF COUNT
+// ==========================
+app.post("/ref-count", (req, res) => {
   const { userId } = req.body;
-
-  if (!users[userId]) return res.json({ error: "User not found" });
-
-  const now = Date.now();
-  const lastClaim = users[userId].lastDaily || 0;
-  const diff = now - lastClaim;
-
-  if (diff < 24 * 60 * 60 * 1000) {
-    const hours = Math.ceil((24*60*60*1000 - diff) / 3600000);
-    return res.json({ error: `Come back in ${hours} hours` });
-  }
-
-  users[userId].balance += DAILY_REWARD;
-  users[userId].lastDaily = now;
-
-  save();
-  res.json({
-    success: true,
-    reward: DAILY_REWARD,
-    balance: users[userId].balance
-  });
+  const count = users[userId]?.refs?.length || 0;
+  res.json({ count });
 });
+
 // ==========================
-// WITHDRAW REQUEST
+// ADMIN
 // ==========================
-app.post("/withdraw", (req, res) => {
-  const { userId, wallet } = req.body;
+const ADMIN_PASSWORD = "admin123";
 
-  if (!users[userId]) {
-    return res.json({ error: "User not found" });
-  }
-
-  if (!wallet || wallet.length < 5) {
-    return res.json({ error: "Invalid wallet address" });
-  }
-
-  if (users[userId].balance < MIN_WITHDRAW) {
-    return res.json({ error: `Minimum withdraw is ${MIN_WITHDRAW}` });
-  }
-
-  // =======================
-// ADMIN DASHBOARD
-// =======================
 app.get("/admin", (req, res) => {
   const pass = req.query.pass;
   if (pass !== ADMIN_PASSWORD) {
-    return res.send("❌ Access Denied");
+    return res.send("❌ Access denied");
   }
 
   let html = `
-  <h2>Withdraw Requests</h2>
-  <table border="1" cellpadding="10">
-    <tr>
-      <th>User</th>
-      <th>Amount</th>
-      <th>Wallet</th>
-      <th>Status</th>
-      <th>Action</th>
-    </tr>
+    <html><head><title>Admin</title>
+    <style>
+      body { font-family: Arial; background: #111; color: white; padding: 20px; }
+      table { width: 100%; border-collapse: collapse; }
+      th, td { border: 1px solid #444; padding: 8px; }
+      th { background: #222; }
+    </style>
+    </head><body>
+    <h2>📊 Admin Dashboard</h2>
+    <table>
+      <tr><th>User</th><th>Balance</th><th>Energy</th><th>Refs</th></tr>
   `;
 
-  for (const userId in users) {
-    const u = users[userId];
-    if (!u.withdraws) continue;
-
-    u.withdraws.forEach((w, index) => {
-      html += `
-        <tr>
-          <td>${userId}</td>
-          <td>${w.amount}</td>
-          <td>${w.wallet}</td>
-          <td>${w.status}</td>
-          <td>
-            ${
-              w.status === "pending"
-                ? `<a href="/approve?uid=${userId}&i=${index}&pass=${pass}">Approve</a>`
-                : "Done"
-            }
-          </td>
-        </tr>
-      `;
-    });
+  for (const id in users) {
+    html += `
+      <tr>
+        <td>${id}</td>
+        <td>${users[id].balance}</td>
+        <td>${users[id].energy}</td>
+        <td>${users[id].refs?.length || 0}</td>
+      </tr>
+    `;
   }
 
-  html += "</table>";
+  html += "</table></body></html>";
   res.send(html);
 });
-  // save withdraw request
-  if (!users[userId].withdraws) users[userId].withdraws = [];
 
-  users[userId].withdraws.push({
-    amount: users[userId].balance,
-    wallet,
-    time: Date.now(),
-    status: "pending"
-  });
-
-  users[userId].balance = 0;
-
-  save();
-  res.json({ success: true });
+// ==========================
+// CATCH ALL
+// ==========================
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "public/index.html"));
 });
 
-app.get("/", (req, res) => {
-  res.send(`
-    <h2>🚀 TeleTech AI Server Running</h2>
-    <p>Go to <a href="/admin?pass=admin123">Admin Dashboard</a></p>
-  `);
-});
-
-app.listen(3000, () => console.log("Running..."));
+// ==========================
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log("Server running on " + PORT));
