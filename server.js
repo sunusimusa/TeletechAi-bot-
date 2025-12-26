@@ -1,67 +1,35 @@
-const express = require("express");
-const fs = require("fs");
-const path = require("path");
-const cors = require("cors");
-
-const app = express();
-app.use(cors());
-app.use(express.json());
-
-// SERVE FRONTEND
-app.use(express.static("public"));
-
-const DB_FILE = "./users.json";
-let users = {};
-
-if (fs.existsSync(DB_FILE)) {
-  users = JSON.parse(fs.readFileSync(DB_FILE));
+let userId = localStorage.getItem("uid");
+if (!userId) {
+  userId = Math.floor(Math.random() * 1000000);
+  localStorage.setItem("uid", userId);
 }
 
-// ==========================
-// SAVE USERS
-// ==========================
-function saveUsers() {
-  fs.writeFileSync(DB_FILE, JSON.stringify(users, null, 2));
+const balanceEl = document.getElementById("balance");
+const energyEl = document.getElementById("energy");
+const tapBtn = document.getElementById("tapBtn");
+
+let energy = 0;
+let balance = 0;
+
+// ================= LOAD USER =================
+async function loadUser() {
+  const res = await fetch("/user", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId })
+  });
+
+  const data = await res.json();
+
+  balance = data.balance;
+  energy = data.energy;
+
+  updateUI();
 }
 
-// ==========================
-// GET / CREATE USER
-// ==========================
-app.post("/user", (req, res) => {
-  const { userId } = req.body;
-
-  if (!users[userId]) {
-    users[userId] = {
-      balance: 0,
-      energy: 100,
-      lastEnergyUpdate: Date.now(),
-      refs: []
-    };
-    saveUsers();
-  }
-
-  // Energy regen
-  const now = Date.now();
-  const diff = Math.floor((now - users[userId].lastEnergyUpdate) / 30000);
-
-  if (diff > 0) {
-    users[userId].energy = Math.min(100, users[userId].energy + diff);
-    users[userId].lastEnergyUpdate = now;
-    saveUsers();
-  }
-
-  res.json(users[userId]);
-});
-
-// ==========================
-// TAP
-// ==========================
 app.post("/tap", (req, res) => {
   const { userId } = req.body;
-
-  if (!users[userId]) {
-    return res.json({ error: "User not found" });
-  }
+  if (!users[userId]) return res.json({ error: "no user" });
 
   if (users[userId].energy <= 0) {
     return res.json(users[userId]);
@@ -73,84 +41,67 @@ app.post("/tap", (req, res) => {
   saveUsers();
   res.json(users[userId]);
 });
+// ================= TAP =================
+tapBtn.onclick = async () => {
+  if (energy <= 0) return;
 
-// ==========================
-// REFERRAL COUNT
-// ==========================
-app.post("/ref-count", (req, res) => {
+  const res = await fetch("/tap", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId })
+  });
+
+  const data = await res.json();
+
+  balance = data.balance;
+  energy = data.energy;
+
+  tapBtn.classList.add("tap-anim");
+  setTimeout(() => tapBtn.classList.remove("tap-anim"), 150);
+
+  updateUI();
+};
+
+// ================= UI UPDATE =================
+function updateUI() {
+  balanceEl.innerText = balance + " TT";
+  energyEl.innerText = energy;
+}
+
+// ================= AUTO ENERGY REFILL =================
+setInterval(async () => {
+  const res = await fetch("/user", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId })
+  });
+
+  const data = await res.json();
+  energy = data.energy;
+  updateUI();
+}, 5000); // every 5 seconds
+app.post("/user", (req, res) => {
   const { userId } = req.body;
-  const count = users[userId]?.refs?.length || 0;
-  res.json({ count });
-});
 
-// ==========================
-// ADD REFERRAL
-// ==========================
-app.post("/referral", (req, res) => {
-  const { referrerId } = req.body;
-
-  if (users[referrerId]) {
-    users[referrerId].refs.push(Date.now());
-    users[referrerId].balance += 10;
-    saveUsers();
+  if (!users[userId]) {
+    users[userId] = {
+      balance: 0,
+      energy: 100,
+      lastEnergy: Date.now(),
+      refs: []
+    };
   }
 
-  res.json({ ok: true });
-});
+  const now = Date.now();
+  const diff = Math.floor((now - users[userId].lastEnergy) / 5000); // 5 sec
 
-// ==========================
-// HOME
-// ==========================
-app.get("/", (req, res) => {
-  res.send("TeleTech AI Server Running");
-});
-// ========================
-// ADMIN AUTH (simple)
-// ========================
-const ADMIN_PASSWORD = "admin123"; // canza daga baya
-
-app.get("/admin", (req, res) => {
-  const pass = req.query.pass;
-
-  if (pass !== ADMIN_PASSWORD) {
-    return res.send("❌ Access denied");
+  if (diff > 0) {
+    users[userId].energy = Math.min(100, users[userId].energy + diff);
+    users[userId].lastEnergy = now;
   }
 
-  res.send(`
-    <html>
-    <head>
-      <title>Admin Dashboard</title>
-      <style>
-        body { font-family: Arial; background:#0d1117; color:white; padding:20px; }
-        table { width:100%; border-collapse: collapse; }
-        th, td { border:1px solid #444; padding:8px; }
-        th { background:#222; }
-      </style>
-    </head>
-    <body>
-      <h2>📊 Admin Dashboard</h2>
-      <table>
-        <tr>
-          <th>User ID</th>
-          <th>Balance</th>
-          <th>Energy</th>
-          <th>Referrals</th>
-        </tr>
-        ${Object.entries(users).map(([id, u]) => `
-          <tr>
-            <td>${id}</td>
-            <td>${u.balance}</td>
-            <td>${u.energy}</td>
-            <td>${u.refs?.length || 0}</td>
-          </tr>
-        `).join("")}
-      </table>
-    </body>
-    </html>
-  `);
+  saveUsers();
+  res.json(users[userId]);
 });
-// ==========================
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log("Server running on port " + PORT);
-});
+
+loadUser();
