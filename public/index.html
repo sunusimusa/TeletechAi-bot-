@@ -18,6 +18,16 @@
   <p>💰 Balance: <span id="balance">0</span></p>
 
   <input id="refLink" readonly />
+<button onclick="copyLink()">Copy Invite Link</button>
+
+<script>
+function copyLink() {
+  navigator.clipboard.writeText(document.getElementById("refLink").value);
+  alert("Copied!");
+}
+</script>
+
+  <input id="refLink" readonly />
 <button onclick="navigator.clipboard.writeText(refLink.value)">
   Copy Invite Link
 </button>
