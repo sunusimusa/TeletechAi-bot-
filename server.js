@@ -1,80 +1,73 @@
 const express = require("express");
 const fs = require("fs");
-const path = require("path");
-
 const app = express();
-const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 app.use(express.static("public"));
 
 const USERS_FILE = "./data/users.json";
-const WITHDRAW_FILE = "./data/withdraws.json";
 
-// helper
-function readJSON(file) {
-  if (!fs.existsSync(file)) return {};
-  return JSON.parse(fs.readFileSync(file));
+function loadUsers() {
+  if (!fs.existsSync(USERS_FILE)) return {};
+  return JSON.parse(fs.readFileSync(USERS_FILE));
 }
 
-function writeJSON(file, data) {
-  fs.writeFileSync(file, JSON.stringify(data, null, 2));
+function saveUsers(data) {
+  fs.writeFileSync(USERS_FILE, JSON.stringify(data, null, 2));
 }
 
-// Home page
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
-});
+// GET USER
+app.get("/user/:id", (req, res) => {
+  const users = loadUsers();
+  const id = req.params.id;
 
-// Get user
-app.post("/user", (req, res) => {
-  const { userId } = req.body;
-  let users = readJSON(USERS_FILE);
-
-  if (!users[userId]) {
-    users[userId] = { balance: 0 };
-    writeJSON(USERS_FILE, users);
+  if (!users[id]) {
+    users[id] = {
+      balance: 0,
+      referredBy: null,
+      referrals: 0
+    };
+    saveUsers(users);
   }
 
-  res.json({ balance: users[userId].balance });
+  res.json(users[id]);
 });
 
-// Tap
-app.post("/tap", (req, res) => {
-  const { userId } = req.body;
-  let users = readJSON(USERS_FILE);
+// TAP
+app.post("/tap/:id", (req, res) => {
+  const users = loadUsers();
+  const id = req.params.id;
 
-  if (!users[userId]) users[userId] = { balance: 0 };
-
-  users[userId].balance += 1;
-  writeJSON(USERS_FILE, users);
-
-  res.json({ balance: users[userId].balance });
-});
-
-// Withdraw
-app.post("/withdraw", (req, res) => {
-  const { userId } = req.body;
-  let users = readJSON(USERS_FILE);
-  let withdraws = readJSON(WITHDRAW_FILE);
-
-  if (!users[userId] || users[userId].balance < 1000) {
-    return res.json({ error: "Minimum 1000 TT required" });
+  if (!users[id]) {
+    users[id] = { balance: 0, referrals: 0 };
   }
 
-  withdraws[userId] = {
-    amount: users[userId].balance,
-    time: Date.now()
-  };
+  users[id].balance += 1;
+  saveUsers(users);
 
-  users[userId].balance = 0;
+  res.json({ balance: users[id].balance });
+});
 
-  writeJSON(USERS_FILE, users);
-  writeJSON(WITHDRAW_FILE, withdraws);
+// REFERRAL
+app.get("/ref/:refId/:newId", (req, res) => {
+  const { refId, newId } = req.params;
+  const users = loadUsers();
 
+  if (!users[newId]) {
+    users[newId] = {
+      balance: 5,
+      referredBy: refId,
+      referrals: 0
+    };
+
+    if (users[refId]) {
+      users[refId].balance += 5;
+      users[refId].referrals += 1;
+    }
+  }
+
+  saveUsers(users);
   res.json({ success: true });
 });
 
-app.listen(PORT, () => {
-  console.log("Server running on port " + PORT);
-});
+app.listen(3000, () => console.log("Server running"));
