@@ -101,6 +101,12 @@ app.get("/ads", (req, res) => {
   const ad = ads[Math.floor(Math.random() * ads.length)];
   res.json(ad);
 });
+// ==========================
+// ADMIN DASHBOARD
+// ==========================
+app.get("/admin", (req, res) => {
+  res.json(users);
+});
 
 // =======================
 // START SERVER
