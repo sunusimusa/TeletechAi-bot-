@@ -156,3 +156,25 @@ async function connectWallet() {
     alert("Wallet connection cancelled");
   }
 }
+
+async function withdraw() {
+  if (!userId) return alert("User not ready");
+
+  const address = document.getElementById("wallet").value;
+  if (!address) return alert("Enter wallet address");
+
+  const res = await fetch("/withdraw", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      userId,
+      amount: 100, // minimum
+      address
+    })
+  });
+
+  const data = await res.json();
+  if (data.error) return alert(data.error);
+
+  alert("Withdraw request sent!");
+}
