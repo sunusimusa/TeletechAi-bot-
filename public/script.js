@@ -54,7 +54,7 @@ async function daily() {
 // REF LINK
 function setReferral() {
   document.getElementById("refLink").value =
-    `https://t.me/YOUR_BOT_USERNAME?start=${userId}`;
+    `https://t.me/teletechaibot?start=${userId}`;
 }
 
 // COPY
