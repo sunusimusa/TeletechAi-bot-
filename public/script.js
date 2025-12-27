@@ -123,6 +123,33 @@ function copyInvite() {
     .catch(() => alert("Failed to copy"));
 }
 
+async function connectWallet() {
+  if (!tonConnectUI) {
+    tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+      manifestUrl: window.location.origin + "/tonconnect-manifest.json",
+    });
+  }
+
+  try {
+    const wallet = await tonConnectUI.connectWallet();
+    document.getElementById("walletAddress").value = wallet.account.address;
+
+    await fetch("/wallet", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        userId,
+        address: wallet.account.address
+      })
+    });
+
+    alert("Wallet connected ✅");
+  } catch (e) {
+    console.log(e);
+    alert("Wallet connection cancelled");
+  }
+}
+
 // REFERRALS
 async function loadReferrals() {
   const res = await fetch("/referrals");
