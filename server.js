@@ -145,6 +145,28 @@ app.get("/leaderboard", (req, res) => {
   res.json(list);
 });
 
+const ADMIN_KEY = "ADMIN123";
+
+// get users
+app.get("/admin/users", (req, res) => {
+  if (req.query.key !== ADMIN_KEY) return res.sendStatus(403);
+  res.json(Object.entries(users).map(([id, u]) => ({ id, ...u })));
+});
+
+// approve withdraw
+app.post("/admin/approve", (req, res) => {
+  if (req.body.key !== ADMIN_KEY) return res.sendStatus(403);
+
+  const user = users[req.body.id];
+  if (!user) return res.sendStatus(404);
+
+  if (user.withdraws.length > 0)
+    user.withdraws[user.withdraws.length - 1].status = "approved";
+
+  save();
+  res.json({ success: true });
+});
+
 // ================= REFERRALS =================
 app.get("/referrals", (req, res) => {
   const list = Object.entries(users)
