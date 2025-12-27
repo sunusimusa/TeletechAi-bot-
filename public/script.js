@@ -1,33 +1,29 @@
-// ===============================
-// TELEGRAM INIT
-// ===============================
+// ================= TELEGRAM INIT =================
 const tg = window.Telegram.WebApp;
 tg.expand();
 
-// ===============================
-// TON CONNECT
-// ===============================
+// ================= TON CONNECT =================
 const tonConnect = new TON_CONNECT_UI.TonConnectUI({
-  manifestUrl: "https://your-domain.com/tonconnect-manifest.json"
+  manifestUrl: "https://teletechai-bot.onrender.com/tonconnect-manifest.json"
 });
 
-// ===============================
-// USER INIT
-// ===============================
-let userId = localStorage.getItem("userId");
+// ================= USER ID =================
+let userId = tg?.initDataUnsafe?.user?.id;
 
 if (!userId) {
-  userId = tg?.initDataUnsafe?.user?.id || Math.floor(Math.random() * 1e9);
+  userId = localStorage.getItem("userId");
+}
+
+if (!userId) {
+  userId = Math.floor(Math.random() * 1000000000);
   localStorage.setItem("userId", userId);
 }
 
-// REF PARAM
+// ================= REF =================
 const params = new URLSearchParams(window.location.search);
 const ref = params.get("ref");
 
-// ===============================
-// LOAD USER
-// ===============================
+// ================= LOAD USER =================
 async function loadUser() {
   const res = await fetch("/user", {
     method: "POST",
@@ -37,8 +33,8 @@ async function loadUser() {
 
   const data = await res.json();
 
-  document.getElementById("balance").innerText = data.balance;
-  document.getElementById("energy").innerText = data.energy;
+  document.getElementById("balance").innerText = data.balance ?? 0;
+  document.getElementById("energy").innerText = data.energy ?? 0;
 
   document.getElementById("refLink").value =
     window.location.origin + "?ref=" + userId;
@@ -46,16 +42,8 @@ async function loadUser() {
 
 loadUser();
 
-// ===============================
-// TAP SYSTEM
-// ===============================
+// ================= TAP =================
 async function tap() {
-  if (navigator.vibrate) navigator.vibrate(40);
-
-  const btn = document.getElementById("tap");
-  btn.style.transform = "scale(0.9)";
-  setTimeout(() => (btn.style.transform = "scale(1)"), 100);
-
   const res = await fetch("/tap", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -63,16 +51,13 @@ async function tap() {
   });
 
   const data = await res.json();
-
   if (data.error) return;
 
   document.getElementById("balance").innerText = data.balance;
   document.getElementById("energy").innerText = data.energy;
 }
 
-// ===============================
-// DAILY REWARD
-// ===============================
+// ================= DAILY =================
 async function claimDaily() {
   const res = await fetch("/daily", {
     method: "POST",
@@ -83,26 +68,19 @@ async function claimDaily() {
   const data = await res.json();
 
   document.getElementById("dailyMsg").innerText =
-    data.error || `🎁 You got ${data.reward} TT`;
+    data.error || `🎁 +${data.reward}`;
 
-  if (!data.error) {
+  if (!data.error)
     document.getElementById("balance").innerText = data.balance;
-  }
 }
 
-// ===============================
-// TASK SYSTEM
-// ===============================
+// ================= TASKS =================
 function openTask(type) {
-  let url = "";
+  if (type === "tg") window.open("https://t.me/TeleAIupdates");
+  if (type === "yt") window.open("https://youtube.com/@Sunusicrypto");
+  if (type === "chat") window.open("https://t.me/tele_tap_ai");
 
-  if (type === "tg") url = "https://t.me/TeleAIupdates";
-  if (type === "yt") url = "https://youtube.com/@Sunusicrypto";
-  if (type === "chat") url = "https://t.me/tele_tap_ai";
-
-  window.open(url, "_blank");
-
-  setTimeout(() => completeTask(type), 5000);
+  setTimeout(() => completeTask(type), 4000);
 }
 
 async function completeTask(type) {
@@ -113,41 +91,34 @@ async function completeTask(type) {
   });
 
   const data = await res.json();
-
-  if (data.error) {
-    document.getElementById("taskMsg").innerText = data.error;
-  } else {
-    document.getElementById("taskMsg").innerText = "✅ Task completed!";
+  document.getElementById("taskMsg").innerText =
+    data.error || "✅ Task completed!";
+  if (!data.error) {
     document.getElementById("balance").innerText = data.balance;
   }
 }
 
-// ===============================
-// WALLET CONNECT
-// ===============================
-document.getElementById("connectWalletBtn")?.addEventListener("click", async () => {
+// ================= CONNECT WALLET =================
+document.getElementById("connectWalletBtn").onclick = async () => {
   const wallet = await tonConnect.connectWallet();
+  if (!wallet) return;
 
-  if (wallet) {
-    document.getElementById("walletAddress").innerText =
-      wallet.account.address;
+  document.getElementById("walletAddress").innerText =
+    wallet.account.address;
 
-    await saveWallet(wallet.account.address);
-  }
-});
-
-async function saveWallet(address) {
   await fetch("/wallet", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ userId, address })
+    body: JSON.stringify({
+      userId,
+      address: wallet.account.address
+    })
   });
-}
+};
 
+// ================= WITHDRAW =================
 async function withdraw() {
-  const amount = prompt("Enter amount to withdraw:");
-
-  if (!amount || amount <= 0) return;
+  const amount = document.getElementById("wallet").value;
 
   const res = await fetch("/withdraw", {
     method: "POST",
@@ -156,21 +127,6 @@ async function withdraw() {
   });
 
   const data = await res.json();
-
-  if (data.error) {
-    document.getElementById("withdrawMsg").innerText = data.error;
-  } else {
-    document.getElementById("withdrawMsg").innerText =
-      "✅ Withdraw request sent. Waiting for admin approval.";
-  }
-}
-
-// ===============================
-// COPY REF LINK
-// ===============================
-function copyLink() {
-  navigator.clipboard.writeText(
-    window.location.origin + "?ref=" + userId
-  );
-  alert("Invite link copied!");
+  document.getElementById("withdrawMsg").innerText =
+    data.error || "Withdrawal sent!";
   }
