@@ -41,7 +41,14 @@ function verifyTelegram(initData) {
 // ================= INIT USER =================
 app.post("/user", (req, res) => {
   const { initData, ref } = req.body;
-  if (!verifyTelegram(initData)) return res.status(403).json({ error: "Invalid" });
+
+  if (!initData) {
+    return res.status(403).json({ error: "No init data" });
+  }
+
+  if (!verifyTelegram(initData)) {
+    return res.status(403).json({ error: "Invalid Telegram auth" });
+  }
 
   const params = new URLSearchParams(initData);
   const user = JSON.parse(params.get("user"));
@@ -50,25 +57,19 @@ app.post("/user", (req, res) => {
   if (!users[userId]) {
     users[userId] = {
       balance: 0,
-      energy: MAX_ENERGY,
+      energy: 100,
       lastEnergy: Date.now(),
       lastDaily: 0,
-      wallet: "",
       refs: [],
+      wallet: "",
       withdraws: []
     };
 
+    // REFERRAL BONUS
     if (ref && users[ref]) {
-      users[ref].refs.push(userId);
       users[ref].balance += 10;
+      users[ref].refs.push(userId);
     }
-  }
-
-  const now = Date.now();
-  const regen = Math.floor((now - users[userId].lastEnergy) / ENERGY_REGEN);
-  if (regen > 0) {
-    users[userId].energy = Math.min(MAX_ENERGY, users[userId].energy + regen);
-    users[userId].lastEnergy += regen * ENERGY_REGEN;
   }
 
   save();
