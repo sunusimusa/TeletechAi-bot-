@@ -1,6 +1,7 @@
 // ================= TELEGRAM INIT =================
 const tg = window.Telegram.WebApp;
 tg.expand();
+tg.ready();
 
 // ================= TON CONNECT =================
 const tonConnect = new TON_CONNECT_UI.TonConnectUI({
@@ -8,14 +9,14 @@ const tonConnect = new TON_CONNECT_UI.TonConnectUI({
 });
 
 // ================= USER ID =================
-let userId = tg?.initDataUnsafe?.user?.id;
+let userId = localStorage.getItem("userId");
 
 if (!userId) {
-  userId = localStorage.getItem("userId");
-}
-
-if (!userId) {
-  userId = Math.floor(Math.random() * 1000000000);
+  if (window.Telegram?.WebApp?.initDataUnsafe?.user?.id) {
+    userId = window.Telegram.WebApp.initDataUnsafe.user.id;
+  } else {
+    userId = "web_" + Math.floor(Math.random() * 1000000000);
+  }
   localStorage.setItem("userId", userId);
 }
 
@@ -39,8 +40,6 @@ async function loadUser() {
   document.getElementById("refLink").value =
     window.location.origin + "?ref=" + userId;
 }
-
-loadUser();
 
 // ================= TAP =================
 async function tap() {
