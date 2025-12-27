@@ -62,4 +62,29 @@ async function loadReferrals() {
     data.map((u, i) => `👤 ${i + 1}. ${u.id} — ${u.refs}`).join("<br>");
 }
 
+const tonConnect = new TON_CONNECT_UI.TonConnectUI({
+  manifestUrl: window.location.origin + "/tonconnect-manifest.json"
+});
+
+async function connectWallet() {
+  await tonConnect.connectWallet();
+}
+
+tonConnect.onStatusChange(wallet => {
+  if (wallet) {
+    document.getElementById("walletAddress").innerText =
+      wallet.account.address;
+
+    // Save wallet to backend
+    fetch("/wallet", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        userId,
+        address: wallet.account.address
+      })
+    });
+  }
+});
+
 init();
