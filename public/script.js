@@ -1,21 +1,17 @@
 const tg = window.Telegram.WebApp;
 tg.expand();
 
-// ===== GET INIT DATA =====
-const initData = tg.initData || "";
-const initDataUnsafe = tg.initDataUnsafe || {};
-
-// ===== GLOBAL USER ID =====
 let userId = null;
+let userReady = false;
 
-// ================= LOAD USER =================
+// Load user
 async function loadUser() {
   const res = await fetch("/user", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      initData: tg.initData,
-    }),
+      initData: tg.initDataUnsafe
+    })
   });
 
   const data = await res.json();
@@ -26,9 +22,10 @@ async function loadUser() {
   }
 
   userId = data.id;
+  userReady = true;
 
-  document.getElementById("balance").innerText = data.balance ?? 0;
-  document.getElementById("energy").innerText = data.energy ?? 0;
+  document.getElementById("balance").innerText = data.balance;
+  document.getElementById("energy").innerText = data.energy;
 
   setReferralLink();
   loadLeaderboard();
@@ -37,14 +34,14 @@ async function loadUser() {
 
 loadUser();
 
-// ================= TAP =================
+// TAP
 async function tap() {
-  if (!userId) return alert("User not ready");
+  if (!userReady) return alert("Please wait...");
 
   const res = await fetch("/tap", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ userId }),
+    body: JSON.stringify({ userId })
   });
 
   const data = await res.json();
@@ -54,12 +51,14 @@ async function tap() {
   document.getElementById("energy").innerText = data.energy;
 }
 
-// ================= DAILY =================
+// DAILY
 async function claimDaily() {
+  if (!userReady) return alert("Please wait...");
+
   const res = await fetch("/daily", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ userId }),
+    body: JSON.stringify({ userId })
   });
 
   const data = await res.json();
@@ -68,14 +67,13 @@ async function claimDaily() {
   document.getElementById("balance").innerText = data.balance;
 }
 
-// ================= REFERRAL =================
+// REFERRAL LINK
 function setReferralLink() {
-  if (!userId) return;
   const link = `https://t.me/YOUR_BOT_USERNAME?start=${userId}`;
   document.getElementById("refLink").value = link;
 }
 
-// ================= LEADERBOARD =================
+// LEADERBOARD
 async function loadLeaderboard() {
   const res = await fetch("/leaderboard");
   const data = await res.json();
@@ -84,7 +82,7 @@ async function loadLeaderboard() {
     data.map((u, i) => `🏆 ${i + 1}. ${u.id} — ${u.balance}`).join("<br>");
 }
 
-// ================= REFERRALS =================
+// REFERRALS
 async function loadReferrals() {
   const res = await fetch("/referrals");
   const data = await res.json();
@@ -93,7 +91,7 @@ async function loadReferrals() {
     data.map((u, i) => `👤 ${i + 1}. ${u.id} — ${u.refs}`).join("<br>");
 }
 
-// ================= WALLET =================
+// WALLET
 async function connectWallet() {
   const tonConnect = new TON_CONNECT_UI.TonConnectUI({
     manifestUrl: window.location.origin + "/tonconnect-manifest.json"
@@ -108,6 +106,6 @@ async function connectWallet() {
     body: JSON.stringify({
       userId,
       address: wallet.account.address
-    }),
+    })
   });
-    }
+}
