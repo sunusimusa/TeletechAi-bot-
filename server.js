@@ -156,6 +156,15 @@ app.get("/leaderboard", (req, res) => {
   res.json(list);
 });
 
+app.get("/leaderboard", (req, res) => {
+  const list = Object.entries(users)
+    .map(([id, u]) => ({ id, refs: u.refs?.length || 0 }))
+    .sort((a, b) => b.refs - a.refs)
+    .slice(0, 10);
+
+  res.json(list);
+});
+
 app.get("/referrals", (req, res) => {
   const list = Object.entries(users)
     .map(([id, u]) => ({
