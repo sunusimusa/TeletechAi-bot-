@@ -2,12 +2,12 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: "Segoe UI", sans-serif;
+  font-family: "Inter", system-ui, sans-serif;
 }
 
 body {
-  background: radial-gradient(circle at top, #0f172a, #020617);
-  color: white;
+  background: linear-gradient(180deg, #0b0f1a, #0f172a);
+  color: #fff;
   min-height: 100vh;
 }
 
@@ -15,81 +15,131 @@ body {
   max-width: 420px;
   margin: auto;
   padding: 20px;
-  text-align: center;
 }
 
+/* HEADER */
 .title {
+  text-align: center;
+  font-size: 22px;
+  font-weight: 700;
   margin-bottom: 15px;
 }
 
+/* STATS */
 .stats {
   display: flex;
-  justify-content: space-between;
+  gap: 10px;
   margin-bottom: 20px;
 }
 
 .stat-box {
-  width: 48%;
+  flex: 1;
   background: #111827;
-  border-radius: 12px;
-  padding: 10px;
+  border-radius: 14px;
+  padding: 15px;
+  text-align: center;
 }
 
+.stat-box span {
+  font-size: 13px;
+  opacity: 0.7;
+}
+
+.stat-box h2 {
+  margin-top: 5px;
+  font-size: 22px;
+  color: #22c55e;
+}
+
+/* TAP BUTTON */
 #tap {
   width: 180px;
   height: 180px;
-  margin: 20px auto;
+  margin: 25px auto;
   border-radius: 50%;
-  background: radial-gradient(circle, #22c55e, #16a34a);
+  background: radial-gradient(circle at top, #22c55e, #15803d);
   display: flex;
-  justify-content: center;
   align-items: center;
-  font-size: 28px;
+  justify-content: center;
+  font-size: 26px;
   font-weight: bold;
+  box-shadow: 0 0 40px rgba(34, 197, 94, 0.5);
   cursor: pointer;
-  box-shadow: 0 0 30px #22c55e;
   transition: 0.15s;
 }
 
 #tap:active {
-  transform: scale(0.9);
+  transform: scale(0.93);
 }
 
-.btn {
-  margin: 10px auto;
-  padding: 12px;
+/* BUTTONS */
+button {
   width: 100%;
-  border-radius: 10px;
   border: none;
-  font-weight: bold;
+  border-radius: 14px;
+  padding: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 10px;
 }
 
 .yellow {
-  background: gold;
+  background: #facc15;
+  color: #000;
 }
 
-.section-title {
-  margin-top: 25px;
-  margin-bottom: 10px;
+.task-btn {
+  background: #1f2933;
+  color: #fff;
+  border: 1px solid #2a3441;
 }
 
-.task-list button {
+.task-btn:hover {
+  background: #2a3441;
+}
+
+/* SECTIONS */
+h3 {
+  margin: 25px 0 10px;
+  font-size: 16px;
+  opacity: 0.9;
+}
+
+/* REFERRAL */
+.ref-box input {
   width: 100%;
-  margin: 6px 0;
-  padding: 10px;
-  border-radius: 8px;
+  padding: 12px;
+  border-radius: 10px;
   border: none;
-}
-
-.ref-box,
-.wallet-box {
-  margin-top: 15px;
-}
-
-input {
-  width: 100%;
-  padding: 10px;
-  border-radius: 8px;
+  background: #0f172a;
+  color: white;
   margin-top: 5px;
+}
+
+/* LEADERBOARD */
+#topUsers, #topReferrals {
+  background: #0f172a;
+  padding: 10px;
+  border-radius: 10px;
+  margin-top: 8px;
+  font-size: 14px;
+}
+
+/* WALLET */
+.wallet-box {
+  margin-top: 20px;
+}
+
+.wallet-box button {
+  background: #2563eb;
+  color: white;
+}
+
+.wallet-box input {
+  margin-top: 8px;
+  background: #0f172a;
+  color: white;
   border: none;
+  padding: 12px;
+  border-radius: 10px;
 }
