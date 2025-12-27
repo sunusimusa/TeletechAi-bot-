@@ -4,6 +4,7 @@ const path = require("path");
 const fetch = (...args) =>
   import("node-fetch").then(({ default: fetch }) => fetch(...args));
 
+const REF_REWARD = 10;
 const app = express();
 app.use(express.json());
 app.use(express.static("public"));
@@ -29,36 +30,41 @@ function saveUsers() {
 
 // ================= USER INIT =================
 app.post("/user", (req, res) => {
-  const { userId, ref } = req.body;
+  const { initData } = req.body;
 
+  if (!initData) return res.json({ error: "No init data" });
+
+  const params = new URLSearchParams(initData);
+  const userData = params.get("user");
+  const startParam = params.get("start"); // referral code
+
+  if (!userData) return res.json({ error: "No user data" });
+
+  const user = JSON.parse(userData);
+  const userId = user.id.toString();
+
+  // Create new user if not exists
   if (!users[userId]) {
     users[userId] = {
       balance: 0,
-      energy: MAX_ENERGY,
+      energy: 100,
       lastEnergy: Date.now(),
       lastDaily: 0,
-      refs: [],
-      tasks: {},
       wallet: "",
+      refs: [],
       withdraws: []
     };
+
+    // 🔥 REFERRAL LOGIC
+    if (startParam && users[startParam] && startParam !== userId) {
+      if (!users[startParam].refs.includes(userId)) {
+        users[startParam].refs.push(userId);
+        users[startParam].balance += REF_REWARD;
+      }
+    }
   }
 
-  // ENERGY REGEN
-  const now = Date.now();
-  const regen = Math.floor((now - users[userId].lastEnergy) / ENERGY_REGEN);
-  if (regen > 0) {
-    users[userId].energy = Math.min(MAX_ENERGY, users[userId].energy + regen);
-    users[userId].lastEnergy = now;
-  }
-
-  // REFERRAL
-  if (ref && users[ref] && !users[ref].refs.includes(userId)) {
-    users[ref].refs.push(userId);
-    users[ref].balance += 10;
-  }
-
-  saveUsers();
+  saveDB();
   res.json(users[userId]);
 });
 
