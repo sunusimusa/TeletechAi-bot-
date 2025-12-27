@@ -1,6 +1,7 @@
 const tg = window.Telegram.WebApp;
 tg.expand();
 
+let tonConnectUI = null;
 let userId = null;
 let userReady = false;
 
