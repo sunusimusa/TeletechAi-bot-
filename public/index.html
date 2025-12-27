@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <script src="https://unpkg.com/@tonconnect/sdk@2.2.0/dist/tonconnect.min.js"></script>
+  <script src="https://unpkg.com/@tonconnect/ui@0.0.9/dist/tonconnect-ui.min.js"></script>
 
   <link rel="stylesheet" href="style.css" />
 </head>
@@ -30,7 +30,7 @@
   </div>
 
   <div id="tap" onclick="tap()">TAP</div>
-  
+
   <button class="btn yellow" onclick="claimDaily()">🎁 Daily Reward</button>
 
   <h3>🎯 Tasks</h3>
@@ -40,27 +40,21 @@
     <button onclick="openTask('chat')">💬 Join Public Chat</button>
   </div>
 
-  <p id="taskMsg"></p>
-
   <h3>👥 Invite Friends</h3>
   <div class="ref-box">
     <input id="refLink" readonly />
     <button onclick="copyInvite()">Copy Invite</button>
   </div>
-  
+
   <h3>🏆 Top 10 Users</h3>
   <div id="topUsers"></div>
-  
+
   <h3>👑 Top Referrals</h3>
   <div id="topReferrals"></div>
-  
-  <div class="wallet-box">
-    <button id="connectWalletBtn">🔗 Connect Wallet</button>
-    <p id="walletAddress"></p>
 
-    <input id="wallet" placeholder="Wallet Address" />
-    <button onclick="withdraw()">Withdraw</button>
-    <p id="withdrawMsg"></p>
+  <div class="wallet-box">
+    <button onclick="connectWallet()">🔗 Connect Wallet</button>
+    <input id="walletAddress" placeholder="Wallet Address" readonly />
   </div>
 
 </div>
