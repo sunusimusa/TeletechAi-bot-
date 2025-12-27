@@ -170,6 +170,34 @@ setInterval(() => {
   saveUsers();
 }, 24 * 60 * 60 * 1000);
 
+// ================= AUTO PAY TOP REFERRALS =================
+
+// runs every 24 hours
+setInterval(() => {
+  console.log("⏰ Running daily referral payout...");
+
+  const ranked = Object.entries(users)
+    .map(([id, u]) => ({
+      id,
+      refs: u.refs ? u.refs.length : 0
+    }))
+    .sort((a, b) => b.refs - a.refs)
+    .slice(0, 3);
+
+  const rewards = [10, 5, 3];
+
+  ranked.forEach((user, index) => {
+    const reward = rewards[index];
+    if (!reward) return;
+
+    users[user.id].balance += reward;
+  });
+
+  saveUsers();
+  console.log("✅ Daily referral rewards paid");
+
+}, 24 * 60 * 60 * 1000);
+
 // ================= START =================
 app.listen(PORT, () => {
   console.log("🚀 Server running on port", PORT);
