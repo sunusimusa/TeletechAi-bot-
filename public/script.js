@@ -1,15 +1,15 @@
 const tg = window.Telegram.WebApp;
 tg.expand();
 
-const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+let userId = null;
+let tonConnectUI;
+
+// ================= INIT TON =================
+tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
   manifestUrl: "https://teletechai-bot.onrender.com/tonconnect-manifest.json"
 });
 
-let userId = null;
-let userReady = false;
-let tonConnectUI = null;
-
-// ================= INIT USER =================
+// ================= LOAD USER =================
 async function loadUser() {
   const res = await fetch("/user", {
     method: "POST",
@@ -20,14 +20,9 @@ async function loadUser() {
   });
 
   const data = await res.json();
-
-  if (data.error) {
-    alert(data.error);
-    return;
-  }
+  if (data.error) return alert(data.error);
 
   userId = data.id;
-
   document.getElementById("balance").innerText = data.balance;
   document.getElementById("energy").innerText = data.energy;
 
@@ -40,7 +35,7 @@ loadUser();
 
 // ================= TAP =================
 async function tap() {
-  if (!userReady) return alert("Please wait...");
+  if (!userId) return alert("Loading...");
 
   const res = await fetch("/tap", {
     method: "POST",
@@ -57,8 +52,6 @@ async function tap() {
 
 // ================= DAILY =================
 async function claimDaily() {
-  if (!userReady) return alert("Please wait...");
-
   const res = await fetch("/daily", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -71,16 +64,8 @@ async function claimDaily() {
   document.getElementById("balance").innerText = data.balance;
 }
 
-// ================= REFERRAL =================
-function setReferralLink() {
-  const link = `https://t.me/YOUR_BOT_USERNAME?start=${userId}`;
-  document.getElementById("refLink").value = link;
-}
-
 // ================= TASKS =================
 function openTask(type) {
-  if (!userReady) return alert("Please wait...");
-
   if (type === "tg") window.open("https://t.me/TeleAIupdates");
   if (type === "yt") window.open("https://youtube.com/@Sunusicrypto");
   if (type === "chat") window.open("https://t.me/tele_tap_ai");
@@ -96,10 +81,22 @@ async function completeTask(type) {
   });
 
   const data = await res.json();
-  if (data.error) return alert(data.error);
+  if (!data.error) {
+    document.getElementById("balance").innerText = data.balance;
+  }
+}
 
-  alert("✅ Task completed!");
-  document.getElementById("balance").innerText = data.balance;
+// ================= REFERRAL =================
+function setReferralLink() {
+  document.getElementById("refLink").value =
+    `https://t.me/YOUR_BOT_USERNAME?start=${userId}`;
+}
+
+function copyInvite() {
+  const input = document.getElementById("refLink");
+  input.select();
+  document.execCommand("copy");
+  alert("Invite copied!");
 }
 
 // ================= LEADERBOARD =================
@@ -120,23 +117,7 @@ async function loadReferrals() {
     data.map((u, i) => `👤 ${i + 1}. ${u.id} — ${u.refs}`).join("<br>");
 }
 
-// ================= COPY INVITE =================
-function copyInvite() {
-  const input = document.getElementById("refLink");
-  input.select();
-  input.setSelectionRange(0, 99999);
-  navigator.clipboard.writeText(input.value);
-  alert("Invite link copied ✅");
-}
-
-// ================= TON CONNECT =================
-function initTon() {
-  tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-    manifestUrl: "https://teletechai-bot.onrender.com/tonconnect-manifest.json"
-  });
-}
-initTon();
-
+// ================= CONNECT WALLET =================
 async function connectWallet() {
   try {
     const wallet = await tonConnectUI.connectWallet();
@@ -150,31 +131,7 @@ async function connectWallet() {
         address: wallet.account.address
       })
     });
-
-    alert("Wallet connected ✅");
   } catch (e) {
     alert("Wallet connection cancelled");
   }
-}
-
-async function withdraw() {
-  if (!userId) return alert("User not ready");
-
-  const address = document.getElementById("wallet").value;
-  if (!address) return alert("Enter wallet address");
-
-  const res = await fetch("/withdraw", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      userId,
-      amount: 100, // minimum
-      address
-    })
-  });
-
-  const data = await res.json();
-  if (data.error) return alert(data.error);
-
-  alert("Withdraw request sent!");
 }
