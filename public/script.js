@@ -3,6 +3,12 @@ tg.expand();
 
 let userId = null;
 
+
+function setReferralLink() {
+  document.getElementById("refLink").value =
+    `https://t.me/YOUR_BOT_USERNAME?start=${userId}`;
+}
+
 async function init() {
   const res = await fetch("/user", {
     method: "POST",
@@ -50,3 +56,5 @@ async function loadBoard() {
   document.getElementById("board").innerHTML =
     data.map(u => `${u.id}: ${u.balance}`).join("<br>");
 }
+
+
