@@ -164,6 +164,25 @@ setInterval(() => {
   saveUsers();
 }, 24 * 60 * 60 * 1000);
 
+app.post("/task", (req, res) => {
+  const { userId, type } = req.body;
+
+  if (!users[userId]) return res.json({ error: "User not found" });
+
+  if (!users[userId].tasks) users[userId].tasks = {};
+
+  if (users[userId].tasks[type]) {
+    return res.json({ error: "Task already completed" });
+  }
+
+  users[userId].tasks[type] = true;
+  users[userId].balance += 10; // reward
+
+  saveDB();
+
+  res.json({ success: true, balance: users[userId].balance });
+});
+
 app.listen(PORT, () => {
   console.log("🚀 Server running on port", PORT);
 });
