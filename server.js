@@ -47,16 +47,30 @@ app.post("/user", (req, res) => {
     users[ref].refs.push(userId);
     users[ref].balance += 10;
   }
+  
+// ENERGY REGEN (FIXED)
+const now = Date.now();
 
-  const now = Date.now();
-  const diff = Math.floor((now - users[userId].lastEnergy) / ENERGY_REGEN);
-  if (diff > 0) {
-    users[userId].energy = Math.min(MAX_ENERGY, users[userId].energy + diff);
-    users[userId].lastEnergy = now;
-  }
+if (!users[userId].lastEnergy) {
+  users[userId].lastEnergy = now;
+}
 
-  saveUsers();
-  res.json(users[userId]);
+if (typeof users[userId].energy !== "number") {
+  users[userId].energy = MAX_ENERGY;
+}
+
+const diff = Math.floor((now - users[userId].lastEnergy) / ENERGY_REGEN);
+
+if (diff > 0) {
+  users[userId].energy = Math.min(MAX_ENERGY, users[userId].energy + diff);
+  users[userId].lastEnergy = now;
+}
+
+saveUsers();
+
+res.json({
+  balance: users[userId].balance,
+  energy: users[userId].energy
 });
 
 // ================= TAP =================
