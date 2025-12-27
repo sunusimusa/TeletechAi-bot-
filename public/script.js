@@ -33,7 +33,7 @@ async function initUser() {
   loadReferrals();
 }
 
-initUser();
+initUser()
 
 // ================= TAP =================
 async function tap() {
@@ -85,6 +85,11 @@ function copyLink() {
   input.select();
   document.execCommand("copy");
   alert("Referral link copied!");
+}
+
+function setReferralLink() {
+  const link = `https://t.me/YOUR_BOT_USERNAME?start=${userId}`;
+  document.getElementById("refLink").value = link;
 }
 
 // ================= LEADERBOARD =================
