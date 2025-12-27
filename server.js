@@ -154,6 +154,28 @@ app.post("/task", async (req, res) => {
   res.json({ success: true, reward: 5, balance: users[userId].balance });
 });
 
+app.get("/admin/withdraws", (req, res) => {
+  if (req.query.pass !== "admin123")
+    return res.send("Access denied");
+
+  let html = "<h2>Withdraw Requests</h2>";
+
+  for (let uid in users) {
+    users[uid].withdraws?.forEach((w, i) => {
+      html += `
+        <div style="border:1px solid #ccc; padding:10px; margin:10px">
+          <b>User:</b> ${uid}<br/>
+          <b>Amount:</b> ${w.amount}<br/>
+          <b>Status:</b> ${w.status}<br/>
+          <a href="/admin/approve?uid=${uid}&i=${i}&pass=admin123">✅ Approve</a>
+        </div>
+      `;
+    });
+  }
+
+  res.send(html);
+});
+
 // ================= WALLET =================
 app.post("/wallet", (req, res) => {
   const { userId, address } = req.body;
