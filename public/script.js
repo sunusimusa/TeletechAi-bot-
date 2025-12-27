@@ -1,6 +1,10 @@
 const tg = window.Telegram.WebApp;
 tg.expand();
 
+const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+  manifestUrl: "https://teletechai-bot.onrender.com/tonconnect-manifest.json"
+});
+
 let userId = null;
 let userReady = false;
 let tonConnectUI = null;
