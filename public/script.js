@@ -56,3 +56,10 @@ async function claimDaily() {
     document.getElementById("balance").innerText = data.balance;
   }
 }
+
+function setReferralLink() {
+  const link = `https://t.me/YOUR_BOT_USERNAME?start=${userId}`;
+  document.getElementById("refLink").value = link;
+}
+
+setReferralLink();
