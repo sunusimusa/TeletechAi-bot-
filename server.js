@@ -200,6 +200,34 @@ app.get("/admin/pay-referrals", (req, res) => {
   res.send("✅ Referral rewards paid successfully");
 });
 
+setInterval(() => {
+  // auto pay top users every 24h
+}, 24 * 60 * 60 * 1000);
+
+// ================= AUTO PAY TOP REFERRALS =================
+setInterval(() => {
+  console.log("⏳ Running daily referral payout...");
+
+  // sort users by referrals count
+  const ranked = Object.entries(users)
+    .map(([id, u]) => ({ id, refs: u.refs?.length || 0 }))
+    .sort((a, b) => b.refs - a.refs)
+    .slice(0, 3); // Top 3
+
+  // Rewards
+  const rewards = [10, 5, 3];
+
+  ranked.forEach((user, index) => {
+    const reward = rewards[index];
+    if (!reward) return;
+
+    users[user.id].balance += reward;
+  });
+
+  saveUsers();
+  console.log("✅ Referral rewards paid");
+}, 24 * 60 * 60 * 1000); // every 24 hours
+
 // ================= START =================
 app.listen(PORT, () => {
   console.log("🚀 Server running on port", PORT);
