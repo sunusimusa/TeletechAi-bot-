@@ -35,15 +35,12 @@ app.post("/user", (req, res) => {
   if (!initData) return res.json({ error: "No init data" });
 
   const params = new URLSearchParams(initData);
-  const userData = params.get("user");
-  const startParam = params.get("start"); // referral code
+  const user = JSON.parse(params.get("user"));
 
-  if (!userData) return res.json({ error: "No user data" });
+  if (!user || !user.id) return res.json({ error: "User not found" });
 
-  const user = JSON.parse(userData);
   const userId = user.id.toString();
 
-  // Create new user if not exists
   if (!users[userId]) {
     users[userId] = {
       balance: 0,
@@ -54,17 +51,8 @@ app.post("/user", (req, res) => {
       refs: [],
       withdraws: []
     };
-
-    // 🔥 REFERRAL LOGIC
-    if (startParam && users[startParam] && startParam !== userId) {
-      if (!users[startParam].refs.includes(userId)) {
-        users[startParam].refs.push(userId);
-        users[startParam].balance += REF_REWARD;
-      }
-    }
   }
 
-  saveDB();
   res.json(users[userId]);
 });
 
