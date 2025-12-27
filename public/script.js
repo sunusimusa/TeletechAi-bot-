@@ -96,5 +96,17 @@ async function loadLeaderboard() {
   document.getElementById("leaderboard").innerHTML = html;
 }
 
+async function loadLeaderboard() {
+  const res = await fetch("/leaderboard");
+  const data = await res.json();
+
+  let html = "";
+  data.forEach((u, i) => {
+    html += `<div>🏆 ${i + 1}. ${u.userId} — ${u.balance}</div>`;
+  });
+
+  document.getElementById("leaderboard").innerHTML = html;
+}
+
 loadLeaderboard();
 loadReferrals();
