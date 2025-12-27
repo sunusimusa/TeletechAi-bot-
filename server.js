@@ -30,14 +30,13 @@ function saveUsers() {
 
 // ================= USER INIT =================
 app.post("/user", (req, res) => {
-  const { initData } = req.body;
+  const tgUser = req.body.initData?.user;
 
-  if (!initData || !initData.user) {
-    return res.json({ error: "User not found" });
+  if (!tgUser || !tgUser.id) {
+    return res.json({ error: "Invalid Telegram user" });
   }
 
-  const user = initData.user;
-  const userId = user.id.toString();
+  const userId = String(tgUser.id);
 
   if (!users[userId]) {
     users[userId] = {
@@ -45,11 +44,22 @@ app.post("/user", (req, res) => {
       energy: 100,
       lastEnergy: Date.now(),
       lastDaily: 0,
-      wallet: "",
       refs: [],
+      tasks: {},
+      wallet: "",
       withdraws: []
     };
   }
+
+  // Energy regen
+  const now = Date.now();
+  const regen = Math.floor((now - users[userId].lastEnergy) / 30000);
+  if (regen > 0) {
+    users[userId].energy = Math.min(100, users[userId].energy + regen);
+    users[userId].lastEnergy = now;
+  }
+
+  saveUsers();
 
   res.json({
     id: userId,
