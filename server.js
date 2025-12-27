@@ -144,6 +144,53 @@ app.post("/withdraw", (req, res) => {
   res.json({ success: true });
 });
 
+app.get("/leaderboard", (req, res) => {
+  const list = Object.entries(users)
+    .map(([id, u]) => ({
+      userId: id,
+      balance: u.balance || 0
+    }))
+    .sort((a, b) => b.balance - a.balance)
+    .slice(0, 10);
+
+  res.json(list);
+});
+
+app.get("/referrals", (req, res) => {
+  const list = Object.entries(users)
+    .map(([id, u]) => ({
+      userId: id,
+      refs: u.refs ? u.refs.length : 0
+    }))
+    .sort((a, b) => b.refs - a.refs)
+    .slice(0, 3);
+
+  res.json(list);
+});
+
+app.get("/admin/pay-referrals", (req, res) => {
+  if (req.query.pass !== "admin123") return res.send("Denied");
+
+  const sorted = Object.entries(users)
+    .map(([id, u]) => ({
+      id,
+      refs: u.refs?.length || 0
+    }))
+    .sort((a, b) => b.refs - a.refs)
+    .slice(0, 3);
+
+  const rewards = [10, 5, 3];
+
+  sorted.forEach((u, i) => {
+    if (users[u.id]) {
+      users[u.id].balance += rewards[i];
+    }
+  });
+
+  saveUsers();
+  res.send("✅ Referral rewards paid successfully");
+});
+
 // ================= START =================
 app.listen(PORT, () => {
   console.log("🚀 Server running on port", PORT);
