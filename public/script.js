@@ -84,5 +84,17 @@ async function loadReferrals() {
   document.getElementById("refList").innerHTML = html;
 }
 
+async function loadLeaderboard() {
+  const res = await fetch("/leaderboard");
+  const data = await res.json();
+
+  let html = "";
+  data.forEach((u, i) => {
+    html += `<p>${i+1}. ${u.id} - ${u.refs} refs</p>`;
+  });
+
+  document.getElementById("leaderboard").innerHTML = html;
+}
+
 loadLeaderboard();
 loadReferrals();
