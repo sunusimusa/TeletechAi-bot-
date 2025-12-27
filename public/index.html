@@ -3,26 +3,70 @@
 <head>
   <meta charset="UTF-8" />
   <title>TeleTech AI</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="https://unpkg.com/@tonconnect/sdk@2.2.0/dist/tonconnect.min.js"></script>
+
   <link rel="stylesheet" href="style.css" />
 </head>
 
 <body>
 
-  <h2>⚡ TeleTech AI</h2>
+<div class="app">
 
-  <div>
-    <p>Balance: <span id="balance">0</span></p>
-    <p>Energy: <span id="energy">0</span></p>
+  <h1 class="title">⚡ TeleTech AI</h1>
+
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stat-box">
+      <span>Balance</span>
+      <h2 id="balance">0</h2>
+    </div>
+
+    <div class="stat-box">
+      <span>Energy</span>
+      <h2 id="energy">0</h2>
+    </div>
   </div>
 
-  <button onclick="tap()">TAP</button>
-  <br><br>
+  <!-- TAP -->
+  <div id="tap" onclick="tap()">
+    TAP
+  </div>
 
-  <button onclick="claimDaily()">🎁 Daily Reward</button>
+  <!-- DAILY -->
+  <button class="btn yellow" onclick="claimDaily()">🎁 Daily Reward</button>
 
-  <script src="script.js"></script>
+  <!-- TASKS -->
+  <h3 class="section-title">🎯 Tasks</h3>
+
+  <div class="task-list">
+    <button onclick="openTask('tg')">📢 Join Telegram</button>
+    <button onclick="openTask('yt')">▶️ Subscribe YouTube</button>
+    <button onclick="openTask('chat')">💬 Join Public Chat</button>
+  </div>
+
+  <p id="taskMsg"></p>
+
+  <!-- REFERRAL -->
+  <div class="ref-box">
+    <input id="refLink" readonly />
+    <button onclick="copyLink()">Copy Invite</button>
+  </div>
+
+  <!-- WALLET -->
+  <div class="wallet-box">
+    <button id="connectWalletBtn">🔗 Connect Wallet</button>
+    <p id="walletAddress"></p>
+
+    <input id="wallet" placeholder="Wallet Address" />
+    <button onclick="withdraw()">Withdraw</button>
+    <p id="withdrawMsg"></p>
+  </div>
+
+</div>
+
+<script src="script.js"></script>
 </body>
 </html>
