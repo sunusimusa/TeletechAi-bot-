@@ -131,4 +131,11 @@ async function withdraw() {
     data.error || "Withdrawal sent!";
   }
 
-  loadUser();
+function copyLink() {
+  navigator.clipboard.writeText(
+    window.location.origin + "?ref=" + userId
+  );
+  alert("Invite link copied!");
+}
+
+loadUser();
