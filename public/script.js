@@ -130,3 +130,5 @@ async function withdraw() {
   document.getElementById("withdrawMsg").innerText =
     data.error || "Withdrawal sent!";
   }
+
+  loadUser();
