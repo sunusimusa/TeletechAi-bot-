@@ -1,35 +1,51 @@
 const express = require("express");
 const fs = require("fs");
+const crypto = require("crypto");
 const path = require("path");
-const fetch = (...args) =>
-  import("node-fetch").then(({ default: fetch }) => fetch(...args));
 
 const app = express();
 app.use(express.json());
 app.use(express.static("public"));
 
 const PORT = process.env.PORT || 3000;
+const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || "PUT_BOT_TOKEN_HERE";
 
-// ================= CONFIG =================
-const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || "";
-const TELEGRAM_API = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}`;
-
-const DB_FILE = "./users.json";
+const DB = "./users.json";
 const MAX_ENERGY = 100;
 const ENERGY_REGEN = 30000;
+const DAILY_REWARD = 20;
 
-// ================= LOAD USERS =================
-let users = fs.existsSync(DB_FILE)
-  ? JSON.parse(fs.readFileSync(DB_FILE))
-  : {};
+let users = fs.existsSync(DB) ? JSON.parse(fs.readFileSync(DB)) : {};
 
-function saveUsers() {
-  fs.writeFileSync(DB_FILE, JSON.stringify(users, null, 2));
+function save() {
+  fs.writeFileSync(DB, JSON.stringify(users, null, 2));
 }
 
-// ================= USER INIT =================
+// 🔐 TELEGRAM AUTH
+function verifyTelegram(initData) {
+  const params = new URLSearchParams(initData);
+  const hash = params.get("hash");
+  params.delete("hash");
+
+  const data = [...params.entries()]
+    .sort()
+    .map(([k, v]) => `${k}=${v}`)
+    .join("\n");
+
+  const secret = crypto.createHash("sha256").update(BOT_TOKEN).digest();
+  const check = crypto.createHmac("sha256", secret).update(data).digest("hex");
+
+  return check === hash;
+}
+
+// ================= INIT USER =================
 app.post("/user", (req, res) => {
-  const { userId, ref } = req.body;
+  const { initData, ref } = req.body;
+  if (!verifyTelegram(initData)) return res.status(403).json({ error: "Invalid" });
+
+  const params = new URLSearchParams(initData);
+  const user = JSON.parse(params.get("user"));
+  const userId = user.id.toString();
 
   if (!users[userId]) {
     users[userId] = {
@@ -37,28 +53,25 @@ app.post("/user", (req, res) => {
       energy: MAX_ENERGY,
       lastEnergy: Date.now(),
       lastDaily: 0,
-      refs: [],
-      tasks: {},
       wallet: "",
+      refs: [],
       withdraws: []
     };
+
+    if (ref && users[ref]) {
+      users[ref].refs.push(userId);
+      users[ref].balance += 10;
+    }
   }
 
-  // ENERGY REGEN
   const now = Date.now();
   const regen = Math.floor((now - users[userId].lastEnergy) / ENERGY_REGEN);
   if (regen > 0) {
     users[userId].energy = Math.min(MAX_ENERGY, users[userId].energy + regen);
-    users[userId].lastEnergy = now;
+    users[userId].lastEnergy += regen * ENERGY_REGEN;
   }
 
-  // REFERRAL
-  if (ref && users[ref] && !users[ref].refs.includes(userId)) {
-    users[ref].refs.push(userId);
-    users[ref].balance += 10;
-  }
-
-  saveUsers();
+  save();
   res.json(users[userId]);
 });
 
@@ -70,45 +83,26 @@ app.post("/tap", (req, res) => {
   if (users[userId].energy <= 0)
     return res.json({ error: "No energy" });
 
-  users[userId].energy -= 1;
-  users[userId].balance += 1;
+  users[userId].energy--;
+  users[userId].balance++;
 
-  saveUsers();
-  res.json({
-    balance: users[userId].balance,
-    energy: users[userId].energy
-  });
+  save();
+  res.json(users[userId]);
 });
 
 // ================= DAILY =================
 app.post("/daily", (req, res) => {
   const { userId } = req.body;
-  const DAY = 86400000;
-
   if (!users[userId]) return res.json({ error: "User not found" });
 
-  if (Date.now() - users[userId].lastDaily < DAY)
+  if (Date.now() - users[userId].lastDaily < 86400000)
     return res.json({ error: "Already claimed" });
 
   users[userId].lastDaily = Date.now();
-  users[userId].balance += 20;
+  users[userId].balance += DAILY_REWARD;
 
-  saveUsers();
-  res.json({ reward: 20, balance: users[userId].balance });
-});
-
-// ================= TASK =================
-app.post("/task", (req, res) => {
-  const { userId, type } = req.body;
-
-  if (!users[userId]) return res.json({ error: "User not found" });
-  if (users[userId].tasks[type]) return res.json({ error: "Done" });
-
-  users[userId].tasks[type] = true;
-  users[userId].balance += 5;
-
-  saveUsers();
-  res.json({ success: true, balance: users[userId].balance });
+  save();
+  res.json({ balance: users[userId].balance });
 });
 
 // ================= WALLET =================
@@ -117,7 +111,7 @@ app.post("/wallet", (req, res) => {
   if (!users[userId]) return res.json({ error: "User not found" });
 
   users[userId].wallet = address;
-  saveUsers();
+  save();
 
   res.json({ success: true });
 });
@@ -128,17 +122,16 @@ app.post("/withdraw", (req, res) => {
 
   if (!users[userId]) return res.json({ error: "User not found" });
   if (amount < 100) return res.json({ error: "Minimum 100" });
-  if (users[userId].balance < amount)
-    return res.json({ error: "Not enough balance" });
+  if (users[userId].balance < amount) return res.json({ error: "Low balance" });
 
   users[userId].balance -= amount;
   users[userId].withdraws.push({
     amount,
-    status: "pending",
-    time: Date.now()
+    time: Date.now(),
+    status: "pending"
   });
 
-  saveUsers();
+  save();
   res.json({ success: true });
 });
 
@@ -152,53 +145,14 @@ app.get("/leaderboard", (req, res) => {
   res.json(list);
 });
 
-// ================= AUTO PAY REFERRALS =================
-setInterval(() => {
-  console.log("⏳ Auto paying top referrers...");
-
-  const top = Object.entries(users)
-    .map(([id, u]) => ({ id, refs: u.refs?.length || 0 }))
+// ================= REFERRALS =================
+app.get("/referrals", (req, res) => {
+  const list = Object.entries(users)
+    .map(([id, u]) => ({ id, refs: u.refs.length }))
     .sort((a, b) => b.refs - a.refs)
-    .slice(0, 3);
+    .slice(0, 10);
 
-  const rewards = [10, 5, 3];
-
-  top.forEach((u, i) => {
-    users[u.id].balance += rewards[i] || 0;
-  });
-
-  saveUsers();
-}, 24 * 60 * 60 * 1000);
-
-// ================= AUTO PAY TOP REFERRALS =================
-
-// runs every 24 hours
-setInterval(() => {
-  console.log("⏰ Running daily referral payout...");
-
-  const ranked = Object.entries(users)
-    .map(([id, u]) => ({
-      id,
-      refs: u.refs ? u.refs.length : 0
-    }))
-    .sort((a, b) => b.refs - a.refs)
-    .slice(0, 3);
-
-  const rewards = [10, 5, 3];
-
-  ranked.forEach((user, index) => {
-    const reward = rewards[index];
-    if (!reward) return;
-
-    users[user.id].balance += reward;
-  });
-
-  saveUsers();
-  console.log("✅ Daily referral rewards paid");
-
-}, 24 * 60 * 60 * 1000);
-
-// ================= START =================
-app.listen(PORT, () => {
-  console.log("🚀 Server running on port", PORT);
+  res.json(list);
 });
+
+app.listen(PORT, () => console.log("🚀 Running on", PORT));
