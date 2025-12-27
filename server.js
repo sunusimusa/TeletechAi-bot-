@@ -1,5 +1,6 @@
 const express = require("express");
 const fs = require("fs");
+const REF_REWARD = 10;
 
 const app = express();
 app.use(express.json());
