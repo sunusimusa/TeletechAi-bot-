@@ -73,22 +73,27 @@ app.post("/user", async (req, res) => {
     });
   }
 
-  if (!users[userId]) {
-    users[userId] = {
-      id: userId,
-      balance: 0,
-      token: 0,
-      level: 1,
-      energy: ENERGY_MAX,
-      lastEnergyUpdate: Date.now(),
-      lastDaily: 0,
-      referrals: 0,
-      tasks: {
-        youtube: false,
-        channel: true,
-        group: false
-      }
-    };
+if (!users[userId]) {
+  users[userId] = {
+    id: userId,
+    balance: 0,
+    token: 0,
+    level: 1,
+    energy: ENERGY_MAX,
+    lastEnergyUpdate: Date.now(),
+    lastDaily: 0,
+    refBy: null,
+    referrals: 0,
+    tasks: {
+      youtube: false,
+      channel: false,
+      group: false
+    }
+  };
+} else {
+  // 🔥 IMPORTANT: regenerate energy on every login
+  regenEnergy(users[userId]);
+}
 
     if (ref && users[ref] && ref !== userId) {
       users[ref].balance += 20;
