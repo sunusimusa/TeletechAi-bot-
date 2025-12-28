@@ -59,44 +59,43 @@ app.post("/user", (req, res) => {
 // TAP
 app.post("/tap", (req, res) => {
   const { userId } = req.body;
+
+  if (!users[userId]) {
+    users[userId] = {
+      balance: 0,
+      energy: 100,
+      level: 1,
+      lastTap: 0
+    };
+  }
+
   const user = users[userId];
 
-  if (!user) return res.json({ error: "User not found" });
-
-  const now = Date.now();
-
-  if (now - user.lastTap < 300) {
-    return res.json({ error: "Slow down" });
+  // Anti-spam
+  if (Date.now() - user.lastTap < 1000) {
+    return res.json({ error: "Too fast" });
   }
 
   if (user.energy <= 0) {
     return res.json({ error: "No energy" });
   }
 
-  user.lastTap = now;
+  user.lastTap = Date.now();
   user.energy -= 1;
   user.balance += 1;
 
+  // Level system
+  if (user.balance >= 1000) user.level = 5;
+  else if (user.balance >= 600) user.level = 4;
+  else if (user.balance >= 300) user.level = 3;
+  else if (user.balance >= 100) user.level = 2;
+  else user.level = 1;
+
   res.json({
     balance: user.balance,
-    energy: user.energy
+    energy: user.energy,
+    level: user.level
   });
-});
-
-if (Date.now() - user.lastTap < 1000) {
-  return res.json({ error: "Too fast" });
-}
-
-user.lastTap = Date.now();
-user.energy -= 1;
-user.balance += 1;
-
-checkLevel(user);
-
-res.json({
-  balance: user.balance,
-  energy: user.energy,
-  level: user.level
 });
 
 // DAILY
