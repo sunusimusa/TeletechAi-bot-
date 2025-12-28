@@ -1,38 +1,60 @@
-#tap {
-  width: 180px;
-  height: 180px;
-  border-radius: 50%;
-  background: radial-gradient(circle, #22d3ee, #0ea5e9);
-  box-shadow: 0 0 45px rgba(34, 211, 238, 0.7);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 26px;
-  font-weight: bold;
-  color: #ffffff;
-  cursor: pointer;
-  transition: 0.2s ease;
-  animation: pulse 2s infinite;
+body {
+  margin: 0;
+  font-family: Arial;
+  background: linear-gradient(180deg, #0b0f1a, #111827);
+  color: white;
+  text-align: center;
 }
 
-@keyframes pulse {
-  0% { box-shadow: 0 0 20px rgba(34,211,238,0.5); }
-  50% { box-shadow: 0 0 50px rgba(34,211,238,0.9); }
-  100% { box-shadow: 0 0 20px rgba(34,211,238,0.5); }
+.app {
+  padding: 20px;
+}
+
+.title {
+  font-size: 26px;
+  margin-bottom: 10px;
+}
+
+.stats {
+  display: flex;
+  justify-content: space-around;
+  margin: 15px 0;
 }
 
 .energy-bar {
-  width: 100%;
+  width: 90%;
   height: 10px;
-  background: #1f2933;
+  background: #222;
+  margin: 10px auto;
   border-radius: 10px;
   overflow: hidden;
-  margin-bottom: 20px;
 }
 
 #energyFill {
   height: 100%;
-  width: 100%;
-  background: linear-gradient(90deg, #22d3ee, #0ea5e9);
-  transition: width 0.3s ease;
+  background: linear-gradient(90deg, cyan, #00ff9d);
+  width: 0%;
+}
+
+.tap-btn {
+  margin: 20px auto;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, #00ffaa, #007f5f);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  font-weight: bold;
+  color: black;
+}
+
+button {
+  margin: 10px;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  background: #ffc107;
+  font-weight: bold;
 }
