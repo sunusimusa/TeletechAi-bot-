@@ -80,7 +80,7 @@ function openTask(type) {
 
 // ================= REFERRAL =================
 function setReferralLink() {
-  const link = `https://t.me/YOUR_BOT_USERNAME?start=${userId}`;
+  const link = `https://t.me/TeletechAi_bot?start=${userId}`;
   document.getElementById("refLink").value = link;
 }
 
