@@ -2,45 +2,64 @@ const tg = window.Telegram.WebApp;
 tg.expand();
 
 let userId = null;
+let balance = 0;
+let energy = 0;
 
-// INIT USER
+// ================= INIT USER =================
 async function init() {
   const res = await fetch("/user", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       initData: tg.initDataUnsafe
-      updateEnergyBar();
     })
   });
 
   const data = await res.json();
 
-  userId = data.id;
-  document.getElementById("balance").innerText = data.balance;
-  document.getElementById("energy").innerText = data.energy;
+  if (!data || data.error) {
+    alert("Failed to load user");
+    return;
+  }
 
+  userId = data.id;
+  balance = data.balance ?? 0;
+  energy = data.energy ?? 0;
+
+  updateUI();
   setReferral();
   loadBoard();
 }
 
 init();
 
-// TAP
+// ================= UPDATE UI =================
+function updateUI() {
+  document.getElementById("balance").innerText = balance;
+  document.getElementById("energy").innerText = energy;
+  updateEnergyBar();
+}
+
+// ================= TAP =================
 async function tap() {
+  if (energy <= 0) return alert("No energy");
+
   const res = await fetch("/tap", {
     method: "POST",
-    updateEnergyBar();
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ userId })
   });
 
   const data = await res.json();
-  document.getElementById("balance").innerText = data.balance;
-  document.getElementById("energy").innerText = data.energy;
+
+  if (data.error) return alert(data.error);
+
+  balance = data.balance;
+  energy = data.energy;
+  updateUI();
 }
 
-// DAILY
+// ================= DAILY =================
 async function daily() {
   const res = await fetch("/daily", {
     method: "POST",
@@ -49,25 +68,25 @@ async function daily() {
   });
 
   const data = await res.json();
-  alert(data.error || "Daily reward claimed!");
-  document.getElementById("balance").innerText = data.balance;
+  if (data.error) return alert(data.error);
+
+  balance = data.balance;
+  updateUI();
 }
 
-// REF LINK
+// ================= ENERGY BAR =================
+function updateEnergyBar() {
+  const percent = Math.min(100, (energy / 100) * 100);
+  document.getElementById("energyFill").style.width = percent + "%";
+}
+
+// ================= REFERRAL =================
 function setReferral() {
   document.getElementById("refLink").value =
-    `https://t.me/teletechaibot?start=${userId}`;
+    `https://t.me/teletechai_bot?start=${userId}`;
 }
 
-// COPY
-function copyInvite() {
-  const input = document.getElementById("refLink");
-  input.select();
-  document.execCommand("copy");
-  alert("Copied!");
-}
-
-// LEADERBOARD
+// ================= LEADERBOARD =================
 async function loadBoard() {
   const res = await fetch("/leaderboard");
   const data = await res.json();
@@ -76,7 +95,10 @@ async function loadBoard() {
     data.map(u => `🏆 ${u.id} — ${u.balance}`).join("<br>");
 }
 
-function updateEnergyBar() {
-  const percent = (energy / 100) * 100;
-  document.getElementById("energyFill").style.width = percent + "%";
+// ================= COPY =================
+function copyInvite() {
+  const el = document.getElementById("refLink");
+  el.select();
+  document.execCommand("copy");
+  alert("Copied!");
 }
