@@ -21,31 +21,12 @@ function saveUsers() {
 // ================= USER INIT =================
 app.post("/user", (req, res) => {
   const { initData } = req.body;
-  const userId = initData?.user?.id || Math.floor(Math.random() * 999999999);
-
-  if (!users[userId]) {
-    users[userId] = {
-      id: userId,
-      balance: 0,
-      energy: 100,
-      level: 1,
-      lastTap: 0
-    };
-  }
-
-  res.json(users[userId]);
-});
-
-// ================= TAP =================
-app.post("/user", (req, res) => {
-  const { initData } = req.body;
 
   const userId = initData?.user?.id;
-  const ref = initData?.start_param; // referral id
+  const ref = initData?.start_param;
 
   if (!userId) return res.json({ error: "Invalid user" });
 
-  // Create user if not exists
   if (!users[userId]) {
     users[userId] = {
       id: userId,
@@ -53,14 +34,16 @@ app.post("/user", (req, res) => {
       energy: 100,
       level: 1,
       lastTap: 0,
+      lastEnergy: Date.now(),
+      lastDaily: 0,
       refBy: null,
       referrals: 0
     };
 
-    // 🔥 REFERRAL LOGIC
+    // 🎁 Referral bonus
     if (ref && users[ref] && ref !== userId) {
       users[userId].refBy = ref;
-      users[ref].balance += 20; // referral bonus
+      users[ref].balance += 20;
       users[ref].referrals += 1;
     }
 
@@ -68,6 +51,42 @@ app.post("/user", (req, res) => {
   }
 
   res.json(users[userId]);
+});
+
+// ================= TAP =================
+app.post("/tap", (req, res) => {
+  const { userId } = req.body;
+  const user = users[userId];
+
+  if (!user) return res.json({ error: "User not found" });
+
+  const now = Date.now();
+
+  // 🔋 ENERGY REGEN (1 energy / 5 sec)
+  const regenTime = 5000;
+  const diff = Math.floor((now - user.lastEnergy) / regenTime);
+  if (diff > 0) {
+    user.energy = Math.min(100, user.energy + diff);
+    user.lastEnergy = now;
+  }
+
+  if (user.energy <= 0) {
+    return res.json({
+      error: "No energy",
+      balance: user.balance,
+      energy: user.energy
+    });
+  }
+
+  user.energy -= 1;
+  user.balance += 1;
+
+  saveUsers();
+
+  res.json({
+    balance: user.balance,
+    energy: user.energy
+  });
 });
 
 // ================= DAILY =================
@@ -78,13 +97,14 @@ app.post("/daily", (req, res) => {
   if (!user) return res.json({ error: "User not found" });
 
   const now = Date.now();
-  if (now - (user.lastDaily || 0) < 86400000) {
+  if (now - user.lastDaily < 86400000) {
     return res.json({ error: "Come back tomorrow" });
   }
 
   user.lastDaily = now;
   user.balance += 50;
 
+  saveUsers();
   res.json({ balance: user.balance });
 });
 
