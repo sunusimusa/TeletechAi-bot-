@@ -7,40 +7,37 @@ app.use(express.json());
 app.use(express.static("public"));
 
 const PORT = process.env.PORT || 3000;
-
-// ================= CONFIG =================
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const CHANNEL = process.env.CHANNEL_USERNAME;
 const GROUP = process.env.GROUP_USERNAME;
 
+// ===== CONFIG =====
 const ENERGY_MAX = 100;
 const ENERGY_REGEN_TIME = 5000;
 
-// ================= DATABASE =================
+// ===== DATABASE =====
 const DB_FILE = "./users.json";
-let users = fs.existsSync(DB_FILE)
-  ? JSON.parse(fs.readFileSync(DB_FILE))
-  : {};
+let users = fs.existsSync(DB_FILE) ? JSON.parse(fs.readFileSync(DB_FILE)) : {};
 
 function saveUsers() {
   fs.writeFileSync(DB_FILE, JSON.stringify(users, null, 2));
 }
 
-// ================= HELPERS =================
-function updateLevel(user) {
-  const lvl = Math.floor(user.balance / 100) + 1;
-  if (lvl > user.level) {
-    user.level = lvl;
-    user.energy = Math.min(ENERGY_MAX, user.energy + 10);
-  }
-}
-
+// ===== HELPERS =====
 function regenEnergy(user) {
   const now = Date.now();
   const diff = Math.floor((now - user.lastEnergyUpdate) / ENERGY_REGEN_TIME);
   if (diff > 0) {
     user.energy = Math.min(ENERGY_MAX, user.energy + diff);
     user.lastEnergyUpdate = now;
+  }
+}
+
+function updateLevel(user) {
+  const level = Math.floor(user.balance / 100) + 1;
+  if (level > user.level) {
+    user.level = level;
+    user.energy = Math.min(ENERGY_MAX, user.energy + 10);
   }
 }
 
@@ -56,7 +53,7 @@ async function isMember(userId, chat) {
   }
 }
 
-// ================= USER INIT =================
+// ===== USER INIT =====
 app.post("/user", async (req, res) => {
   const { initData } = req.body;
   const userId = initData?.user?.id;
@@ -64,74 +61,45 @@ app.post("/user", async (req, res) => {
 
   if (!userId) return res.json({ error: "Invalid user" });
 
-  // 🔐 Force join channel
-  const joined = await isMember(userId, CHANNEL);
-  if (!joined) {
-    return res.json({
-      error: "JOIN_REQUIRED",
-      message: "Join our channel first"
-    });
-  }
-
-if (!users[userId]) {
-  users[userId] = {
-    id: userId,
-    balance: 0,
-    token: 0,
-    level: 1,
-    energy: ENERGY_MAX,
-    lastEnergyUpdate: Date.now(),
-    lastDaily: 0,
-    refBy: null,
-    referrals: 0,
-    tasks: {
-      youtube: false,
-      channel: false,
-      group: false
-    }
-  };
-} else {
-  // 🔥 IMPORTANT: regenerate energy on every login
-  regenEnergy(users[userId]);
-}
+  if (!users[userId]) {
+    users[userId] = {
+      id: userId,
+      balance: 0,
+      token: 0,
+      level: 1,
+      energy: ENERGY_MAX,
+      lastEnergyUpdate: Date.now(),
+      lastDaily: 0,
+      refBy: null,
+      referrals: 0,
+      tasks: { youtube: false, channel: false, group: false }
+    };
 
     if (ref && users[ref] && ref !== userId) {
       users[ref].balance += 20;
       users[ref].referrals += 1;
       users[userId].refBy = ref;
     }
-
-    saveUsers();
+  } else {
+    regenEnergy(users[userId]);
   }
 
+  saveUsers();
   res.json(users[userId]);
 });
 
-// ================= TAP =================
+// ===== TAP =====
 app.post("/tap", (req, res) => {
   const user = users[req.body.userId];
   if (!user) return res.json({ error: "User not found" });
 
-  // Regen energy
-  const now = Date.now();
-  const diff = Math.floor((now - user.lastEnergyUpdate) / ENERGY_REGEN_TIME);
+  regenEnergy(user);
 
-  if (diff > 0) {
-    user.energy = Math.min(ENERGY_MAX, user.energy + diff);
-    user.lastEnergyUpdate = now;
-  }
-
-  if (user.energy <= 0) {
-    return res.json({
-      error: "No energy",
-      balance: user.balance,
-      energy: user.energy
-    });
-  }
+  if (user.energy <= 0)
+    return res.json({ error: "No energy", balance: user.balance });
 
   user.energy -= 1;
   user.balance += 1;
-
   updateLevel(user);
   saveUsers();
 
@@ -142,7 +110,7 @@ app.post("/tap", (req, res) => {
   });
 });
 
-// ================= DAILY =================
+// ===== DAILY =====
 app.post("/daily", (req, res) => {
   const user = users[req.body.userId];
   if (!user) return res.json({ error: "User not found" });
@@ -157,7 +125,7 @@ app.post("/daily", (req, res) => {
   res.json({ balance: user.balance });
 });
 
-// ================= TASK VERIFY =================
+// ===== TASK VERIFY =====
 app.post("/task", async (req, res) => {
   const { userId, type } = req.body;
   const user = users[userId];
@@ -170,7 +138,7 @@ app.post("/task", async (req, res) => {
   if (type === "channel") ok = await isMember(userId, CHANNEL);
   if (type === "group") ok = await isMember(userId, GROUP);
 
-  if (!ok) return res.json({ error: "Not verified" });
+  if (!ok) return res.json({ error: "Join first" });
 
   user.tasks[type] = true;
   user.balance += 20;
@@ -179,14 +147,17 @@ app.post("/task", async (req, res) => {
   res.json({ success: true, balance: user.balance });
 });
 
-// ================= STATS =================
+// ===== LEADERBOARD =====
 app.get("/leaderboard", (req, res) => {
-  res.json(
-    Object.values(users).sort((a, b) => b.balance - a.balance).slice(0, 10)
-  );
+  res.json(Object.values(users).sort((a, b) => b.balance - a.balance).slice(0, 10));
 });
 
-// ================= START =================
+// ===== STATS =====
+app.get("/stats", (req, res) => {
+  res.json({ total: Object.keys(users).length });
+});
+
+// ===== START SERVER =====
 app.listen(PORT, () => {
   console.log("🚀 Server running on port", PORT);
 });
