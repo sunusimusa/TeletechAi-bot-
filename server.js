@@ -76,6 +76,19 @@ async function checkMember(userId, chat) {
   }
 }
 
+async function sendWelcome(userId) {
+  await sendTelegramMessage(
+    userId,
+    `👋 Welcome to *TeleTap AI* 🔥
+
+💰 Earn coins by tapping
+🎁 Daily rewards available
+👥 Invite friends & earn more
+
+🚀 Start now and grow your balance!`
+  );
+}
+
 // ================= USER INIT =================
 app.post("/user", (req, res) => {
   const { initData } = req.body;
@@ -101,6 +114,9 @@ app.post("/user", (req, res) => {
         group: false
       }
     };
+
+    await sendWelcome(userId);
+  }
 
     if (ref && users[ref] && ref !== userId) {
       users[ref].balance += 20;
@@ -185,6 +201,14 @@ app.post("/task", (req, res) => {
 app.get("/leaderboard", (req, res) => {
   const list = Object.values(users)
     .sort((a, b) => b.balance - a.balance)
+    .slice(0, 10);
+
+  res.json(list);
+});
+
+app.get("/top-referrals", (req, res) => {
+  const list = Object.values(users)
+    .sort((a, b) => b.referrals - a.referrals)
     .slice(0, 10);
 
   res.json(list);
