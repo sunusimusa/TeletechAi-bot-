@@ -132,6 +132,31 @@ app.get("/leaderboard", (req, res) => {
   res.json(list);
 });
 
+app.post("/convert", (req, res) => {
+  const { userId } = req.body;
+  const user = users[userId];
+
+  if (!user) return res.json({ error: "User not found" });
+
+  const RATE = 100; // 100 balance = 1 token
+
+  if (user.balance < RATE) {
+    return res.json({ error: "Not enough balance" });
+  }
+
+  const tokens = Math.floor(user.balance / RATE);
+
+  user.balance -= tokens * RATE;
+  user.token += tokens;
+
+  saveUsers();
+
+  res.json({
+    token: user.token,
+    balance: user.balance
+  });
+});
+
 // ===== START SERVER =====
 app.listen(PORT, () => {
   console.log("🚀 Server running on port", PORT);
