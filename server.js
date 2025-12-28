@@ -9,7 +9,7 @@ const PORT = process.env.PORT || 3000;
 
 // ===== CONFIG =====
 const ENERGY_MAX = 100;
-const ENERGY_REGEN_TIME = 5000; // 5 sec
+const ENERGY_REGEN_TIME = 5000;
 
 // ===== DATABASE =====
 const DB_FILE = "./users.json";
@@ -21,6 +21,15 @@ function saveUsers() {
   fs.writeFileSync(DB_FILE, JSON.stringify(users, null, 2));
 }
 
+// ===== LEVEL SYSTEM =====
+function updateLevel(user) {
+  const newLevel = Math.floor(user.balance / 100) + 1;
+  if (newLevel > user.level) {
+    user.level = newLevel;
+    user.energy = Math.min(ENERGY_MAX, user.energy + 10);
+  }
+}
+
 // ===== USER INIT =====
 app.post("/user", (req, res) => {
   const { initData } = req.body;
@@ -30,16 +39,18 @@ app.post("/user", (req, res) => {
   if (!userId) return res.json({ error: "Invalid user" });
 
   if (!users[userId]) {
-    function updateLevel(user) {
-  const newLevel = Math.floor(user.balance / 100) + 1;
+    users[userId] = {
+      id: userId,
+      balance: 0,
+      level: 1,
+      energy: ENERGY_MAX,
+      lastEnergyUpdate: Date.now(),
+      lastDaily: 0,
+      refBy: null,
+      referrals: 0
+    };
 
-  if (newLevel > user.level) {
-    user.level = newLevel;
-    user.energy = Math.min(ENERGY_MAX, user.energy + 10); // bonus energy
-  }
-    }
-
-    // Referral bonus
+    // referral reward
     if (ref && users[ref] && ref !== userId) {
       users[ref].balance += 20;
       users[ref].referrals += 1;
@@ -52,7 +63,7 @@ app.post("/user", (req, res) => {
   res.json(users[userId]);
 });
 
-// ===== ENERGY REGEN FUNCTION =====
+// ===== ENERGY REGEN =====
 function regenEnergy(user) {
   const now = Date.now();
   const diff = Math.floor((now - user.lastEnergyUpdate) / ENERGY_REGEN_TIME);
@@ -80,15 +91,13 @@ app.post("/tap", (req, res) => {
     });
   }
 
-    user.energy -= 1;
-    user.balance += 1;
+  user.energy -= 1;
+  user.balance += 1;
+  updateLevel(user);
 
-    updateLevel(user);
-    user.lastTap = Date.now();
+  saveUsers();
 
-    saveUsers();
-
-    res.json({
+  res.json({
     balance: user.balance,
     energy: user.energy,
     level: user.level
