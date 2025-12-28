@@ -73,3 +73,8 @@ async function loadBoard() {
   document.getElementById("board").innerHTML =
     data.map(u => `🏆 ${u.id} — ${u.balance}`).join("<br>");
 }
+
+function updateEnergyBar() {
+  const percent = (energy / 100) * 100;
+  document.getElementById("energyFill").style.width = percent + "%";
+}
