@@ -51,36 +51,55 @@ app.post("/user", (req, res) => {
 // TAP
 app.post("/tap", (req, res) => {
   const { userId } = req.body;
-  if (!users[userId]) return res.json({ error: "User not found" });
+  const user = users[userId];
 
-  if (users[userId].energy <= 0)
+  if (!user) return res.json({ error: "User not found" });
+
+  const now = Date.now();
+
+  if (now - user.lastTap < 800) {
+    return res.json({ error: "Too fast" });
+  }
+
+  if (user.energy <= 0) {
     return res.json({ error: "No energy" });
+  }
 
-  users[userId].energy--;
-  users[userId].balance++;
+  user.energy -= 1;
+  user.balance += 1;
+  user.lastTap = now;
 
-  save();
-  res.json(users[userId]);
+  saveUsers();
+
+  res.json({
+    balance: user.balance,
+    energy: user.energy
+  });
 });
 
 // DAILY
 app.post("/daily", (req, res) => {
   const { userId } = req.body;
+  const user = users[userId];
+
+  if (!user) return res.json({ error: "User not found" });
+
   const now = Date.now();
+  if (now - user.lastDaily < 86400000) {
+    return res.json({ error: "Come back tomorrow" });
+  }
 
-  if (now - users[userId].lastDaily < 86400000)
-    return res.json({ error: "Come tomorrow" });
+  user.lastDaily = now;
+  user.balance += 50;
+  saveUsers();
 
-  users[userId].lastDaily = now;
-  users[userId].balance += 50;
-
-  save();
-  res.json(users[userId]);
+  res.json({ balance: user.balance });
 });
 
 // LEADERBOARD
 app.get("/leaderboard", (req, res) => {
-  const list = Object.entries(users)
+  const list = Obj
+    ect.entries(users)
     .map(([id, u]) => ({ id, balance: u.balance }))
     .sort((a, b) => b.balance - a.balance)
     .slice(0, 10);
