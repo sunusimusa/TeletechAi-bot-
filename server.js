@@ -107,16 +107,29 @@ app.post("/tap", (req, res) => {
   const user = users[req.body.userId];
   if (!user) return res.json({ error: "User not found" });
 
-  regenEnergy(user);
+  // Regen energy
+  const now = Date.now();
+  const diff = Math.floor((now - user.lastEnergyUpdate) / ENERGY_REGEN_TIME);
 
-  if (user.energy <= 0)
-    return res.json({ error: "No energy", balance: user.balance });
+  if (diff > 0) {
+    user.energy = Math.min(ENERGY_MAX, user.energy + diff);
+    user.lastEnergyUpdate = now;
+  }
 
-  user.energy--;
-  user.balance++;
+  if (user.energy <= 0) {
+    return res.json({
+      error: "No energy",
+      balance: user.balance,
+      energy: user.energy
+    });
+  }
+
+  user.energy -= 1;
+  user.balance += 1;
+
   updateLevel(user);
-
   saveUsers();
+
   res.json({
     balance: user.balance,
     energy: user.energy,
