@@ -96,6 +96,31 @@ app.post("/daily", (req, res) => {
   res.json({ balance: user.balance });
 });
 
+// ================= TOKEN CONVERT =================
+app.post("/convert", (req, res) => {
+  const { userId } = req.body;
+
+  const user = users[userId];
+  if (!user) return res.json({ error: "User not found" });
+
+  const rate = 100; // 100 balance = 1 token
+
+  if (user.balance < rate)
+    return res.json({ error: "Not enough balance" });
+
+  const tokens = Math.floor(user.balance / rate);
+
+  user.balance -= tokens * rate;
+  user.token = (user.token || 0) + tokens;
+
+  saveUsers();
+
+  res.json({
+    token: user.token,
+    balance: user.balance
+  });
+});
+
 // LEADERBOARD
 app.get("/leaderboard", (req, res) => {
   const list = Obj
