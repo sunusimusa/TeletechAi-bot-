@@ -57,7 +57,7 @@ app.post("/tap", (req, res) => {
 
   const now = Date.now();
 
-  if (now - user.lastTap < 800) {
+  if (now - user.lastTap < 1500) {
     return res.json({ error: "Too fast" });
   }
 
