@@ -3,47 +3,29 @@ tg.expand();
 
 let userId = null;
 
-// ================= INIT =================
+// ================= INIT USER =================
 async function init() {
   const res = await fetch("/user", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      initData: tg.initDataUnsafe
-    })
+    body: JSON.stringify({ initData: tg.initDataUnsafe })
   });
 
   const data = await res.json();
 
   userId = data.id;
-
-  updateUI(data);
-  setReferralLink();
-}
-
-function updateUI(data) {
   document.getElementById("balance").innerText = data.balance;
   document.getElementById("energy").innerText = data.energy;
+  document.getElementById("level").innerText = data.level;
+  document.getElementById("token").innerText = data.token || 0;
 
-  if (document.getElementById("level")) {
-    document.getElementById("level").innerText = data.level || 1;
-  }
+  setReferralLink();
+  loadLeaderboard();
+  loadTopRefs();
+  loadStats();
 }
 
-async function convertToken() {
-  const res = await fetch("/convert", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ userId })
-  });
-
-  const data = await res.json();
-
-  if (data.error) return alert(data.error);
-
-  document.getElementById("token").innerText = data.token;
-  document.getElementById("balance").innerText = data.balance;
-}
+init();
 
 // ================= TAP =================
 async function tap() {
@@ -54,13 +36,11 @@ async function tap() {
   });
 
   const data = await res.json();
+  if (data.error) return alert(data.error);
 
-  if (data.error) {
-    alert(data.error);
-    return;
-  }
-
-  updateUI(data);
+  document.getElementById("balance").innerText = data.balance;
+  document.getElementById("energy").innerText = data.energy;
+  document.getElementById("level").innerText = data.level;
 }
 
 // ================= DAILY =================
@@ -72,18 +52,35 @@ async function daily() {
   });
 
   const data = await res.json();
+  if (data.error) return alert(data.error);
 
-  if (data.error) {
-    alert(data.error);
-    return;
-  }
+  document.getElementById("balance").innerText = data.balance;
+  alert("🎁 Daily reward claimed!");
+}
 
-  updateUI(data);
+// ================= TASKS =================
+function openTask(type) {
+  if (type === "youtube") window.open("https://youtube.com/@YOURCHANNEL", "_blank");
+  if (type === "channel") window.open("https://t.me/TeleAIupdates", "_blank");
+  if (type === "group") window.open("https://t.me/tele_tap_ai", "_blank");
+
+  fetch("/task", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId, type })
+  })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        document.getElementById("balance").innerText = data.balance;
+        alert("✅ Task completed!");
+      }
+    });
 }
 
 // ================= REFERRAL =================
 function setReferralLink() {
-  const link = `https://t.me/teletechai_bot?start=${userId}`;
+  const link = `https://t.me/YOUR_BOT_USERNAME?start=${userId}`;
   document.getElementById("refLink").value = link;
 }
 
@@ -94,48 +91,31 @@ function copyInvite() {
   alert("Invite link copied!");
 }
 
-function openTask(type) {
-  let url = "";
-
-  if (type === "youtube") url = "https://youtube.com/@Sunusicrypto";
-  if (type === "channel") url = "https://t.me/TeleAIupdates";
-  if (type === "group") url = "https://t.me/tele_tap_ai";
-
-  window.open(url, "_blank");
-
-  setTimeout(() => completeTask(type), 5000);
-}
-
-async function completeTask(type) {
-  const res = await fetch("/task", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ userId, type })
-  });
-
-  const data = await res.json();
-
-  if (data.error) {
-    alert(data.error);
-  } else {
-    document.getElementById("balance").innerText = data.balance;
-    alert("✅ Task completed!");
-  }
-}
-
 // ================= LEADERBOARD =================
-async function loadLeaderboard() {
-  const res = await fetch("/leaderboard");
-  const data = await res.json();
-
-  const board = document.getElementById("board");
-  board.innerHTML = "";
-
-  data.forEach(u => {
-    board.innerHTML += `🏆 ${u.id} — ${u.balance}<br>`;
-  });
+function loadLeaderboard() {
+  fetch("/leaderboard")
+    .then(r => r.json())
+    .then(data => {
+      document.getElementById("board").innerHTML =
+        data.map((u, i) => `#${i + 1} — ${u.balance} coins`).join("<br>");
+    });
 }
 
-// ================= START =================
-init();
-loadLeaderboard();
+// ================= TOP REFERRALS =================
+function loadTopRefs() {
+  fetch("/top-referrals")
+    .then(r => r.json())
+    .then(data => {
+      document.getElementById("topRefs").innerHTML =
+        data.map((u, i) => `#${i + 1} — ${u.referrals} invites`).join("<br>");
+    });
+}
+
+// ================= TOTAL USERS =================
+function loadStats() {
+  fetch("/stats")
+    .then(r => r.json())
+    .then(data => {
+      document.getElementById("totalUsers").innerText = data.total;
+    });
+}
