@@ -1,47 +1,20 @@
-body {
-  background: #0f172a;
-  color: white;
-  font-family: Arial, sans-serif;
-  text-align: center;
-}
-
-.app {
-  max-width: 400px;
-  margin: auto;
-  padding: 20px;
-}
-
-.stats {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 20px;
-}
-
 #tap {
   width: 180px;
   height: 180px;
-  background: #22c55e;
   border-radius: 50%;
+  background: radial-gradient(circle, #22d3ee, #0ea5e9);
+  box-shadow: 0 0 45px rgba(34, 211, 238, 0.7);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 20px auto;
   font-size: 26px;
   font-weight: bold;
+  color: #ffffff;
   cursor: pointer;
+  transition: 0.2s ease;
 }
 
-button {
-  width: 100%;
-  padding: 12px;
-  margin-top: 10px;
-  border: none;
-  border-radius: 10px;
-  font-weight: bold;
-}
-
-input {
-  width: 100%;
-  padding: 10px;
-  margin-top: 8px;
+#tap:active {
+  transform: scale(0.92);
+  box-shadow: 0 0 20px rgba(34, 211, 238, 0.9);
 }
