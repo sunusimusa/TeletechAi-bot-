@@ -3,33 +3,37 @@ tg.expand();
 
 let userId = null;
 
-// ================= INIT =================
 async function init() {
+  const initData = tg.initDataUnsafe;
+
+  if (!initData || !initData.user) {
+    alert("Telegram WebApp not detected");
+    return;
+  }
+
   const res = await fetch("/user", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ initData: tg.initDataUnsafe })
+    body: JSON.stringify({
+      userId: initData.user.id,
+      start_param: initData.start_param || null
+    })
   });
 
   const data = await res.json();
 
-  if (data.error === "JOIN_REQUIRED") {
-    alert("🚨 Please join our channel first!");
-    window.open("https://t.me/TeleAIupdates", "_blank");
+  if (data.error) {
+    alert(data.error);
     return;
   }
 
-  userId = data.id;
+  userId = data.telegramId;
 
   document.getElementById("balance").innerText = data.balance;
   document.getElementById("energy").innerText = data.energy;
   document.getElementById("level").innerText = data.level;
-  document.getElementById("token").innerText = data.token || 0;
 
   setReferralLink();
-  loadLeaderboard();
-  loadTopRefs();
-  loadStats();
 }
 
 init();
