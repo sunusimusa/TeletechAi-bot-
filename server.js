@@ -39,16 +39,24 @@ app.post("/user", (req, res) => {
   if (!userId) return res.json({ error: "Invalid user" });
 
   if (!users[userId]) {
-    users[userId] = {
-      id: userId,
-      balance: 0,
-      level: 1,
-      energy: ENERGY_MAX,
-      lastEnergyUpdate: Date.now(),
-      lastDaily: 0,
-      refBy: null,
-      referrals: 0
-    };
+  users[userId] = {
+    id: userId,
+    balance: 0,
+    level: 1,
+    energy: ENERGY_MAX,
+    lastEnergyUpdate: Date.now(),
+    lastDaily: 0,
+    refBy: null,
+    referrals: 0,
+
+    // 👇 TASKS NAN
+    tasks: {
+      youtube: false,
+      channel: false,
+      group: false
+    }
+  };
+  }
 
     // referral reward
     if (ref && users[ref] && ref !== userId) {
