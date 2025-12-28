@@ -1,6 +1,8 @@
 const express = require("express");
 const fs = require("fs");
 const path = require("path");
+const ENERGY_MAX = 100;
+const ENERGY_REGEN_TIME = 10000; // 10 seconds
 
 const app = express();
 app.use(express.json());
