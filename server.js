@@ -57,19 +57,33 @@ app.post("/user", (req, res) => {
 });
 
 // TAP
-app.post("/tap", (req, res) => {
-  const { userId } = req.body;
+app.post("/user", (req, res) => {
+  const { initData } = req.body;
+
+  const userData = parseTelegramData(initData); // ka riga kana dashi
+  const userId = userData.id;
+  const ref = userData.start_param; // referral id
 
   if (!users[userId]) {
     users[userId] = {
+      id: userId,
       balance: 0,
       energy: 100,
-      level: 1,
-      lastTap: 0
+      lastTap: 0,
+      refBy: null,
+      referrals: 0
     };
+
+    // 👉 REFERRAL BONUS
+    if (ref && users[ref] && ref !== userId) {
+      users[userId].refBy = ref;
+      users[ref].balance += 10; // bonus
+      users[ref].referrals += 1;
+    }
   }
 
-  const user = users[userId];
+  res.json(users[userId]);
+});
 
   // Anti-spam
 const now = Date.now();
