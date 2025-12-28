@@ -15,6 +15,14 @@ function save() {
   fs.writeFileSync(DB, JSON.stringify(users, null, 2));
 }
 
+function checkLevel(user) {
+  if (user.balance >= 1000) user.level = 5;
+  else if (user.balance >= 600) user.level = 4;
+  else if (user.balance >= 300) user.level = 3;
+  else if (user.balance >= 100) user.level = 2;
+  else user.level = 1;
+}
+
 // CREATE / LOAD USER
 app.post("/user", (req, res) => {
   const initData = req.body.initData;
@@ -28,8 +36,8 @@ app.post("/user", (req, res) => {
     users[userId] = {
       balance: 0,
       energy: 100,
-      lastDaily: 0,
-      refs: []
+      level: 1,
+      lastTap: 0
     };
 
     // REFERRAL REWARD
@@ -73,6 +81,22 @@ app.post("/tap", (req, res) => {
     balance: user.balance,
     energy: user.energy
   });
+});
+
+if (Date.now() - user.lastTap < 1000) {
+  return res.json({ error: "Too fast" });
+}
+
+user.lastTap = Date.now();
+user.energy -= 1;
+user.balance += 1;
+
+checkLevel(user);
+
+res.json({
+  balance: user.balance,
+  energy: user.energy,
+  level: user.level
 });
 
 // DAILY
