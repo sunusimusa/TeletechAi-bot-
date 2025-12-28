@@ -9,22 +9,24 @@ app.use(express.static("public"));
 const PORT = process.env.PORT || 3000;
 
 // ================= CONFIG =================
-const ENERGY_MAX = 100;
-const ENERGY_REGEN_TIME = 5000;
-
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const CHANNEL = process.env.CHANNEL_USERNAME;
 const GROUP = process.env.GROUP_USERNAME;
 
+const ENERGY_MAX = 100;
+const ENERGY_REGEN_TIME = 5000;
+
 // ================= DATABASE =================
 const DB_FILE = "./users.json";
-let users = fs.existsSync(DB_FILE) ? JSON.parse(fs.readFileSync(DB_FILE)) : {};
+let users = fs.existsSync(DB_FILE)
+  ? JSON.parse(fs.readFileSync(DB_FILE))
+  : {};
 
 function saveUsers() {
   fs.writeFileSync(DB_FILE, JSON.stringify(users, null, 2));
 }
 
-// ================= UTILITIES =================
+// ================= HELPERS =================
 function updateLevel(user) {
   const lvl = Math.floor(user.balance / 100) + 1;
   if (lvl > user.level) {
@@ -39,18 +41,6 @@ function regenEnergy(user) {
   if (diff > 0) {
     user.energy = Math.min(ENERGY_MAX, user.energy + diff);
     user.lastEnergyUpdate = now;
-  }
-}
-
-async function sendMessage(userId, text) {
-  try {
-    await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-      chat_id: userId,
-      text,
-      parse_mode: "HTML"
-    });
-  } catch (e) {
-    console.log("TG error:", e.message);
   }
 }
 
@@ -74,6 +64,15 @@ app.post("/user", async (req, res) => {
 
   if (!userId) return res.json({ error: "Invalid user" });
 
+  // 🔐 Force join channel
+  const joined = await isMember(userId, CHANNEL);
+  if (!joined) {
+    return res.json({
+      error: "JOIN_REQUIRED",
+      message: "Join our channel first"
+    });
+  }
+
   if (!users[userId]) {
     users[userId] = {
       id: userId,
@@ -83,9 +82,12 @@ app.post("/user", async (req, res) => {
       energy: ENERGY_MAX,
       lastEnergyUpdate: Date.now(),
       lastDaily: 0,
-      refBy: null,
       referrals: 0,
-      tasks: { youtube: false, channel: false, group: false }
+      tasks: {
+        youtube: false,
+        channel: true,
+        group: false
+      }
     };
 
     if (ref && users[ref] && ref !== userId) {
@@ -94,33 +96,10 @@ app.post("/user", async (req, res) => {
       users[userId].refBy = ref;
     }
 
-    await sendMessage(
-      userId,
-      `👋 Welcome to *TeleTap AI*\n\n💰 Earn by tapping\n🎁 Daily rewards\n👥 Invite friends`
-    );
-
     saveUsers();
   }
 
   res.json(users[userId]);
-});
-
-app.post("/webhook", (req, res) => {
-  const update = req.body;
-
-  if (update.message) {
-    const chatId = update.message.chat.id;
-    const text = update.message.text;
-
-    if (text === "/start") {
-      axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-        chat_id: chatId,
-        text: "🔥 Welcome to TeleTap AI!\nTap and earn rewards 🚀"
-      });
-    }
-  }
-
-  res.sendStatus(200);
 });
 
 // ================= TAP =================
@@ -136,8 +115,8 @@ app.post("/tap", (req, res) => {
   user.energy--;
   user.balance++;
   updateLevel(user);
-  saveUsers();
 
+  saveUsers();
   res.json({
     balance: user.balance,
     energy: user.energy,
@@ -166,10 +145,9 @@ app.post("/task", async (req, res) => {
   const user = users[userId];
   if (!user) return res.json({ error: "User not found" });
 
-  if (user.tasks[type]) return res.json({ success: true, balance: user.balance });
+  if (user.tasks[type]) return res.json({ success: true });
 
   let ok = false;
-
   if (type === "youtube") ok = true;
   if (type === "channel") ok = await isMember(userId, CHANNEL);
   if (type === "group") ok = await isMember(userId, GROUP);
@@ -178,39 +156,17 @@ app.post("/task", async (req, res) => {
 
   user.tasks[type] = true;
   user.balance += 20;
-
   saveUsers();
+
   res.json({ success: true, balance: user.balance });
 });
 
 // ================= STATS =================
 app.get("/leaderboard", (req, res) => {
-  res.json(Object.values(users).sort((a, b) => b.balance - a.balance).slice(0, 10));
+  res.json(
+    Object.values(users).sort((a, b) => b.balance - a.balance).slice(0, 10)
+  );
 });
-
-app.get("/top-referrals", (req, res) => {
-  res.json(Object.values(users).sort((a, b) => b.referrals - a.referrals).slice(0, 10));
-});
-
-app.get("/stats", (req, res) => {
-  res.json({ total: Object.keys(users).length });
-});
-
-const BOT_TOKEN = process.env.BOT_TOKEN;
-const WEBHOOK_URL = process.env.WEBHOOK_URL;
-
-async function setWebhook() {
-  try {
-    await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/setWebhook`, {
-      url: `${WEBHOOK_URL}/webhook`
-    });
-    console.log("✅ Webhook set successfully");
-  } catch (err) {
-    console.error("❌ Webhook error:", err.message);
-  }
-}
-
-setWebhook();
 
 // ================= START =================
 app.listen(PORT, () => {
