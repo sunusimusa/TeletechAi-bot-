@@ -178,6 +178,22 @@ app.get("/stats", (req, res) => {
   res.json({ total: Object.keys(users).length });
 });
 
+const BOT_TOKEN = process.env.BOT_TOKEN;
+const WEBHOOK_URL = process.env.WEBHOOK_URL;
+
+async function setWebhook() {
+  try {
+    await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/setWebhook`, {
+      url: `${WEBHOOK_URL}/webhook`
+    });
+    console.log("✅ Webhook set successfully");
+  } catch (err) {
+    console.error("❌ Webhook error:", err.message);
+  }
+}
+
+setWebhook();
+
 // ================= START =================
 app.listen(PORT, () => {
   console.log("🚀 Server running on port", PORT);
