@@ -287,4 +287,22 @@ function spin() {
   document.getElementById("spinResult").innerText = "🎉 You got: " + reward;
 }
 
+function tap() {
+  document.getElementById("tapResult").innerText = "🔥 +1 Coin!";
+}
+
+function openBox() {
+  alert("🎁 You opened a box and got 20 coins!");
+}
+
+function spin() {
+  const rewards = ["10 Coins", "20 Coins", "Nothing 😅", "50 Coins"];
+  const reward = rewards[Math.floor(Math.random() * rewards.length)];
+  alert("🎰 You won: " + reward);
+}
+
+function openPage(page) {
+  alert("Opening: " + page);
+}
+
 loadTeamRanking();
