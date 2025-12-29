@@ -273,4 +273,18 @@ function openPage(page) {
   }
 }
 
+function openFullPage() {
+  document.getElementById("fullPage").style.display = "flex";
+}
+
+function closeFullPage() {
+  document.getElementById("fullPage").style.display = "none";
+}
+
+function spin() {
+  const rewards = ["10 Coins", "20 Coins", "50 Coins", "Try Again"];
+  const reward = rewards[Math.floor(Math.random() * rewards.length)];
+  document.getElementById("spinResult").innerText = "🎉 You got: " + reward;
+}
+
 loadTeamRanking();
