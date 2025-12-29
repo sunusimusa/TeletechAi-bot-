@@ -68,3 +68,14 @@ button {
   margin-bottom: 6px;
   color: white;
 }
+
+.btn {
+  background: #f5c400;
+  color: #000;
+  padding: 14px 20px;
+  border-radius: 12px;
+  font-size: 16px;
+  border: none;
+  font-weight: bold;
+  margin: 10px 0;
+}
