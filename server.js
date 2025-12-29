@@ -157,8 +157,17 @@ app.post("/tap", async (req, res) => {
 
   user.energy -= 1;
   user.balance += 1;
-  await rewardRefChain(user.telegramId, 1);
   user.level = Math.floor(user.balance / 100) + 1;
+
+  await rewardRefChain(user.telegramId, 1);
+
+  if (user.teamId) {
+    const team = await Team.findById(user.teamId);
+    if (team) {
+      team.totalScore += 1;
+      await team.save();
+    }
+  }
 
   await user.save();
 
@@ -166,15 +175,6 @@ app.post("/tap", async (req, res) => {
     balance: user.balance,
     energy: user.energy,
     level: user.level
-
-if (user.teamId) {
-  const team = await Team.findById(user.teamId);
-  if (team) {
-    team.totalScore += 1;
-    await team.save();
-  }
-  }
-    
   });
 });
 
