@@ -74,23 +74,38 @@ app.post("/user", async (req, res) => {
     user = new User({ telegramId: userId });
 
     if (ref && ref !== userId) {
-      const refUser = await User.findOne({ telegramId: ref });
-      if (refUser) {
-        refUser.balance += REF_BONUS;
-        refUser.referrals += 1;
-        await refUser.save();
-        user.refBy = ref;
-      }
+  const refUser = await User.findOne({ telegramId: ref });
+  if (refUser) {
+    refUser.referrals += 1;
+
+    const oldLevel = refUser.level;
+    const newLevel = calculateLevel(refUser.referrals);
+
+    if (newLevel > oldLevel) {
+      refUser.level = newLevel;
+      refUser.balance += levelBonus(newLevel);
     }
 
-    await user.save();
+    await refUser.save();
+    user.refBy = ref;
   }
+    }
 
-  regenEnergy(user);
-  await user.save();
+function calculateLevel(referrals) {
+  if (referrals >= 50) return 5;
+  if (referrals >= 20) return 4;
+  if (referrals >= 10) return 3;
+  if (referrals >= 5) return 2;
+  return 1;
+}
 
-  res.json(user);
-});
+function levelBonus(level) {
+  if (level === 2) return 50;
+  if (level === 3) return 100;
+  if (level === 4) return 200;
+  if (level === 5) return 500;
+  return 0;
+}
 
 // ================= TAP =================
 app.post("/tap", async (req, res) => {
