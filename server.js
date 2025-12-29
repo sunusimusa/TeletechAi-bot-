@@ -33,25 +33,37 @@ mongoose.connect(process.env.MONGODB_URI)
 // ================= MODEL =================
 const userSchema = new mongoose.Schema({
   telegramId: String,
+
   balance: { type: Number, default: 0 },
   token: { type: Number, default: 0 },
   level: { type: Number, default: 1 },
+
   energy: { type: Number, default: ENERGY_MAX },
-  refLevel: { type: Number, default: 1 },
   lastEnergyUpdate: { type: Number, default: Date.now },
+
   lastDaily: { type: Number, default: 0 },
   lastBox: { type: Number, default: 0 },
-  teamId: { type: String, default: null },
-  spinCount: { type: Number, default: 1 }, // adadin spins
-lastSpin: { type: Number, default: 0 }
-  refBy: String,
+
+  // 🎰 Spin system
+  spinCount: { type: Number, default: 1 },
+  lastSpin: { type: Number, default: 0 },
+
+  // 🎯 Referral system
+  refBy: { type: String, default: null },
   referrals: { type: Number, default: 0 },
+
+  // 🎥 Ads / Tasks
+  adsSpinCount: { type: Number, default: 0 },
+  lastAdsSpin: { type: Number, default: 0 },
+
   tasks: {
     youtube: { type: Boolean, default: false },
-    channel: { type: Boolean, default: falseadsSpinCount: { type: Number, default: 0 },
-lastAdsSpin: { type: Number, default: 0 }, },
+    channel: { type: Boolean, default: false },
     group: { type: Boolean, default: false }
-  }
+  },
+
+  // 👥 Team system
+  teamId: { type: String, default: null }
 });
 
 const teamSchema = new mongoose.Schema({
