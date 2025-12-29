@@ -15,7 +15,7 @@
 
   <!-- TOP BAR -->
   <div class="top-bar">
-    <button class="menu-btn" onclick="openMenu()">☰</button>
+  <button class="menu-btn" onclick="openMenu()">☰</button>
     <h2>TeleTech AI</h2>
   </div>
 
@@ -29,10 +29,14 @@
   </div>
 
   <!-- MAIN CONTENT -->
-  <div class="content">
+ <div class="content">
 
     <h2 class="title">🔥 Tap & Earn</h2>
     <p>🔥 Over <span id="totalUsers">0</span> users joined!</p>
+
+        <!-- LEADERBOARD -->
+    <h3>🏆 Top Inviters</h3>
+    <div id="topRefs"></div>
 
     <!-- STATS -->
     <div class="stats">
@@ -84,10 +88,6 @@
     <!-- TOKEN -->
     <button onclick="convertToken()">💎 Convert to Token</button>
     <p>Token: <span id="token">0</span></p>
-
-    <!-- LEADERBOARD -->
-    <h3>🏆 Top Inviters</h3>
-    <div id="topRefs"></div>
 
     <div class="ad-banner" onclick="openAd()">
       <img src="https://i.imgur.com/3ZQ3Z6Y.png" />
