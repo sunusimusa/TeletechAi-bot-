@@ -13,6 +13,19 @@
 
 <div class="app">
 
+  <!-- Menu Button -->
+<button class="menu-btn" onclick="openMenu()">☰</button>
+
+<!-- Side Menu -->
+<div id="sideMenu" class="side-menu">
+  <span class="close" onclick="closeMenu()">✖</span>
+
+  <a href="#" onclick="openPage('profile')">👤 Profile</a>
+  <a href="#" onclick="openPage('wallet')">💰 Wallet</a>
+  <a href="#" onclick="openPage('leaderboard')">🏆 Leaderboard</a>
+  <a href="#" onclick="openPage('spin')">🎰 Spin</a>
+</div>
+
   <h3>🏆 Top Teams</h3>
 <div id="teamBoard" class="team-board"></div>
 
