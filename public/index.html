@@ -2,128 +2,205 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>TeleTech AI</title>
 
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <link rel="stylesheet" href="style.css" />
+
+  <style>
+    body {
+      margin: 0;
+      background: #0b0f1a;
+      color: #fff;
+      font-family: Arial, sans-serif;
+    }
+
+    /* TOP BAR */
+    .top-bar {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      height: 55px;
+      background: #0e1322;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 15px;
+      z-index: 1000;
+    }
+
+    .menu-btn {
+      font-size: 26px;
+      cursor: pointer;
+    }
+
+    .title {
+      font-weight: bold;
+    }
+
+    /* SIDE MENU */
+    .side-menu {
+      position: fixed;
+      left: -260px;
+      top: 0;
+      width: 260px;
+      height: 100%;
+      background: #111;
+      padding: 20px;
+      transition: 0.3s;
+      z-index: 2000;
+    }
+
+    .side-menu a {
+      display: block;
+      color: white;
+      padding: 12px 0;
+      text-decoration: none;
+    }
+
+    .side-menu.open {
+      left: 0;
+    }
+
+    /* FULL PAGE */
+    .full-page {
+      position: fixed;
+      right: -100%;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background: #0b0f1a;
+      transition: 0.3s;
+      z-index: 2000;
+    }
+
+    .full-page.active {
+      right: 0;
+    }
+
+    .page-header {
+      padding: 15px;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .content {
+      padding: 80px 20px;
+    }
+
+    .btn {
+      background: gold;
+      color: black;
+      border: none;
+      padding: 12px;
+      border-radius: 8px;
+      margin: 6px 0;
+      width: 100%;
+      font-weight: bold;
+    }
+
+    .tap-btn {
+      width: 200px;
+      height: 200px;
+      background: linear-gradient(45deg, #00ffb3, #00c18c);
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 30px auto;
+      font-size: 28px;
+      font-weight: bold;
+    }
+
+    .stats {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 10px;
+    }
+
+    .stats div {
+      text-align: center;
+    }
+  </style>
 </head>
 
 <body>
 
-<div class="app">
+<!-- TOP BAR -->
+<div class="top-bar">
+  <div class="menu-btn" onclick="openMenu()">☰</div>
+  <div class="title">TeleTech AI</div>
+  <div class="menu-btn" onclick="openFullPage()">☰</div>
+</div>
 
-  <!-- OPEN BUTTON -->
-<button class="menu-btn" onclick="openFullPage()">☰</button>
+<!-- SIDE MENU -->
+<div id="sideMenu" class="side-menu">
+  <div onclick="closeMenu()">❌ Close</div>
+  <a onclick="openPage('profile')">👤 Profile</a>
+  <a onclick="openPage('wallet')">💰 Wallet</a>
+  <a onclick="openPage('leaderboard')">🏆 Leaderboard</a>
+  <a onclick="openPage('spin')">🎰 Spin</a>
+</div>
 
-<!-- FULL SCREEN PAGE -->
+<!-- FULL PAGE -->
 <div id="fullPage" class="full-page">
   <div class="page-header">
     <span onclick="closeFullPage()">← Back</span>
-    <h3>🔥 Spin & Earn</h3>
+    <b>Spin & Earn</b>
   </div>
 
-  <div class="page-content">
-    <h2>🎰 Lucky Spin</h2>
-    <button class="spin-btn" onclick="spin()">SPIN NOW</button>
-
+  <div class="content">
+    <button class="btn" onclick="spin()">🎰 SPIN NOW</button>
     <p id="spinResult"></p>
   </div>
 </div>
 
-  <!-- Menu Button -->
-<button class="menu-btn" onclick="openMenu()">☰</button>
+<!-- MAIN CONTENT -->
+<div class="content">
 
-<!-- Side Menu -->
-<div id="sideMenu" class="side-menu">
-  <span class="close" onclick="closeMenu()">✖</span>
+  <h3>🔥 Tap & Earn</h3>
 
-  <a href="#" onclick="openPage('profile')">👤 Profile</a>
-  <a href="#" onclick="openPage('wallet')">💰 Wallet</a>
-  <a href="#" onclick="openPage('leaderboard')">🏆 Leaderboard</a>
-  <a href="#" onclick="openPage('spin')">🎰 Spin</a>
-</div>
-
-  <h3>🏆 Top Teams</h3>
-<div id="teamBoard" class="team-board"></div>
-
-  <div class="leaderboard">
-  <h3>🏆 Top Inviters</h3>
-  <div id="topRefs">Loading...</div>
-  </div>
-
-  <h2 class="title">🔥 Tap & Earn</h2>
-  <p>🔥 Over <span id="totalUsers">0</span> users joined!</p>
-
-  <!-- STATS -->
   <div class="stats">
-    <div>
-      <small>Balance</small>
-      <h3 id="balance">0</h3>
-    </div>
-
-    <div>
-      <small>Energy</small>
-      <h3 id="energy">0</h3>
-    </div>
-
-    <div>
-      <small>Level</small>
-      <h3 id="level">1</h3>
-    </div>
+    <div><small>Balance</small><h3 id="balance">0</h3></div>
+    <div><small>Energy</small><h3 id="energy">0</h3></div>
+    <div><small>Level</small><h3 id="level">1</h3></div>
   </div>
 
-  <!-- ENERGY BAR -->
-  <div class="energy-bar">
-    <div id="energyFill"></div>
-  </div>
-
-  <!-- TAP BUTTON -->
   <div class="tap-btn" onclick="tap()">TAP</div>
 
-  <button onclick="openBox()" class="btn">
-🎁 Open Box
-  </button>
-  <button onclick="spin()">🎡 Lucky Spin</button>
-<p id="spinResult"></p>
-  <button onclick="watchAd()">🎥 Watch Ad & Spin</button>
-<p id="adsInfo"></p>
+  <button class="btn" onclick="openBox()">🎁 Open Box</button>
+  <button class="btn" onclick="spin()">🎡 Lucky Spin</button>
+  <button class="btn" onclick="watchAd()">🎥 Watch Ad</button>
 
-  <!-- DAILY -->
-  <button class="btn" onclick="daily()">🎁 Daily Reward</button>
-
-  <!-- TASKS -->
   <h3>🎯 Tasks</h3>
-  <button onclick="openTask('youtube')">▶️ Subscribe YouTube</button>
-  <button onclick="openTask('channel')">📢 Join Update Channel</button>
-  <button onclick="openTask('group')">💬 Join Public Chat</button>
+  <button class="btn" onclick="openTask('youtube')">YouTube</button>
+  <button class="btn" onclick="openTask('channel')">Channel</button>
+  <button class="btn" onclick="openTask('group')">Group</button>
 
-  <!-- REFERRAL -->
   <h3>👥 Invite Friends</h3>
-  <input id="refLink" readonly />
-  <button onclick="copyInvite()">Copy Invite</button>
+  <input id="refLink" style="width:100%" readonly />
+  <button class="btn" onclick="copyInvite()">Copy Invite</button>
 
-  <!-- TOKEN -->
-  <button onclick="convertToken()">💎 Convert to Token</button>
-  <p>Token: <span id="token">0</span></p>
-
-  <!-- LEADERBOARD -->
-  <h3>🏆 Leaderboard</h3>
-  <div id="board"></div>
-
-  <h3>🏆 Top Inviters</h3>
-
-  <div class="ad-banner" onclick="openAd()">
-  <img src="https://i.imgur.com/3ZQ3Z6Y.png" alt="Ad Banner">
-  </div>
-  
-  <button onclick="openRoadmap()" class="btn">
-  🚀 Roadmap
-  </button>
-<div id="topRefs"></div>
+  <button class="btn" onclick="convertToken()">💎 Convert Token</button>
 
 </div>
 
-<script src="script.js"></script>
+<script>
+function openMenu() {
+  document.getElementById("sideMenu").classList.add("open");
+}
+function closeMenu() {
+  document.getElementById("sideMenu").classList.remove("open");
+}
+function openFullPage() {
+  document.getElementById("fullPage").classList.add("active");
+}
+function closeFullPage() {
+  document.getElementById("fullPage").classList.remove("active");
+}
+</script>
+
 </body>
 </html>
