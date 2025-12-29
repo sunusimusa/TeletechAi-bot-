@@ -88,6 +88,33 @@ async function openBox() {
   document.getElementById("balance").innerText = data.balance;
 }
 
+async function watchAd() {
+  alert("📺 Watching Ad...");
+
+  setTimeout(async () => {
+    const res = await fetch("/ads-spin", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId: USER_ID })
+    });
+
+    const data = await res.json();
+
+    if (data.error) {
+      alert(data.error === "LIMIT_REACHED"
+        ? "❌ Ad limit reached today"
+        : data.error);
+      return;
+    }
+
+    document.getElementById("balance").innerText = data.balance;
+    document.getElementById("energy").innerText = data.energy;
+
+    document.getElementById("adsInfo").innerText =
+      `🎁 You got: ${data.reward} | Spins left: ${data.spinsLeft}`;
+  }, 3000); // fake ad delay
+}
+
 // ================= TASK =================
 function openTask(type) {
   if (type === "youtube") window.open("https://youtube.com/@Sunusicrypto", "_blank");
