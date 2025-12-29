@@ -79,3 +79,16 @@ button {
   font-weight: bold;
   margin: 10px 0;
 }
+
+.ad-banner {
+  width: 90%;
+  margin: 15px auto;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 0 10px rgba(0,0,0,0.4);
+}
+
+.ad-banner img {
+  width: 100%;
+  display: block;
+}
