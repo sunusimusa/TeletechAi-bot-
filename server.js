@@ -22,6 +22,7 @@ mongoose.connect(process.env.MONGODB_URI)
   .catch(err => console.error("❌ Mongo Error:", err));
 
 // ================= MODEL =================
+lastBox: { type: Number, default: 0 },
 const userSchema = new mongoose.Schema({
   telegramId: String,
   balance: { type: Number, default: 0 },
