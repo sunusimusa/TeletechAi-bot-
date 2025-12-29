@@ -134,6 +134,15 @@ app.get("/top-referrals", async (req, res) => {
   res.json(users);
 });
 
+ // ================= TOP REFERRALS =================
+app.get("/top-referrals", async (req, res) => {
+  const users = await User.find()
+    .sort({ referrals: -1 })
+    .limit(10);
+
+  res.json(users);
+});   
+
 // ================= START =================
 app.listen(PORT, () => {
   console.log("🚀 Server running on port", PORT);
