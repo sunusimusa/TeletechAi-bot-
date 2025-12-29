@@ -28,6 +28,7 @@ const userSchema = new mongoose.Schema({
   token: { type: Number, default: 0 },
   level: { type: Number, default: 1 },
   energy: { type: Number, default: ENERGY_MAX },
+  refLevel: { type: Number, default: 1 },
   lastEnergyUpdate: { type: Number, default: Date.now },
   lastDaily: { type: Number, default: 0 },
   refBy: String,
@@ -60,6 +61,30 @@ async function isMember(userId, chat) {
     return ["member", "administrator", "creator"].includes(res.data.result.status);
   } catch {
     return false;
+  }
+}
+
+async function rewardRefChain(userId, amount) {
+  let currentUser = await User.findOne({ telegramId: userId });
+  let level = 1;
+
+  while (currentUser?.refBy && level <= 5) {
+    const parent = await User.findOne({ telegramId: currentUser.refBy });
+    if (!parent) break;
+
+    let percent = 0;
+    if (level === 1) percent = 0.10;
+    if (level === 2) percent = 0.05;
+    if (level === 3) percent = 0.03;
+    if (level === 4) percent = 0.02;
+    if (level === 5) percent = 0.01;
+
+    const reward = Math.floor(amount * percent);
+    parent.balance += reward;
+    await parent.save();
+
+    currentUser = parent;
+    level++;
   }
 }
 
@@ -120,6 +145,7 @@ app.post("/tap", async (req, res) => {
 
   user.energy -= 1;
   user.balance += 1;
+  await rewardRefChain(user.telegramId, 1);
   user.level = Math.floor(user.balance / 100) + 1;
 
   await user.save();
@@ -142,6 +168,7 @@ app.post("/daily", async (req, res) => {
   user.lastDaily = Date.now();
   user.balance += 50;
   await user.save();
+  await rewardRefChain(user.telegramId, 50);
 
   res.json({ balance: user.balance });
 });
