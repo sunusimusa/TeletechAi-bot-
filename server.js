@@ -32,6 +32,7 @@ const userSchema = new mongoose.Schema({
   lastEnergyUpdate: { type: Number, default: Date.now },
   lastDaily: { type: Number, default: 0 },
   lastBox: { type: Number, default: 0 },
+  teamId: { type: String, default: null },
   refBy: String,
   referrals: { type: Number, default: 0 },
   tasks: {
@@ -40,6 +41,16 @@ const userSchema = new mongoose.Schema({
     group: { type: Boolean, default: false }
   }
 });
+
+const teamSchema = new mongoose.Schema({
+  name: String,
+  leader: String,
+  members: [String],
+  totalScore: { type: Number, default: 0 },
+  createdAt: { type: Date, default: Date.now }
+});
+
+const Team = mongoose.model("Team", teamSchema);
 
 const User = mongoose.model("User", userSchema);
 
@@ -155,6 +166,15 @@ app.post("/tap", async (req, res) => {
     balance: user.balance,
     energy: user.energy,
     level: user.level
+
+if (user.teamId) {
+  const team = await Team.findById(user.teamId);
+  if (team) {
+    team.totalScore += 1;
+    await team.save();
+  }
+  }
+    
   });
 });
 
@@ -229,10 +249,58 @@ app.get("/top-referrals", async (req, res) => {
   res.json(users);
 });
 
+app.get("/team-leaderboard", async (req, res) => {
+  const teams = await Team.find()
+    .sort({ totalScore: -1 })
+    .limit(10);
+
+  res.json(teams);
+});
+
 // ================= STATS =================
 app.get("/stats", async (req, res) => {
   const total = await User.countDocuments();
   res.json({ total });
+});
+
+app.post("/team/create", async (req, res) => {
+  const { userId, teamName } = req.body;
+
+  const user = await User.findOne({ telegramId: userId });
+  if (!user) return res.json({ error: "User not found" });
+
+  if (user.teamId) return res.json({ error: "Already in team" });
+
+  const team = new Team({
+    name: teamName,
+    leader: userId,
+    members: [userId]
+  });
+
+  await team.save();
+
+  user.teamId = team._id;
+  await user.save();
+
+  res.json({ success: true, teamId: team._id });
+});
+
+app.post("/team/join", async (req, res) => {
+  const { userId, teamId } = req.body;
+
+  const user = await User.findOne({ telegramId: userId });
+  const team = await Team.findById(teamId);
+
+  if (!user || !team) return res.json({ error: "Invalid data" });
+  if (user.teamId) return res.json({ error: "Already in team" });
+
+  team.members.push(userId);
+  user.teamId = team._id;
+
+  await team.save();
+  await user.save();
+
+  res.json({ success: true });
 });
 
 // ================= START =================
