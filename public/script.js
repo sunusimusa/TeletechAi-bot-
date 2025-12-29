@@ -131,3 +131,23 @@ function loadStats() {
       document.getElementById("totalUsers").innerText = data.total;
     });
 }
+
+function loadTopRefs() {
+  fetch("/top-referrals")
+    .then(res => res.json())
+    .then(data => {
+      let html = "";
+      data.forEach((u, i) => {
+        html += `
+          <div class="rank-row">
+            <span>#${i + 1}</span>
+            <span>${u.telegramId}</span>
+            <span>${u.referrals} 👥</span>
+          </div>
+        `;
+      });
+      document.getElementById("topRefs").innerHTML = html;
+    });
+}
+
+loadTopRefs();
