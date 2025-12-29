@@ -4,8 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>TeleTech AI</title>
-
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <link rel="stylesheet" href="style.css" />
 </head>
 
@@ -13,89 +11,31 @@
 
 <div class="app">
 
-  <!-- TOP BAR -->
-  <div class="top-bar">
-  <button class="menu-btn" onclick="openMenu()">☰</button>
-    <h2>TeleTech AI</h2>
+  <!-- TOP TITLE -->
+  <h2 class="title">🔥 Tap & Earn</h2>
+
+  <!-- TAP CIRCLE -->
+  <div class="tap-circle" onclick="tap()">
+    TAP
   </div>
 
-  <!-- SIDE MENU -->
-  <div id="sideMenu" class="side-menu">
-    <span class="close" onclick="closeMenu()">✖</span>
-    <a href="#" onclick="openPage('profile')">👤 Profile</a>
-    <a href="#" onclick="openPage('wallet')">💰 Wallet</a>
-    <a href="#" onclick="openPage('leaderboard')">🏆 Leaderboard</a>
-    <a href="#" onclick="openPage('spin')">🎰 Spin</a>
+  <p id="tapResult"></p>
+
+  <!-- BUTTONS -->
+  <div class="action-buttons">
+    <button onclick="openBox()">🎁 Open Box</button>
+    <button onclick="spin()">🎡 Lucky Spin</button>
   </div>
 
-  <!-- MAIN CONTENT -->
- <div class="content">
-
-    <h2 class="title">🔥 Tap & Earn</h2>
-    <p>🔥 Over <span id="totalUsers">0</span> users joined!</p>
-
-        <!-- LEADERBOARD -->
-    <h3>🏆 Top Inviters</h3>
-    <div id="topRefs"></div>
-
-    <!-- STATS -->
-    <div class="stats">
-      <div>
-        <small>Balance</small>
-        <h3 id="balance">0</h3>
-      </div>
-      <div>
-        <small>Energy</small>
-        <h3 id="energy">0</h3>
-      </div>
-      <div>
-        <small>Level</small>
-        <h3 id="level">1</h3>
-      </div>
-    </div>
-
-    <!-- ENERGY BAR -->
-    <div class="energy-bar">
-      <div id="energyFill"></div>
-    </div>
-
-    <!-- TAP -->
-    <div class="tap-container">
-      <div class="tap-btn" onclick="tap()">TAP</div>
-    </div>
-
-    <!-- ACTION BUTTONS -->
-    <div class="action-buttons">
-      <button onclick="openBox()">🎁 Open Box</button>
-      <button onclick="spin()">🎡 Lucky Spin</button>
-      <button onclick="watchAd()">🎥 Watch Ad</button>
-    </div>
-
-    <!-- DAILY -->
-    <button class="btn" onclick="daily()">🎁 Daily Reward</button>
-
-    <!-- TASKS -->
-    <h3>🎯 Tasks</h3>
-    <button onclick="openTask('youtube')">▶️ Subscribe YouTube</button>
-    <button onclick="openTask('channel')">📢 Join Update Channel</button>
-    <button onclick="openTask('group')">💬 Join Public Chat</button>
-
-    <!-- REFERRAL -->
-    <h3>👥 Invite Friends</h3>
-    <input id="refLink" readonly />
-    <button onclick="copyInvite()">Copy Invite</button>
-
-    <!-- TOKEN -->
-    <button onclick="convertToken()">💎 Convert to Token</button>
-    <p>Token: <span id="token">0</span></p>
-
-    <div class="ad-banner" onclick="openAd()">
-      <img src="https://i.imgur.com/3ZQ3Z6Y.png" />
-    </div>
-
-    <button onclick="openRoadmap()" class="btn">🚀 Roadmap</button>
-
+  <!-- BOTTOM NAV -->
+  <div class="bottom-nav">
+    <div onclick="openPage('home')">🏠<span>Home</span></div>
+    <div onclick="openPage('spin')">🎰<span>Spin</span></div>
+    <div onclick="openPage('team')">👥<span>Team</span></div>
+    <div onclick="openPage('tasks')">📋<span>Tasks</span></div>
+    <div onclick="openPage('profile')">⚙️<span>Profile</span></div>
   </div>
+
 </div>
 
 <script src="script.js"></script>
