@@ -1,15 +1,23 @@
 const tg = window.Telegram.WebApp;
 tg.expand();
 
+let USER_ID = null;
 
- let USER_ID = null;
-
+// ================= INIT =================
 async function init() {
+  const tgUser = tg.initDataUnsafe?.user;
+
+  if (!tgUser) {
+    alert("Please reopen the bot");
+    return;
+  }
+
   const res = await fetch("/user", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      initData: window.Telegram.WebApp.initDataUnsafe
+      userId: tgUser.id,
+      initData: tg.initDataUnsafe
     })
   });
 
@@ -20,17 +28,16 @@ async function init() {
     return;
   }
 
-  USER_ID = data.id; // <<< MUHIMMI
+  USER_ID = data.telegramId || data.id;
 
   document.getElementById("balance").innerText = data.balance;
   document.getElementById("energy").innerText = data.energy;
   document.getElementById("level").innerText = data.level;
 
-  document.getElementById("refLink").value =
-    `https://t.me/TeletechAi_bot?start=${data.id}`;
-}
-
   setReferralLink();
+  loadLeaderboard();
+  loadTopRefs();
+  loadStats();
 }
 
 init();
@@ -40,9 +47,7 @@ async function tap() {
   const res = await fetch("/tap", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      userId: USER_ID
-    })
+    body: JSON.stringify({ userId: USER_ID })
   });
 
   const data = await res.json();
@@ -58,7 +63,7 @@ async function daily() {
   const res = await fetch("/daily", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ userId })
+    body: JSON.stringify({ userId: USER_ID })
   });
 
   const data = await res.json();
@@ -68,7 +73,7 @@ async function daily() {
   alert("🎁 Daily reward claimed!");
 }
 
-// ================= TASKS =================
+// ================= TASK =================
 function openTask(type) {
   if (type === "youtube") window.open("https://youtube.com/@Sunusicrypto", "_blank");
   if (type === "channel") window.open("https://t.me/TeleAIupdates", "_blank");
@@ -78,7 +83,7 @@ function openTask(type) {
     const res = await fetch("/task", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId: USER_ID })
+      body: JSON.stringify({ userId: USER_ID, type })
     });
 
     const data = await res.json();
@@ -92,7 +97,7 @@ function openTask(type) {
 // ================= REFERRAL =================
 function setReferralLink() {
   document.getElementById("refLink").value =
-    `https://t.me/TeletechAi_bot?start=${userId}`;
+    `https://t.me/TeletechAi_bot?start=${USER_ID}`;
 }
 
 function copyInvite() {
@@ -117,24 +122,6 @@ function loadTopRefs() {
   fetch("/top-referrals")
     .then(res => res.json())
     .then(data => {
-      document.getElementById("topRefs").innerHTML =
-        data.map((u, i) => `#${i + 1} — ${u.referrals} invites`).join("<br>");
-    });
-}
-
-// ================= TOTAL USERS =================
-function loadStats() {
-  fetch("/stats")
-    .then(res => res.json())
-    .then(data => {
-      document.getElementById("totalUsers").innerText = data.total;
-    });
-}
-
-function loadTopRefs() {
-  fetch("/top-referrals")
-    .then(res => res.json())
-    .then(data => {
       let html = "";
       data.forEach((u, i) => {
         html += `
@@ -149,4 +136,11 @@ function loadTopRefs() {
     });
 }
 
-loadTopRefs();
+// ================= STATS =================
+function loadStats() {
+  fetch("/stats")
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById("totalUsers").innerText = data.total;
+    });
+}
