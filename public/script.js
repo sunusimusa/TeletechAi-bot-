@@ -3,20 +3,12 @@ tg.expand();
 
 let userId = null;
 
-async function init() {
-  const initData = tg.initDataUnsafe;
-
-  if (!initData || !initData.user) {
-    alert("Telegram WebApp not detected");
-    return;
-  }
-
+ async function init() {
   const res = await fetch("/user", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      userId: initData.user.id,
-      start_param: initData.start_param || null
+      initData: window.Telegram.WebApp.initDataUnsafe
     })
   });
 
@@ -27,11 +19,15 @@ async function init() {
     return;
   }
 
-  userId = data.telegramId;
+  window.userId = data.id;
 
   document.getElementById("balance").innerText = data.balance;
   document.getElementById("energy").innerText = data.energy;
   document.getElementById("level").innerText = data.level;
+
+  document.getElementById("refLink").value =
+    `https://t.me/teletechai-bot?start=${data.id}`;
+ }
 
   setReferralLink();
 }
@@ -43,7 +39,7 @@ async function tap() {
   const res = await fetch("/tap", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ userId })
+    body: JSON.stringify({ userId: window.userId })
   });
 
   const data = await res.json();
