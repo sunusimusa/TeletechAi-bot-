@@ -44,6 +44,8 @@ const userSchema = new mongoose.Schema({
   teamId: { type: String, default: null },
   spinCount: { type: Number, default: 1 }, // adadin spins
 lastSpin: { type: Number, default: 0 }
+  adsSpinCount: { type: Number, default: 0 },
+lastAdsSpin: { type: Number, default: 0 },
   refBy: String,
   referrals: { type: Number, default: 0 },
   tasks: {
@@ -358,6 +360,38 @@ app.post("/spin", async (req, res) => {
     reward: reward.label,
     balance: user.balance,
     energy: user.energy
+  });
+});
+
+app.post("/ads-spin", async (req, res) => {
+  const user = await User.findOne({ telegramId: req.body.userId });
+  if (!user) return res.json({ error: "USER_NOT_FOUND" });
+
+  const now = Date.now();
+
+  // reset every 24 hours
+  if (!user.lastAdsSpin || now - user.lastAdsSpin > 24 * 60 * 60 * 1000) {
+    user.adsSpinCount = 0;
+    user.lastAdsSpin = now;
+  }
+
+  if (user.adsSpinCount >= 3) {
+    return res.json({ error: "LIMIT_REACHED" });
+  }
+
+  const reward = SPIN_REWARDS[Math.floor(Math.random() * SPIN_REWARDS.length)];
+
+  if (reward.reward) user.balance += reward.reward;
+  if (reward.energy) user.energy += reward.energy;
+
+  user.adsSpinCount += 1;
+  await user.save();
+
+  res.json({
+    reward: reward.label,
+    balance: user.balance,
+    energy: user.energy,
+    spinsLeft: 3 - user.adsSpinCount
   });
 });
 
