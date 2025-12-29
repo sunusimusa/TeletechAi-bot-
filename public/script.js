@@ -73,6 +73,21 @@ async function daily() {
   alert("🎁 Daily reward claimed!");
 }
 
+async function openBox() {
+  const res = await fetch("/open-box", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId: USER_ID })
+  });
+
+  const data = await res.json();
+
+  if (data.error) return alert(data.error);
+
+  alert(`🎁 You got ${data.reward} coins!`);
+  document.getElementById("balance").innerText = data.balance;
+}
+
 // ================= TASK =================
 function openTask(type) {
   if (type === "youtube") window.open("https://youtube.com/@Sunusicrypto", "_blank");
