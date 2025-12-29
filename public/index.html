@@ -13,98 +13,84 @@
 
 <div class="app">
 
-  <!-- TOP TITLE -->
-  <h2 class="title">🔥 Tap & Earn</h2>
+  <!-- ================= HEADER ================= -->
+  <header class="top-bar">
+    <h2 class="title">🔥 Tap & Earn</h2>
+  </header>
 
-  <!-- TAP CIRCLE -->
-  <div class="tap-circle" onclick="tap()">
-    TAP
+  <!-- ================= TAP AREA ================= -->
+  <section class="tap-section">
+    <div class="tap-circle" onclick="tap()">TAP</div>
+    <p id="tapResult"></p>
+  </section>
+
+  <!-- ================= STATS ================= -->
+  <section class="stats">
+    <div>
+      <small>Balance</small>
+      <h3 id="balance">0</h3>
+    </div>
+    <div>
+      <small>Energy</small>
+      <h3 id="energy">0</h3>
+    </div>
+    <div>
+      <small>Level</small>
+      <h3 id="level">1</h3>
+    </div>
+  </section>
+
+  <!-- ENERGY BAR -->
+  <div class="energy-bar">
+    <div id="energyFill"></div>
   </div>
 
-  <p id="tapResult"></p>
+  <!-- ================= ACTIONS ================= -->
+  <section class="actions">
+    <button onclick="openBox()">🎁 Open Box</button>
+    <button onclick="spin()">🎡 Lucky Spin</button>
+    <button onclick="watchAd()">🎥 Watch Ad</button>
+  </section>
 
-     <!-- TOP INVITERS -->
-    <section class="section">
-      <h3>🏆 Top Inviters</h3>
-      <div id="topRefs"></div>
-    </section>
+  <!-- ================= TASKS ================= -->
+  <section class="tasks">
+    <h3>🎯 Tasks</h3>
+    <button onclick="openTask('youtube')">▶️ Subscribe YouTube</button>
+    <button onclick="openTask('channel')">📢 Join Update Channel</button>
+    <button onclick="openTask('group')">💬 Join Public Chat</button>
+  </section>
 
-    <!-- STATS -->
-    <section class="stats">
-      <div>
-        <small>Balance</small>
-        <h3 id="balance">0</h3>
-      </div>
-      <div>
-        <small>Energy</small>
-        <h3 id="energy">0</h3>
-      </div>
-      <div>
-        <small>Level</small>
-        <h3 id="level">1</h3>
-      </div>
-    </section>
+  <!-- ================= REFERRAL ================= -->
+  <section class="referral">
+    <h3>👥 Invite Friends</h3>
+    <input id="refLink" readonly />
+    <button onclick="copyInvite()">Copy Invite</button>
+  </section>
 
-    <!-- ENERGY BAR -->
-    <section class="energy-bar">
-      <div id="energyFill"></div>
-    </section>
+  <!-- ================= TOKEN ================= -->
+  <section class="token">
+    <button onclick="convertToken()">💎 Convert to Token</button>
+    <p>Token: <span id="token">0</span></p>
+  </section>
 
-    <!-- ================= MAIN CONTENT ================= -->
-  <main class="content">
+  <!-- ================= AD ================= -->
+  <section class="ad-banner" onclick="openAd()">
+    <img src="https://i.imgur.com/3ZQ3Z6Y.png" />
+  </section>
 
-    <!-- HEADER INFO -->
-    <section class="hero">
-      <h2>🔥 Tap & Earn</h2>
-      <p>🔥 Over <span id="totalUsers">0</span> users joined!</p>
-    </section>
+  <!-- ================= ROADMAP ================= -->
+  <section class="roadmap">
+    <button onclick="openRoadmap()" class="btn">🚀 Roadmap</button>
+  </section>
 
-      <!-- ACTION BUTTONS -->
-    <section class="actions">
-      <button onclick="openBox()">🎁 Open Box</button>
-      <button onclick="spin()">🎡 Lucky Spin</button>
-      <button onclick="watchAd()">🎥 Watch Ad</button>
-    </section>
-
-  <!-- TASKS -->
-    <section class="tasks">
-      <h3>🎯 Tasks</h3>
-      <button onclick="openTask('youtube')">▶️ Subscribe YouTube</button>
-      <button onclick="openTask('channel')">📢 Join Update Channel</button>
-      <button onclick="openTask('group')">💬 Join Public Chat</button>
-    </section>
-
-    <!-- REFERRAL -->
-    <section class="referral">
-      <h3>👥 Invite Friends</h3>
-      <input id="refLink" readonly />
-      <button onclick="copyInvite()">Copy Invite</button>
-    </section>
-
-    <!-- TOKEN -->
-    <section class="token">
-      <button onclick="convertToken()">💎 Convert to Token</button>
-      <p>Token: <span id="token">0</span></p>
-    </section>
-
-   <!-- AD BANNER -->
-    <section class="ad-banner" onclick="openAd()">
-      <img src="https://i.imgur.com/3ZQ3Z6Y.png" />
-    </section>
-
-    <!-- ROADMAP -->
-    <section class="roadmap">
-      <button onclick="openRoadmap()" class="btn">🚀 Roadmap</button>
-    </section>
-
-  <!-- BOTTOM NAV -->
-  <div class="bottom-nav">
+  <!-- ================= BOTTOM NAV ================= -->
+  <nav class="bottom-nav">
     <div onclick="openPage('home')">🏠<span>Home</span></div>
     <div onclick="openPage('spin')">🎰<span>Spin</span></div>
     <div onclick="openPage('team')">👥<span>Team</span></div>
     <div onclick="openPage('tasks')">📋<span>Tasks</span></div>
     <div onclick="openPage('profile')">⚙️<span>Profile</span></div>
-  </div>
+  </nav>
 
 </div>
 
