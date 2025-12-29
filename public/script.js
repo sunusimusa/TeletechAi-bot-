@@ -1,9 +1,10 @@
 const tg = window.Telegram.WebApp;
 tg.expand();
 
-let userId = null;
 
- async function init() {
+ let USER_ID = null;
+
+async function init() {
   const res = await fetch("/user", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -19,15 +20,15 @@ let userId = null;
     return;
   }
 
-  window.userId = data.id;
+  USER_ID = data.id; // <<< MUHIMMI
 
   document.getElementById("balance").innerText = data.balance;
   document.getElementById("energy").innerText = data.energy;
   document.getElementById("level").innerText = data.level;
 
   document.getElementById("refLink").value =
-    `https://t.me/teletechai-bot?start=${data.id}`;
- }
+    `https://t.me/TeletechAi_bot?start=${data.id}`;
+}
 
   setReferralLink();
 }
@@ -39,7 +40,9 @@ async function tap() {
   const res = await fetch("/tap", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ userId: window.userId })
+    body: JSON.stringify({
+      userId: USER_ID
+    })
   });
 
   const data = await res.json();
@@ -75,7 +78,7 @@ function openTask(type) {
     const res = await fetch("/task", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId, type })
+      body: JSON.stringify({ userId: USER_ID })
     });
 
     const data = await res.json();
