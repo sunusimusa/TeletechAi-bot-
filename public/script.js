@@ -207,3 +207,24 @@ function loadStats() {
       document.getElementById("totalUsers").innerText = data.total;
     });
 }
+
+function loadTeamRanking() {
+  fetch("/team-leaderboard")
+    .then(res => res.json())
+    .then(data => {
+      let html = "";
+
+      data.forEach((team, index) => {
+        html += `
+          <div class="team-row">
+            <span>#${index + 1} ${team.name}</span>
+            <span>🔥 ${team.totalScore}</span>
+          </div>
+        `;
+      });
+
+      document.getElementById("teamBoard").innerHTML = html;
+    });
+}
+
+loadTeamRanking();
