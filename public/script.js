@@ -1,6 +1,8 @@
 const tg = window.Telegram.WebApp;
 tg.expand();
 
+let maxEnergy = 100;
+let regenInterval = null;
 let USER_ID = null;
 let balance = 0;
 let energy = 0;
@@ -29,6 +31,7 @@ async function init() {
   level = Number(data.level) || 1;
 
   updateUI();
+  startEnergyRegen();
   setReferralLink();
   loadLeaderboard();
   loadTopRefs();
@@ -205,6 +208,18 @@ function loadStats() {
     .then(d => {
       document.getElementById("totalUsers").innerText = d.total;
     });
+}
+
+function startEnergyRegen() {
+  if (regenInterval) return;
+
+  regenInterval = setInterval(() => {
+    if (energy < maxEnergy) {
+      energy += 1;
+      document.getElementById("energy").innerText = energy;
+      document.getElementById("energyFill").style.width = energy + "%";
+    }
+  }, 10000); // every 10 seconds
 }
 
 // ================= MENU =================
