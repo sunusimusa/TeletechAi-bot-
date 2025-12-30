@@ -317,4 +317,23 @@ function openPage(page) {
   alert("Opening: " + page);
 }
 
+function tap() {
+  if (energy <= 0) {
+    document.getElementById("tapResult").innerText = "⚡ No Energy!";
+    return;
+  }
+
+  energy -= 1;
+  balance += 1;
+
+  document.getElementById("energy").innerText = energy;
+  document.getElementById("balance").innerText = balance;
+
+  document.getElementById("energyFill").style.width = energy + "%";
+
+  const btn = document.querySelector(".tap-btn");
+  btn.classList.add("tap-animate");
+  setTimeout(() => btn.classList.remove("tap-animate"), 150);
+}
+
 loadTeamRanking();
