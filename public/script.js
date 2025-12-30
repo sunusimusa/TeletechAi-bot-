@@ -95,6 +95,30 @@ function spin() {
   });
         }
 
+function convertToken() {
+  fetch("/convert", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId: USER_ID })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.error) {
+      alert(data.error);
+      return;
+    }
+
+    document.getElementById("token").innerText = data.tokens;
+    document.getElementById("balance").innerText = data.balance;
+
+    alert("✅ Converted to token!");
+  })
+  .catch(err => {
+    console.error(err);
+    alert("❌ Error converting token");
+  });
+}
+
 // ================= TASK BUTTONS =================
 function openTask(type) {
   if (type === "youtube") {
