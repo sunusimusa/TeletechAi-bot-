@@ -39,8 +39,6 @@ mongoose.connect(process.env.MONGODB_URI)
 
 // ================= MODEL =================
 
-const mongoose = require("mongoose");
-
 const ENERGY_MAX = 100;
 
 const userSchema = new mongoose.Schema({
