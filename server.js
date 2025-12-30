@@ -3,6 +3,8 @@ const express = require("express");
 const mongoose = require("mongoose");
 const axios = require("axios");
 
+import { sendJetton } from "./ton.js";
+import User from "./models/User.js";
 const TOKEN_CONTRACT = process.env.TOKEN_CONTRACT;
 const TOKEN_DECIMALS = Number(process.env.TOKEN_DECIMALS);
 const TOKEN_RATE = Number(process.env.TOKEN_RATE);
@@ -431,6 +433,23 @@ app.post("/convert", async (req, res) => {
     tokens,
     balance: user.balance
   });
+});
+
+app.post("/withdraw", async (req, res) => {
+  const { userId, wallet } = req.body;
+
+  const user = await User.findOne({ telegramId: userId });
+  if (!user) return res.json({ error: "User not found" });
+
+  if (user.token <= 0)
+    return res.json({ error: "No token to withdraw" });
+
+  await sendJetton(wallet, user.token);
+
+  user.token = 0;
+  await user.save();
+
+  res.json({ success: true });
 });
 
 // ================= START =================
