@@ -42,5 +42,11 @@ export async function sendJetton(toAddress, amount) {
     ]
   });
 
+module.exports = {
+  sendJetton: async () => {
+    console.log("TON disabled for now");
+  }
+};
+  
   return true;
 }
