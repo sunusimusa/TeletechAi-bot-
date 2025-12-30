@@ -35,54 +35,7 @@ const SPIN_REWARDS = [
 // ================= DATABASE =================
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log("✅ MongoDB Connected"))
-  .catch(err => console.error("❌ Mongo Error:", err));
-
-// ================= MODEL =================
-
-  telegramId: { type: String, required: true },
-
-  balance: { type: Number, default: 0 },
-  token: { type: Number, default: 0 },
-  level: { type: Number, default: 1 },
-
-  energy: { type: Number, default: ENERGY_MAX },
-  lastEnergyUpdate: { type: Number, default: Date.now },
-
-  lastDaily: { type: Number, default: 0 },
-  lastBox: { type: Number, default: 0 },
-
-  // 🎰 Spin system
-  spinCount: { type: Number, default: 1 },
-  lastSpin: { type: Number, default: 0 },
-
-  // 👥 Referral system
-  refBy: { type: String, default: null },
-  referrals: { type: Number, default: 0 },
-
-  // 🎥 Ads / Tasks
-  adsSpinCount: { type: Number, default: 0 },
-  lastAdsSpin: { type: Number, default: 0 },
-
-  tasks: {
-    youtube: { type: Boolean, default: false },
-    channel: { type: Boolean, default: false },
-    group: { type: Boolean, default: false }
-  },
-
-  // 👥 Team
-  teamId: { type: String, default: null }
-
-}, { timestamps: true });
-
-({
-  name: String,
-  leader: String,
-  members: [String],
-  totalScore: { type: Number, default: 0 },
-  createdAt: { type: Date, default: Date.now }
-});
-
-const User = require("./models/User");
+  .catch(err => console.error("❌ Mongo Error:", err))
 
 // ================= HELPERS =================
 function regenEnergy(user) {
