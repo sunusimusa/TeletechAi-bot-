@@ -94,3 +94,72 @@ function spin() {
     updateUI();
   });
         }
+
+// ================= TASK BUTTONS =================
+function openTask(type) {
+  if (type === "youtube") {
+    window.open("https://youtube.com/@Sunusicrypto", "_blank");
+  }
+
+  if (type === "channel") {
+    window.open("https://t.me/TeleAIupdates", "_blank");
+  }
+
+  if (type === "group") {
+    window.open("https://t.me/tele_tap_ai", "_blank");
+  }
+
+  // give reward after delay
+  setTimeout(async () => {
+    const res = await fetch("/task", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        userId: USER_ID,
+        type: type
+      })
+    });
+
+    const data = await res.json();
+    if (data.error) return alert(data.error);
+
+    balance = data.balance;
+    updateUI();
+    alert("✅ Task completed!");
+  }, 3000);
+}
+
+// ================= COPY INVITE =================
+function copyInvite() {
+  const link = `https://t.me/TeletechAi_bot?start=${USER_ID}`;
+  navigator.clipboard.writeText(link);
+  alert("✅ Invite link copied!");
+}
+
+// ================= ROADMAP =================
+function openRoadmap() {
+  alert(`🚀 TELE TECH AI ROADMAP
+
+PHASE 1 ✅
+• Tap
+• Daily Reward
+• Referral
+
+PHASE 2 🔜
+• Token
+• Energy Boost
+• Spin
+
+PHASE 3 🔜
+• Withdraw
+• NFT
+
+PHASE 4 🔜
+• Airdrop
+• Mobile App`);
+}
+
+// ================= WHITEPAPER =================
+function openWhitepaper() {
+  window.open("/whitepaper.html", "_blank");
+}
