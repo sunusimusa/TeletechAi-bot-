@@ -83,7 +83,7 @@ const teamSchema = new mongoose.Schema({
 
 const Team = mongoose.model("Team", teamSchema);
 
-const User = mongoose.model("User", userSchema);
+const User = require("./models/User");
 
 // ================= HELPERS =================
 function regenEnergy(user) {
