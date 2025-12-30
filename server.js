@@ -3,6 +3,9 @@ const express = require("express");
 const mongoose = require("mongoose");
 const axios = require("axios");
 
+const TOKEN_CONTRACT = process.env.TOKEN_CONTRACT;
+const TOKEN_DECIMALS = Number(process.env.TOKEN_DECIMALS);
+const TOKEN_RATE = Number(process.env.TOKEN_RATE);
 const app = express();
 app.use(express.json());
 app.use(express.static("public"));
