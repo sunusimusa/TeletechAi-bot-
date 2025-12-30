@@ -36,29 +36,27 @@ init();
 
 // ================= TAP (MAIN FIX) =================
 function tap() {
-  const btn = document.querySelector(".tap-btn");
-
-  // Animation
-  btn.classList.add("tap-animate");
-  setTimeout(() => btn.classList.remove("tap-animate"), 120);
-
-  // Prevent tapping if energy empty
   if (energy <= 0) {
     document.getElementById("tapResult").innerText = "⚡ No Energy!";
     return;
   }
 
-  // Update values
+  // reduce & increase
   energy -= 1;
   balance += 1;
 
+  // update UI
   document.getElementById("energy").innerText = energy;
   document.getElementById("balance").innerText = balance;
 
-  // Energy bar
+  // energy bar
   document.getElementById("energyFill").style.width = energy + "%";
 
-  // Feedback text
+  // animation
+  const btn = document.querySelector(".tap-btn");
+  btn.classList.add("tap-animate");
+  setTimeout(() => btn.classList.remove("tap-animate"), 120);
+
   document.getElementById("tapResult").innerText = "🔥 +1 Coin!";
 }
 
