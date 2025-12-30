@@ -406,6 +406,27 @@ app.post("/ads-spin", async (req, res) => {
   });
 });
 
+app.post("/convert", async (req, res) => {
+  const { userId } = req.body;
+
+  const user = await User.findOne({ telegramId: userId });
+  if (!user) return res.json({ error: "User not found" });
+
+  if (user.balance < 100) {
+    return res.json({ error: "Not enough balance" });
+  }
+
+  user.balance -= 100;
+  user.tokens += 1;
+
+  await user.save();
+
+  res.json({
+    balance: user.balance,
+    tokens: user.tokens
+  });
+});
+
 // ================= START =================
 app.listen(PORT, () => {
   console.log("🚀 Server running on port", PORT);
