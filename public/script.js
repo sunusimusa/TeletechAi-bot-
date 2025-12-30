@@ -2,6 +2,9 @@ const tg = window.Telegram.WebApp;
 tg.expand();
 
 let USER_ID = null;
+let balance = 0;
+let energy = 0;
+let level = 1;
 
 // ================= INIT =================
 async function init() {
@@ -21,11 +24,11 @@ async function init() {
   if (data.error) return alert(data.error);
 
   USER_ID = data.telegramId || data.id;
+  balance = Number(data.balance) || 0;
+  energy = Number(data.energy) || 0;
+  level = Number(data.level) || 1;
 
-  document.getElementById("balance").innerText = data.balance;
-  document.getElementById("energy").innerText = data.energy;
-  document.getElementById("level").innerText = data.level;
-
+  updateUI();
   setReferralLink();
   loadLeaderboard();
   loadTopRefs();
@@ -34,30 +37,42 @@ async function init() {
 
 init();
 
-// ================= TAP (MAIN FIX) =================
+// ================= UI UPDATE =================
+function updateUI() {
+  document.getElementById("balance").innerText = balance;
+  document.getElementById("energy").innerText = energy;
+  document.getElementById("level").innerText = level;
+
+  const bar = document.getElementById("energyFill");
+  if (bar) bar.style.width = Math.min(energy, 100) + "%";
+}
+
+// ================= TAP =================
 function tap() {
   if (energy <= 0) {
-    document.getElementById("tapResult").innerText = "⚡ No Energy!";
+    showTapMsg("⚡ No Energy!");
     return;
   }
 
-  // reduce & increase
-  energy -= 1;
-  balance += 1;
+  energy--;
+  balance++;
 
-  // update UI
-  document.getElementById("energy").innerText = energy;
-  document.getElementById("balance").innerText = balance;
+  updateUI();
+  animateTap();
+  showTapMsg("🔥 +1 Coin!");
+}
 
-  // energy bar
-  document.getElementById("energyFill").style.width = energy + "%";
-
-  // animation
+function animateTap() {
   const btn = document.querySelector(".tap-btn");
+  if (!btn) return;
   btn.classList.add("tap-animate");
-  setTimeout(() => btn.classList.remove("tap-animate"), 120);
+  setTimeout(() => btn.classList.remove("tap-animate"), 150);
+}
 
-  document.getElementById("tapResult").innerText = "🔥 +1 Coin!";
+function showTapMsg(text) {
+  const el = document.getElementById("tapResult");
+  if (!el) return;
+  el.innerText = text;
 }
 
 // ================= DAILY =================
@@ -71,7 +86,8 @@ async function daily() {
   const data = await res.json();
   if (data.error) return alert(data.error);
 
-  document.getElementById("balance").innerText = data.balance;
+  balance = data.balance;
+  updateUI();
   alert("🎁 Daily reward claimed!");
 }
 
@@ -86,11 +102,12 @@ async function openBox() {
   const data = await res.json();
   if (data.error) return alert(data.error);
 
-  document.getElementById("balance").innerText = data.balance;
+  balance = data.balance;
+  updateUI();
   alert(`🎁 You got ${data.reward} coins!`);
 }
 
-// ================= WATCH AD =================
+// ================= ADS =================
 async function watchAd() {
   alert("📺 Watching Ad...");
 
@@ -104,71 +121,44 @@ async function watchAd() {
     const data = await res.json();
     if (data.error) return alert(data.error);
 
-    document.getElementById("balance").innerText = data.balance;
-    document.getElementById("energy").innerText = data.energy;
-  }, 3000);
-}
-
-// ================= TASK =================
-function openTask(type) {
-  if (type === "youtube") window.open("https://youtube.com/@Sunusicrypto");
-  if (type === "channel") window.open("https://t.me/TeleAIupdates");
-  if (type === "group") window.open("https://t.me/tele_tap_ai");
-
-  setTimeout(async () => {
-    const res = await fetch("/task", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId: USER_ID, type })
-    });
-
-    const data = await res.json();
-    if (data.error) return alert(data.error);
-
-    document.getElementById("balance").innerText = data.balance;
+    balance = data.balance;
+    energy = data.energy;
+    updateUI();
   }, 3000);
 }
 
 // ================= REFERRAL =================
 function setReferralLink() {
-  document.getElementById("refLink").value =
-    `https://t.me/TeletechAi_bot?start=${USER_ID}`;
-}
-
-function copyInvite() {
   const input = document.getElementById("refLink");
-  input.select();
-  document.execCommand("copy");
-  alert("Invite link copied!");
+  if (input)
+    input.value = `https://t.me/TeletechAi_bot?start=${USER_ID}`;
 }
 
 // ================= LEADERBOARD =================
 function loadLeaderboard() {
   fetch("/leaderboard")
-    .then(res => res.json())
-    .then(data => {
+    .then(r => r.json())
+    .then(d => {
       document.getElementById("board").innerHTML =
-        data.map((u, i) => `#${i + 1} — ${u.balance} coins`).join("<br>");
+        d.map((u, i) => `#${i + 1} — ${u.balance}`).join("<br>");
     });
 }
 
 function loadTopRefs() {
   fetch("/top-referrals")
-    .then(res => res.json())
-    .then(data => {
+    .then(r => r.json())
+    .then(d => {
       document.getElementById("topRefs").innerHTML =
-        data.map((u, i) =>
-          `<div>#${i + 1} ${u.telegramId} (${u.referrals})</div>`
-        ).join("");
+        d.map((u, i) => `#${i + 1} ${u.telegramId} (${u.referrals})`).join("");
     });
 }
 
 // ================= STATS =================
 function loadStats() {
   fetch("/stats")
-    .then(res => res.json())
-    .then(data => {
-      document.getElementById("totalUsers").innerText = data.total;
+    .then(r => r.json())
+    .then(d => {
+      document.getElementById("totalUsers").innerText = d.total;
     });
 }
 
@@ -176,31 +166,22 @@ function loadStats() {
 function openMenu() {
   document.getElementById("sideMenu").style.left = "0";
 }
-
 function closeMenu() {
   document.getElementById("sideMenu").style.left = "-260px";
 }
 
 function openRoadmap() {
-  alert(`
-🚀 TELE TECH AI ROADMAP
+  alert(`🚀 TELE TECH AI ROADMAP
 
 PHASE 1 ✅
-- Tap to Earn
-- Referral System
-- Daily Reward
+Tap • Referral • Daily
 
 PHASE 2 🔜
-- Convert to Token
-- Energy Boost
-- Spin Rewards
+Token • Energy Boost • Spin
 
 PHASE 3 🔜
-- Withdraw
-- NFT Rewards
+Withdraw • NFT
 
 PHASE 4 🔜
-- Airdrop
-- Mobile App
-  `);
+Airdrop • Mobile App`);
 }
