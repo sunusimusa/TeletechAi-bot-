@@ -7,174 +7,115 @@ body {
 }
 
 .app {
-  padding-bottom: 90px;
+  max-width: 480px;
+  margin: auto;
+  padding-bottom: 120px;
+  position: relative;
 }
 
-.title {
-  margin-top: 20px;
+/* ================= TAP ================= */
+
+.tap-container {
+  position: relative;
+  z-index: 5;
+  margin-top: 10px;
 }
 
-.tap-circle {
+.tap-btn {
   width: 220px;
   height: 220px;
-  margin: 40px auto;
-  background: radial-gradient(circle, #00ffb3, #00b894);
+  margin: 20px auto;
   border-radius: 50%;
+  background: radial-gradient(circle, #00ffb3, #00c896);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 36px;
   font-weight: bold;
-  cursor: pointer;
-  animation: pulse 1.5s infinite;
-}
-
-@keyframes pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.08); }
-  100% { transform: scale(1); }
-}
-
-.action-buttons button {
-  width: 90%;
-  padding: 15px;
-  margin: 8px auto;
-  border: none;
-  border-radius: 10px;
-  background: gold;
-  font-size: 16px;
-  font-weight: bold;
-}
-
-.bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: #111;
-  display: flex;
-  justify-content: space-around;
-  padding: 10px 0;
-  border-top: 1px solid #333;
-}
-
-.bottom-nav div {
-  color: white;
-  font-size: 12px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.bottom-nav div:hover {
-  color: #00ffb3;
-}
-
-body {
-  margin: 0;
-  background: #0d1117;
-  color: white;
-  font-family: Arial, sans-serif;
-}
-
-.app {
-  max-width: 480px;
-  margin: auto;
-  padding-bottom: 90px;
-}
-
-.title {
-  text-align: center;
-  margin-top: 15px;
-}
-
-.tap-circle {
-  width: 220px;
-  height: 220px;
-  margin: 20px auto;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #00ffcc, #00c896);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 32px;
-  font-weight: bold;
   color: #000;
   cursor: pointer;
-  box-shadow: 0 0 30px rgba(0,255,200,0.5);
+  box-shadow: 0 0 25px rgba(0,255,200,0.6);
+  animation: pulseGlow 1.4s infinite;
+  z-index: 10;
+  position: relative;
 }
 
-.stats {
-  display: flex;
-  justify-content: space-around;
-  margin: 15px 0;
+.tap-btn:active {
+  transform: scale(0.92);
 }
 
-.stats div {
-  text-align: center;
-}
+/* ================= ENERGY BAR ================= */
 
 .energy-bar {
   width: 90%;
   height: 10px;
   background: #333;
-  margin: 10px auto;
+  margin: 12px auto 25px auto;
   border-radius: 20px;
   overflow: hidden;
+  z-index: 1;
+  position: relative;
 }
 
 #energyFill {
   height: 100%;
   width: 100%;
   background: linear-gradient(90deg, #00ff99, #00ffaa);
-  transition: 0.3s;
+  transition: width 0.3s ease;
 }
 
-.actions button,
+/* ================= STATS ================= */
+
+.stats {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.stats div {
+  text-align: center;
+}
+
+/* ================= BUTTONS ================= */
+
+.action-buttons button,
 .btn {
   width: 90%;
-  margin: 6px auto;
-  display: block;
-  padding: 12px;
-  background: gold;
-  border: none;
+  padding: 14px;
+  margin: 8px auto;
   border-radius: 12px;
+  border: none;
+  background: gold;
   font-weight: bold;
+  font-size: 16px;
 }
+
+/* ================= BOTTOM NAV ================= */
 
 .bottom-nav {
   position: fixed;
   bottom: 0;
-  width: 100%;
+  left: 0;
+  right: 0;
   background: #0f172a;
   display: flex;
-  justify-content: space-around;
+  justify-content: center;
+  gap: 25px;
   padding: 10px 0;
+  z-index: 99;
 }
 
 .bottom-nav div {
-  text-align: center;
   color: white;
-  font-size: 13px;
+  font-size: 12px;
+  text-align: center;
 }
 
-/* TAP ANIMATION */
-.tap-btn {
-  transition: transform 0.1s ease, box-shadow 0.1s ease;
-}
+/* ================= ANIMATION ================= */
 
-.tap-btn.tap-animate {
-  transform: scale(0.9);
-  box-shadow: 0 0 25px #00ffcc;
-}
-
-/* Pulse glow */
 @keyframes pulseGlow {
   0% { box-shadow: 0 0 10px #00ffcc; }
   50% { box-shadow: 0 0 25px #00ffcc; }
   100% { box-shadow: 0 0 10px #00ffcc; }
-}
-
-.tap-btn {
-  animation: pulseGlow 1.5s infinite;
 }
