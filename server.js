@@ -38,8 +38,13 @@ mongoose.connect(process.env.MONGODB_URI)
   .catch(err => console.error("❌ Mongo Error:", err));
 
 // ================= MODEL =================
+
+const mongoose = require("mongoose");
+
+const ENERGY_MAX = 100;
+
 const userSchema = new mongoose.Schema({
-  telegramId: String,
+  telegramId: { type: String, required: true },
 
   balance: { type: Number, default: 0 },
   token: { type: Number, default: 0 },
@@ -55,7 +60,7 @@ const userSchema = new mongoose.Schema({
   spinCount: { type: Number, default: 1 },
   lastSpin: { type: Number, default: 0 },
 
-  // 🎯 Referral system
+  // 👥 Referral system
   refBy: { type: String, default: null },
   referrals: { type: Number, default: 0 },
 
@@ -69,9 +74,12 @@ const userSchema = new mongoose.Schema({
     group: { type: Boolean, default: false }
   },
 
-  // 👥 Team system
+  // 👥 Team
   teamId: { type: String, default: null }
-});
+
+}, { timestamps: true });
+
+module.exports = mongoose.model("User", userSchema);
 
 const teamSchema = new mongoose.Schema({
   name: String,
