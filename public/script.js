@@ -118,6 +118,10 @@ function spin() {
     });
 }
 
+function openFight() {
+  window.location.href = "/game/fight.html";
+}
+
 // ================= ADS =================
 function watchAd() {
   setTimeout(async () => {
