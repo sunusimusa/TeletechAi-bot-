@@ -3,8 +3,6 @@ const express = require("express");
 const mongoose = require("mongoose");
 const axios = require("axios");
 
-import { sendJetton } from "./ton.js";
-import User from "./models/User.js";
 const TOKEN_CONTRACT = process.env.TOKEN_CONTRACT;
 const TOKEN_DECIMALS = Number(process.env.TOKEN_DECIMALS);
 const TOKEN_RATE = Number(process.env.TOKEN_RATE);
