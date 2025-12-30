@@ -268,3 +268,7 @@ Withdraw • NFT
 PHASE 4 🔜
 Airdrop • Mobile App`);
 }
+
+function openWhitepaper() {
+  window.open("/whitepaper.html", "_blank");
+}
