@@ -29,10 +29,7 @@ const SPIN_REWARDS = [
 { label: "20 Coins", reward: 20 },
 { label: "50 Coins", reward: 50 },
 { label: "Energy +20", energy: 20 },
-{ label: "Nothing", reward: 0 }
-];
-
-const mongoose = require("mongoose");
+{ label: "Nothing", reward: 
 
 const teamSchema = new mongoose.Schema({
   name: String,
@@ -44,6 +41,44 @@ const teamSchema = new mongoose.Schema({
 
 module.exports = mongoose.model("Team", teamSchema);
 
+const mongoose = require("mongoose");
+
+const userSchema = new mongoose.Schema({
+  telegramId: { type: String, required: true },
+
+  balance: { type: Number, default: 0 },
+  token: { type: Number, default: 0 },
+  level: { type: Number, default: 1 },
+
+  energy: { type: Number, default: 100 },
+  lastEnergyUpdate: { type: Number, default: Date.now },
+
+  lastDaily: { type: Number, default: 0 },
+  lastBox: { type: Number, default: 0 },
+
+  // 🎰 Spin
+  spinCount: { type: Number, default: 1 },
+  lastSpin: { type: Number, default: 0 },
+
+  // 👥 Referral
+  refBy: { type: String, default: null },
+  referrals: { type: Number, default: 0 },
+
+  // 🎥 Ads / Tasks
+  adsSpinCount: { type: Number, default: 0 },
+  lastAdsSpin: { type: Number, default: 0 },
+
+  tasks: {
+    youtube: { type: Boolean, default: false },
+    channel: { type: Boolean, default: false },
+    group: { type: Boolean, default: false }
+  },
+
+  teamId: { type: String, default: null }
+
+}, { timestamps: true });
+
+module.exports = mongoose.model("User", userSchema);
 // ================= DATABASE =================
 mongoose.connect(process.env.MONGODB_URI)
 .then(() => console.log("✅ MongoDB Connected"))
