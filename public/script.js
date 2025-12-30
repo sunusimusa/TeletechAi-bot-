@@ -249,19 +249,25 @@ function startEnergyRegen() {
 function openMenu() {
   document.getElementById("sideMenu").style.left = "0";
 }
+
 function closeMenu() {
   document.getElementById("sideMenu").style.left = "-260px";
 }
 
+// ================== WITHDRAW ==================
 function withdraw() {
   const wallet = document.getElementById("wallet").value;
+
+  if (!wallet) {
+    return alert("❌ Shigar da wallet address");
+  }
 
   fetch("/withdraw", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       userId: USER_ID,
-      wallet
+      wallet: wallet
     })
   })
   .then(res => res.json())
@@ -271,6 +277,7 @@ function withdraw() {
   });
 }
 
+// ================== ROADMAP ==================
 function openRoadmap() {
   alert(`🚀 TELE TECH AI ROADMAP
 
@@ -287,6 +294,7 @@ PHASE 4 🔜
 Airdrop • Mobile App`);
 }
 
+// ================== WHITEPAPER ==================
 function openWhitepaper() {
   window.open("/whitepaper.html", "_blank");
 }
