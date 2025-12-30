@@ -154,10 +154,15 @@ function openTask(type) {
 }
 
 // ================= COPY INVITE =================
-function copyInvite() {
-  const link = `https://t.me/TeletechAi_bot?start=${USER_ID}`;
-  navigator.clipboard.writeText(link);
-  alert("✅ Invite link copied!");
+function setReferralLink() {
+  const input = document.getElementById("refLink");
+
+  if (!input) return;
+
+  const userId = USER_ID;
+  const link = `https://t.me/TeletechAi_bot?start=${userId}`;
+
+  input.value = link;
 }
 setReferralLink();
 
