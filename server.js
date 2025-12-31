@@ -18,7 +18,8 @@ mongoose.connect(process.env.MONGODB_URI)
   .catch(err => console.error("❌ Mongo Error:", err));
 
 // ---------------- TELEGRAM BOT ----------------
-const bot = new TelegramBot(BOT_TOKEN, { polling: true });
+const TelegramBot = require("node-telegram-bot-api");
+const bot = new TelegramBot(process.env.BOT_TOKEN, { polling: true });
 
 bot.on("message", async (msg) => {
   const chatId = msg.chat.id;
@@ -27,31 +28,37 @@ bot.on("message", async (msg) => {
   if (text.startsWith("/start")) {
     const param = text.split(" ")[1];
 
+    // ================= FIGHT MODE =================
     if (param === "fight") {
       return bot.sendMessage(chatId, "⚔️ Fight Arena", {
         reply_markup: {
-          inline_keyboard: [[
-            {
-              text: "🔥 Open Fight",
-              web_app: {
-                url: "https://YOUR-DOMAIN/game/fight.html"
+          inline_keyboard: [
+            [
+              {
+                text: "🔥 Open Fight",
+                web_app: {
+                  url: "https://teletechai-bot.onrender.com/game/fight.html"
+                }
               }
-            }
-          ]]
+            ]
+          ]
         }
       });
     }
 
+    // ================= NORMAL START =================
     return bot.sendMessage(chatId, "🚀 Welcome to TeleTech AI", {
       reply_markup: {
-        inline_keyboard: [[
-          {
-            text: "🎮 Open Game",
-            web_app: {
-              url: "https://YOUR-DOMAIN"
+        inline_keyboard: [
+          [
+            {
+              text: "🚀 Open App",
+              web_app: {
+                url: "https://teletechai-bot.onrender.com"
+              }
             }
-          }
-        ]]
+          ]
+        ]
       }
     });
   }
