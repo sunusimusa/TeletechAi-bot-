@@ -42,3 +42,46 @@ button {
   border: none;
   border-radius: 10px;
 }
+
+body {
+  background: linear-gradient(#0f172a, #020617);
+  color: white;
+  text-align: center;
+  font-family: sans-serif;
+}
+
+.enemy img {
+  width: 150px;
+  animation: float 2s ease-in-out infinite;
+}
+
+@keyframes float {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0); }
+}
+
+.hp-bar {
+  width: 80%;
+  height: 15px;
+  background: #333;
+  margin: 10px auto;
+  border-radius: 10px;
+}
+
+#enemyHp, #playerHp {
+  height: 100%;
+  background: lime;
+  width: 100%;
+  border-radius: 10px;
+  transition: width 0.3s;
+}
+
+button {
+  margin-top: 20px;
+  padding: 15px 40px;
+  font-size: 18px;
+  border-radius: 10px;
+  background: #22c55e;
+  border: none;
+}
