@@ -11,7 +11,16 @@ app.use(express.static("public"));
 const PORT = process.env.PORT || 3000;
 
 // ===== TELEGRAM BOT =====
-const bot = new TelegramBot(process.env.BOT_TOKEN, { polling: true });
+const TelegramBot = require("node-telegram-bot-api");
+
+const bot = new TelegramBot(process.env.BOT_TOKEN);
+
+bot.setWebHook(`https://teletechai-bot.onrender.com/bot${process.env.BOT_TOKEN}`);
+
+app.post(`/bot${process.env.BOT_TOKEN}`, (req, res) => {
+  bot.processUpdate(req.body);
+  res.sendStatus(200);
+});
 
 // ===== BOT HANDLER =====
 bot.on("message", async (msg) => {
