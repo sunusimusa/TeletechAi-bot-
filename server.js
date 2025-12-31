@@ -19,4 +19,8 @@ bot.on("message", msg => {
   bot.sendMessage(msg.chat.id, "Bot working ✅");
 });
 
+app.get("/", (req, res) => {
+  res.sendFile(__dirname + "/public/index.html");
+});
+
 app.listen(3000, () => console.log("Server running"));
