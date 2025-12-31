@@ -46,6 +46,32 @@ function regenEnergy(user) {
   }
 }
 
+// ================= VERIFY TELEGRAM DATA =================
+function verifyTelegram(initData) {
+  const params = new URLSearchParams(initData);
+  const hash = params.get("hash");
+  params.delete("hash");
+
+  const dataCheckString = [...params.entries()]
+    .sort()
+    .map(([k, v]) => `${k}=${v}`)
+    .join("\n");
+
+  const secret = crypto
+    .createHmac("sha256", "WebAppData")
+    .update(process.env.BOT_TOKEN)
+    .digest();
+
+  const checkHash = crypto
+    .createHmac("sha256", secret)
+    .update(dataCheckString)
+    .digest("hex");
+
+  if (checkHash !== hash) return null;
+
+  return Object.fromEntries(params);
+}
+
 // ================== INIT USER ==================
 app.post("/user", async (req, res) => {
   const { userId } = req.body;
