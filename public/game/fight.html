@@ -1,121 +1,80 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Fight Arena</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+  <link rel="stylesheet" href="style.css">
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
-  <style>
-    body {
-      background: #0f172a;
-      color: white;
-      text-align: center;
-      font-family: sans-serif;
-    }
-
-    .bar {
-      width: 90%;
-      height: 25px;
-      background: #333;
-      border-radius: 20px;
-      margin: 10px auto;
-      overflow: hidden;
-    }
-
-    .hp {
-      height: 100%;
-      background: limegreen;
-      width: 100%;
-      transition: 0.3s;
-    }
-
-    button {
-      margin-top: 20px;
-      padding: 15px 40px;
-      font-size: 18px;
-      background: #22c55e;
-      border: none;
-      border-radius: 12px;
-      cursor: pointer;
-    }
-  </style>
 </head>
+
 <body>
 
 <h2>⚔️ Fight Arena</h2>
 
-<p>Enemy HP</p>
-<div class="bar"><div id="enemyHp" class="hp"></div></div>
+<div class="arena">
+  <div class="fighter">
+    <img id="enemy" src="images/enemy.png">
+    <div class="bar"><div id="enemyHP" class="hp"></div></div>
+  </div>
 
-<p>Your HP</p>
-<div class="bar"><div id="myHp" class="hp"></div></div>
+  <div class="fighter">
+    <img id="hero" src="images/hero.png">
+    <div class="bar"><div id="myHP" class="hp"></div></div>
+  </div>
+</div>
 
 <button onclick="attack()">🔥 ATTACK</button>
 
 <script>
-const tg = window.Telegram.WebApp;
-tg.expand();
-
 let enemyHP = 100;
 let myHP = 100;
-let canAttack = true;
+let lock = false;
 
-const enemyBar = document.getElementById("enemyHp");
-const myBar = document.getElementById("myHp");
-
-function updateBars() {
-  enemyBar.style.width = enemyHP + "%";
-  myBar.style.width = myHP + "%";
+function update() {
+  document.getElementById("enemyHP").style.width = enemyHP + "%";
+  document.getElementById("myHP").style.width = myHP + "%";
 }
 
-async function attack() {
-  if (!canAttack) return;
-  canAttack = false;
+function attack() {
+  if (lock) return;
+  lock = true;
 
   enemyHP -= Math.floor(Math.random() * 15) + 5;
   if (enemyHP < 0) enemyHP = 0;
 
-  updateBars();
+  document.getElementById("enemy").classList.add("hit");
+  update();
 
-  if (enemyHP <= 0) {
-    alert("🎉 You Win!");
-    await reward();
-    resetFight();
-    return;
-  }
-
-  // Enemy attack after delay
   setTimeout(() => {
-    myHP -= Math.floor(Math.random() * 12) + 4;
-    if (myHP < 0) myHP = 0;
-    updateBars();
+    document.getElementById("enemy").classList.remove("hit");
 
-    if (myHP <= 0) {
-      alert("💀 You Lost!");
-      resetFight();
+    if (enemyHP <= 0) {
+      alert("🎉 YOU WIN!");
+      reset();
+      return;
     }
 
-    canAttack = true;
-  }, 700);
+    myHP -= Math.floor(Math.random() * 10) + 5;
+    if (myHP < 0) myHP = 0;
+
+    document.getElementById("hero").classList.add("hit");
+    update();
+
+    setTimeout(() => {
+      document.getElementById("hero").classList.remove("hit");
+      if (myHP <= 0) alert("💀 YOU LOST!");
+      lock = false;
+    }, 300);
+
+  }, 300);
 }
 
-function resetFight() {
+function reset() {
   enemyHP = 100;
   myHP = 100;
-  updateBars();
-  canAttack = true;
-}
-
-async function reward() {
-  await fetch("/game-win", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      initData: tg.initData
-    })
-  });
+  update();
+  lock = false;
 }
 </script>
 
