@@ -95,6 +95,28 @@ function reset() {
   update();
   lock = false;
 }
+<script>
+let enemyHP = 100;
+let playerHP = 100;
+
+function attack() {
+  enemyHP -= Math.floor(Math.random() * 20) + 5;
+  playerHP -= Math.floor(Math.random() * 10);
+
+  if (enemyHP < 0) enemyHP = 0;
+  if (playerHP < 0) playerHP = 0;
+
+  document.getElementById("enemyHp").style.width = enemyHP + "%";
+  document.getElementById("playerHp").style.width = playerHP + "%";
+
+  if (enemyHP <= 0) {
+    alert("🎉 You Win!");
+  }
+
+  if (playerHP <= 0) {
+    alert("💀 You Lose!");
+  }
+}
 </script>
 
 </body>
