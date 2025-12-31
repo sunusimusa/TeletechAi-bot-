@@ -2,7 +2,6 @@ require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const crypto = require("crypto");
-const TelegramBot = require("node-telegram-bot-api");
 
 const app = express();
 app.use(express.json());
@@ -65,11 +64,6 @@ function verifyTelegram(initData) {
 }
 
 // ================= TELEGRAM BOT =================
-const bot = new TelegramBot(BOT_TOKEN, { polling: true });
-
-bot.on("message", async (msg) => {
-  const chatId = msg.chat.id;
-  const text = msg.text || "";
 
   if (text.startsWith("/start")) {
     const ref = text.split(" ")[1];
