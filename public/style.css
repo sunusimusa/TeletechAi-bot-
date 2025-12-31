@@ -1,87 +1,52 @@
 body {
-  background: linear-gradient(180deg, #0f172a, #020617);
+  background: #0b132b;
   color: white;
   text-align: center;
   font-family: sans-serif;
 }
 
 .arena {
-  display: flex;
-  justify-content: space-around;
-  margin-top: 30px;
+  margin-top: 20px;
 }
 
-.fighter img {
-  width: 120px;
-  transition: 0.2s;
-}
-
-.hit {
-  transform: scale(1.1) rotate(-5deg);
+img {
+  width: 200px;
+  margin: 10px;
 }
 
 .bar {
-  width: 120px;
-  height: 14px;
-  background: #333;
-  border-radius: 10px;
-  margin-top: 5px;
-}
-
-.hp {
-  height: 100%;
-  background: lime;
-  border-radius: 10px;
-}
-
-button {
-  margin-top: 40px;
-  padding: 15px 40px;
-  font-size: 18px;
-  background: #22c55e;
-  border: none;
-  border-radius: 10px;
-}
-
-body {
-  background: linear-gradient(#0f172a, #020617);
-  color: white;
-  text-align: center;
-  font-family: sans-serif;
-}
-
-.enemy img {
-  width: 150px;
-  animation: float 2s ease-in-out infinite;
-}
-
-@keyframes float {
-  0% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
-  100% { transform: translateY(0); }
-}
-
-.hp-bar {
   width: 80%;
-  height: 15px;
+  height: 18px;
   background: #333;
   margin: 10px auto;
   border-radius: 10px;
 }
 
-#enemyHp, #playerHp {
+.hp {
   height: 100%;
-  background: lime;
   width: 100%;
+  background: #00ff88;
   border-radius: 10px;
   transition: width 0.3s;
 }
 
 button {
   margin-top: 20px;
-  padding: 15px 40px;
+  padding: 15px 30px;
+  background: #00c853;
+  border: none;
+  color: white;
   font-size: 18px;
   border-radius: 10px;
-  background: #22c55e;
-  border: none;
+}
+
+.hit {
+  animation: shake 0.2s;
+}
+
+@keyframes shake {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  50% { transform: translateX(5px); }
+  100% { transform: translateX(0); }
 }
