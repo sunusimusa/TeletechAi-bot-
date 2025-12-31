@@ -2,33 +2,29 @@ require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const crypto = require("crypto");
-const TelegramBot = require("node-telegram-bot-api");
 
 const app = express();
 app.use(express.json());
 app.use(express.static("public"));
 
 const PORT = process.env.PORT || 3000;
-const BOT_TOKEN = process.env.BOT_TOKEN;
 
-// ================== TELEGRAM BOT ==================
-const bot = new TelegramBot(BOT_TOKEN, { polling: true });
-
-// ================== DATABASE ==================
+// ================= DATABASE =================
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log("✅ MongoDB Connected"))
   .catch(err => console.error("❌ Mongo Error:", err));
 
-// ================== MODEL ==================
-const User = mongoose.model("User", new mongoose.Schema({
-  telegramId: String,
+// ================= USER MODEL =================
+const userSchema = new mongoose.Schema({
+  telegramId: { type: String, unique: true },
   balance: { type: Number, default: 0 },
   energy: { type: Number, default: 100 },
   level: { type: Number, default: 1 },
-  lastEnergyUpdate: { type: Number, default: Date.now }
-}));
+});
 
-// ================== VERIFY TELEGRAM ==================
+const User = mongoose.model("User", userSchema);
+
+// ================= VERIFY TELEGRAM =================
 function verifyTelegram(initData) {
   const params = new URLSearchParams(initData);
   const hash = params.get("hash");
@@ -41,7 +37,7 @@ function verifyTelegram(initData) {
 
   const secret = crypto
     .createHmac("sha256", "WebAppData")
-    .update(BOT_TOKEN)
+    .update(process.env.BOT_TOKEN)
     .digest();
 
   const checkHash = crypto
@@ -54,56 +50,20 @@ function verifyTelegram(initData) {
   return Object.fromEntries(params);
 }
 
-// ================== BOT COMMAND ==================
-bot.on("message", async (msg) => {
-  const chatId = msg.chat.id;
-  const text = msg.text || "";
-
-  if (text.startsWith("/start")) {
-    const param = text.split(" ")[1];
-
-    if (param === "fight") {
-      return bot.sendMessage(chatId, "⚔️ Fight Arena", {
-        reply_markup: {
-          inline_keyboard: [[
-            {
-              text: "🔥 Open Fight",
-              web_app: {
-                url: "https://teletechai-bot.onrender.com/game/fight.html"
-              }
-            }
-          ]]
-        }
-      });
-    }
-
-    return bot.sendMessage(chatId, "🚀 Welcome to TeleTech AI", {
-      reply_markup: {
-        inline_keyboard: [[
-          {
-            text: "Open App",
-            web_app: {
-              url: "https://teletechai-bot.onrender.com"
-            }
-          }
-        ]]
-      }
-    });
-  }
-});
-
-// ================== INIT USER ==================
+// ================= INIT USER =================
 app.post("/user", async (req, res) => {
   const { initData } = req.body;
   if (!initData) return res.json({ error: "NO_INIT_DATA" });
 
   const data = verifyTelegram(initData);
-  if (!data) return res.json({ error: "INVALID_USER" });
+  if (!data || !data.user) return res.json({ error: "INVALID_USER" });
 
-  const telegramId = data.user.id;
+  let user = await User.findOne({ telegramId: data.user.id });
 
-  let user = await User.findOne({ telegramId });
-  if (!user) user = await User.create({ telegramId });
+  if (!user) {
+    user = new User({ telegramId: data.user.id });
+    await user.save();
+  }
 
   res.json({
     id: user.telegramId,
@@ -113,24 +73,23 @@ app.post("/user", async (req, res) => {
   });
 });
 
-// ================== GAME WIN ==================
+// ================= GAME WIN =================
 app.post("/game-win", async (req, res) => {
   const { initData, reward } = req.body;
-  if (!initData) return res.json({ error: "NO_INIT_DATA" });
 
   const data = verifyTelegram(initData);
-  if (!data) return res.json({ error: "INVALID_USER" });
+  if (!data || !data.user) return res.json({ error: "INVALID_USER" });
 
-  const user = await User.findOne({ telegramId: data.user.id });
-  if (!user) return res.json({ error: "NO_USER" });
+  let user = await User.findOne({ telegramId: data.user.id });
+  if (!user) user = new User({ telegramId: data.user.id });
 
-  user.balance += reward || 1;
+  user.balance += reward || 10;
   await user.save();
 
   res.json({ success: true, balance: user.balance });
 });
 
-// ================== START SERVER ==================
+// ================= START SERVER =================
 app.listen(PORT, () => {
-  console.log("🚀 Server running on", PORT);
+  console.log("🚀 Server running on port", PORT);
 });
