@@ -4,66 +4,95 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Fight Arena</title>
-  <link rel="stylesheet" href="style.css">
+
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <style>
+    body {
+      background: #0f172a;
+      color: white;
+      text-align: center;
+      font-family: Arial;
+      padding: 20px;
+    }
+
+    .arena {
+      margin-top: 40px;
+    }
+
+    .bar {
+      width: 80%;
+      height: 20px;
+      background: #333;
+      margin: 10px auto;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .hp {
+      height: 100%;
+      width: 100%;
+      background: #22c55e;
+      transition: width 0.3s;
+    }
+
+    img {
+      width: 120px;
+      margin: 10px;
+    }
+
+    button {
+      margin-top: 25px;
+      padding: 15px 40px;
+      font-size: 18px;
+      background: #22c55e;
+      border: none;
+      border-radius: 10px;
+      color: black;
+    }
+
+    .hit {
+      animation: shake 0.2s;
+    }
+
+    @keyframes shake {
+      0% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      50% { transform: translateX(5px); }
+      75% { transform: translateX(-5px); }
+      100% { transform: translateX(0); }
+    }
+  </style>
 </head>
 
 <body>
 
 <h2>⚔️ Fight Arena</h2>
 
-  <div class="arena">
-  <h2>⚔️ Fight Arena</h2>
-
-  <div class="enemy">
-    <img src="/images/enemy.png" id="enemyImg" />
-    <div class="hp-bar">
-      <div id="enemyHp"></div>
-    </div>
-  </div>
-
-  <div class="player">
-    <div class="hp-bar">
-      <div id="playerHp"></div>
-    </div>
-  </div>
-
-  <button onclick="attack()">🔥 ATTACK</button>
-  </div>
-
 <div class="arena">
-  <div class="fighter">
-    <img id="enemy" src="images/enemy.png">
-    <div class="bar"><div id="enemyHP" class="hp"></div></div>
-  </div>
+  <img id="enemy" src="/images/enemy.png">
+  <div class="bar"><div id="enemyHP" class="hp"></div></div>
 
-  <div class="fighter">
-    <img id="hero" src="images/hero.png">
-    <div class="bar"><div id="myHP" class="hp"></div></div>
-  </div>
+  <img id="player" src="/images/hero.png">
+  <div class="bar"><div id="playerHP" class="hp"></div></div>
 </div>
 
 <button onclick="attack()">🔥 ATTACK</button>
 
 <script>
 let enemyHP = 100;
-let myHP = 100;
-let lock = false;
-
-function update() {
-  document.getElementById("enemyHP").style.width = enemyHP + "%";
-  document.getElementById("myHP").style.width = myHP + "%";
-}
+let playerHP = 100;
+let locked = false;
 
 function attack() {
-  if (lock) return;
-  lock = true;
+  if (locked) return;
+  locked = true;
 
-  enemyHP -= Math.floor(Math.random() * 15) + 5;
+  enemyHP -= Math.floor(Math.random() * 20) + 5;
   if (enemyHP < 0) enemyHP = 0;
 
   document.getElementById("enemy").classList.add("hit");
-  update();
+  updateBars();
 
   setTimeout(() => {
     document.getElementById("enemy").classList.remove("hit");
@@ -74,48 +103,31 @@ function attack() {
       return;
     }
 
-    myHP -= Math.floor(Math.random() * 10) + 5;
-    if (myHP < 0) myHP = 0;
+    playerHP -= Math.floor(Math.random() * 15) + 5;
+    if (playerHP < 0) playerHP = 0;
 
-    document.getElementById("hero").classList.add("hit");
-    update();
+    document.getElementById("player").classList.add("hit");
+    updateBars();
 
     setTimeout(() => {
-      document.getElementById("hero").classList.remove("hit");
-      if (myHP <= 0) alert("💀 YOU LOST!");
-      lock = false;
+      document.getElementById("player").classList.remove("hit");
+      if (playerHP <= 0) alert("💀 YOU LOSE!");
+      locked = false;
     }, 300);
 
   }, 300);
 }
 
+function updateBars() {
+  document.getElementById("enemyHP").style.width = enemyHP + "%";
+  document.getElementById("playerHP").style.width = playerHP + "%";
+}
+
 function reset() {
   enemyHP = 100;
-  myHP = 100;
-  update();
-  lock = false;
-}
-<script>
-let enemyHP = 100;
-let playerHP = 100;
-
-function attack() {
-  enemyHP -= Math.floor(Math.random() * 20) + 5;
-  playerHP -= Math.floor(Math.random() * 10);
-
-  if (enemyHP < 0) enemyHP = 0;
-  if (playerHP < 0) playerHP = 0;
-
-  document.getElementById("enemyHp").style.width = enemyHP + "%";
-  document.getElementById("playerHp").style.width = playerHP + "%";
-
-  if (enemyHP <= 0) {
-    alert("🎉 You Win!");
-  }
-
-  if (playerHP <= 0) {
-    alert("💀 You Lose!");
-  }
+  playerHP = 100;
+  updateBars();
+  locked = false;
 }
 </script>
 
