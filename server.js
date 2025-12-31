@@ -23,4 +23,8 @@ app.get("/", (req, res) => {
   res.sendFile(__dirname + "/public/index.html");
 });
 
+web_app: {
+  url: "https://teletechai-bot.onrender.com/game/fight.html"
+}
+
 app.listen(3000, () => console.log("Server running"));
