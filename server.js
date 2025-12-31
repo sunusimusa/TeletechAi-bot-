@@ -19,23 +19,20 @@ mongoose.connect(process.env.MONGODB_URI)
 // ================= MODEL =================
 const userSchema = new mongoose.Schema({
   telegramId: { type: String, unique: true },
-
   balance: { type: Number, default: 0 },
   energy: { type: Number, default: 100 },
   level: { type: Number, default: 1 },
-
   lastEnergyUpdate: { type: Number, default: Date.now },
-
   referralBy: { type: String, default: null },
-  referrals: { type: Number, default: 0 },
-
-  createdAt: { type: Date, default: Date.now }
+  referrals: { type: Number, default: 0 }
 });
 
+const User = mongoose.model("User", userSchema);
+
+// ================= ENERGY =================
 function regenEnergy(user) {
   const now = Date.now();
   const diff = Math.floor((now - user.lastEnergyUpdate) / 5000);
-
   if (diff > 0) {
     user.energy = Math.min(100, user.energy + diff);
     user.lastEnergyUpdate = now;
@@ -75,30 +72,15 @@ bot.on("message", async (msg) => {
   const text = msg.text || "";
 
   if (text.startsWith("/start")) {
-    const param = text.split(" ")[1];
+    const ref = text.split(" ")[1];
 
-    if (param === "fight") {
-      return bot.sendMessage(chatId, "⚔️ Fight Arena", {
-        reply_markup: {
-          inline_keyboard: [[
-            {
-              text: "🔥 Open Fight",
-              web_app: {
-                url: "https://teletechai-bot.onrender.com/game/fight.html"
-              }
-            }
-          ]]
-        }
-      });
-    }
-
-    return bot.sendMessage(chatId, "Welcome to TeleTech AI 🚀", {
+    return bot.sendMessage(chatId, "🔥 Welcome to TeleTech AI", {
       reply_markup: {
         inline_keyboard: [[
           {
-            text: "🚀 Open App",
+            text: "⚔️ Open Fight",
             web_app: {
-              url: "https://teletechai-bot.onrender.com"
+              url: `https://teletechai-bot.onrender.com/game/fight.html?ref=${ref || ""}`
             }
           }
         ]]
@@ -107,28 +89,9 @@ bot.on("message", async (msg) => {
   }
 });
 
-// ================= GAME WIN =================
-app.post("/game-win", async (req, res) => {
-  const { initData } = req.body;
-  if (!initData) return res.json({ error: "NO_INIT_DATA" });
-
-  const data = verifyTelegram(initData);
-  if (!data) return res.json({ error: "INVALID_USER" });
-
-  const userId = data.user.id;
-
-  let user = await User.findOne({ telegramId: userId });
-  if (!user) user = await User.create({ telegramId: userId });
-
-  user.balance += 10;
-  await user.save();
-
-  res.json({ success: true, balance: user.balance });
-});
-
+// ================= INIT USER =================
 app.post("/user", async (req, res) => {
   const { initData, ref } = req.body;
-
   const data = verifyTelegram(initData);
   if (!data) return res.json({ error: "INVALID_USER" });
 
@@ -137,10 +100,7 @@ app.post("/user", async (req, res) => {
   let user = await User.findOne({ telegramId: userId });
 
   if (!user) {
-    user = new User({
-      telegramId: userId,
-      referralBy: ref || null
-    });
+    user = new User({ telegramId: userId, referralBy: ref || null });
 
     if (ref) {
       const refUser = await User.findOne({ telegramId: ref });
@@ -162,6 +122,7 @@ app.post("/user", async (req, res) => {
   });
 });
 
+// ================= TAP =================
 app.post("/tap", async (req, res) => {
   const { initData } = req.body;
   const data = verifyTelegram(initData);
@@ -173,8 +134,8 @@ app.post("/tap", async (req, res) => {
   regenEnergy(user);
   if (user.energy <= 0) return res.json({ error: "NO_ENERGY" });
 
-  user.energy -= 1;
-  user.balance += 1;
+  user.energy--;
+  user.balance++;
   user.level = Math.floor(user.balance / 50) + 1;
 
   await user.save();
@@ -186,6 +147,20 @@ app.post("/tap", async (req, res) => {
   });
 });
 
+// ================= GAME WIN =================
+app.post("/game-win", async (req, res) => {
+  const { initData } = req.body;
+  const data = verifyTelegram(initData);
+  if (!data) return res.json({ error: "INVALID_USER" });
+
+  const user = await User.findOne({ telegramId: data.user.id });
+  if (!user) return res.json({ error: "NO_USER" });
+
+  user.balance += 10;
+  await user.save();
+
+  res.json({ success: true, balance: user.balance });
+});
 
 // ================= START SERVER =================
 app.listen(PORT, () => {
