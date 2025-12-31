@@ -283,3 +283,8 @@ Airdrop • Mobile App`);
 function openWhitepaper() {
   window.open("/whitepaper.html", "_blank");
                               }
+async function main() {
+  await init();
+}
+
+main();
