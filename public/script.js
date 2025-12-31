@@ -48,7 +48,11 @@ async function init() {
   startEnergyRegen();
 }
 
-init();
+async function main() {
+  await init();
+}
+
+main();
 
 // ================= UI =================
 function updateUI() {
@@ -283,8 +287,3 @@ Airdrop • Mobile App`);
 function openWhitepaper() {
   window.open("/whitepaper.html", "_blank");
                               }
-async function main() {
-  await init();
-}
-
-main();
