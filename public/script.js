@@ -12,24 +12,33 @@ let regenInterval = null;
 // ================= INIT =================
 async function init() {
   const tgUser = tg.initDataUnsafe?.user;
-  if (!tgUser) return alert("Please open from Telegram");
+
+  if (!tgUser || !tgUser.id) {
+    alert("❌ Open this bot from Telegram");
+    return;
+  }
+
+  USER_ID = tgUser.id; // ✅ MUHIMMI
 
   const res = await fetch("/user", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      userId: tgUser.id,
+      userId: USER_ID,
       initData: tg.initDataUnsafe
     })
   });
 
   const data = await res.json();
-  if (data.error) return alert(data.error);
 
-  USER_ID = data.id || data.telegramId;
-  balance = data.balance;
-  energy = data.energy;
-  level = data.level;
+  if (data.error) {
+    alert(data.error);
+    return;
+  }
+
+  balance = data.balance ?? 0;
+  energy = data.energy ?? 0;
+  level = data.level ?? 1;
 
   updateUI();
   setReferralLink();
