@@ -134,7 +134,9 @@ function spin() {
 // ======= FIGHT GAME =======
 
 function openFight() {
-  Telegram.WebApp.openLink("/game/fight.html");
+  Telegram.WebApp.openLink(
+    "https://t.me/TeletechAi_bot?startapp=fight"
+  );
 }
 
 async function attack() {
