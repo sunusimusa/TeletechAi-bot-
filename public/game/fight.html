@@ -1,12 +1,55 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
   <title>Fight Arena</title>
-  <script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      background: #0f172a;
+      color: white;
+      font-family: sans-serif;
+      text-align: center;
+      padding: 30px;
+    }
+
+    button {
+      padding: 15px 25px;
+      font-size: 18px;
+      margin-top: 20px;
+      background: #22c55e;
+      border: none;
+      border-radius: 10px;
+      color: #000;
+    }
+  </style>
 </head>
 <body>
 
-<script src="fight.js"></script>
+  <h1>⚔️ Fight Arena</h1>
+  <p>Beat enemy to earn coins</p>
+
+  <button onclick="fight()">🔥 Attack</button>
+
+  <script>
+    const USER_ID = window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
+
+    function fight() {
+      fetch("/game-win", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: USER_ID,
+          reward: 20
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.error) return alert(data.error);
+        alert("🏆 You won 20 coins!");
+      });
+    }
+  </script>
 
 </body>
 </html>
