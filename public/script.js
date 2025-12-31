@@ -134,7 +134,7 @@ function spin() {
 // ======= FIGHT GAME =======
 
 function openFight() {
-  window.location.href = "/game/fight.html";
+  Telegram.WebApp.openLink("/game/fight.html");
 }
 
 async function attack() {
