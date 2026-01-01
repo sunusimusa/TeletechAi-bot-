@@ -2,6 +2,7 @@ import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
+import User from "./models/User.js";
 
 dotenv.config();
 
@@ -10,36 +11,12 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static("public"));
 
-// ================= DATABASE =================
+// ================= DB =================
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("✅ MongoDB Connected"))
   .catch(err => console.error("❌ Mongo Error:", err));
 
-// ================= USER MODEL =================
-const UserSchema = new mongoose.Schema({
-  telegramId: { type: String, unique: true },
-
-  balance: { type: Number, default: 0 },
-  energy: { type: Number, default: 100 },
-  freeTries: { type: Number, default: 3 },
-  tokens: { type: Number, default: 0 },
-
-  lastEnergy: { type: Number, default: Date.now },
-  lastDaily: { type: Number, default: 0 },
-
-  withdrawals: [
-    {
-      amount: Number,
-      wallet: String,
-      status: { type: String, default: "pending" },
-      date: { type: Date, default: Date.now }
-    }
-  ]
-});
-
-const User = mongoose.model("User", UserSchema);
-
-// ================= ENERGY SYSTEM =================
+// ================= ENERGY FUNCTION =================
 function regenEnergy(user) {
   const now = Date.now();
   const diff = Math.floor((now - user.lastEnergy) / 300000); // 5 min
@@ -50,7 +27,7 @@ function regenEnergy(user) {
   }
 }
 
-// ================= GET / CREATE USER =================
+// ================= CREATE / LOAD USER =================
 app.post("/api/user", async (req, res) => {
   const { telegramId } = req.body;
   if (!telegramId) return res.json({ error: "NO_USER" });
@@ -97,13 +74,18 @@ app.post("/api/convert", async (req, res) => {
   const user = await User.findOne({ telegramId });
 
   if (!user) return res.json({ error: "USER_NOT_FOUND" });
-  if (user.balance < 10000) return res.json({ error: "NOT_ENOUGH_POINTS" });
+  if (user.balance < 10000)
+    return res.json({ error: "NOT_ENOUGH_POINTS" });
 
   user.balance -= 10000;
   user.tokens += 1;
+
   await user.save();
 
-  res.json({ tokens: user.tokens, balance: user.balance });
+  res.json({
+    tokens: user.tokens,
+    balance: user.balance
+  });
 });
 
 // ================= DAILY BONUS =================
@@ -131,7 +113,7 @@ app.post("/api/daily", async (req, res) => {
   });
 });
 
-// ================= START SERVER =================
+// ================= START =================
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log("🚀 Server running on port", PORT);
