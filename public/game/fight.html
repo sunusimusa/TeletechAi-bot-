@@ -1,156 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
   <title>Fight Arena</title>
-
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      background: linear-gradient(180deg, #0b1220, #0f172a);
-      color: white;
-      font-family: Arial, sans-serif;
-      text-align: center;
-    }
-
-    h1 {
-      margin-top: 20px;
-    }
-
-    .arena {
-      margin-top: 30px;
-    }
-
-    .fighter {
-      margin: 20px auto;
-    }
-
-    .fighter img {
-      width: 160px;
-      max-width: 80%;
-      transition: transform 0.2s;
-    }
-
-    .hit {
-      transform: scale(1.1) rotate(2deg);
-    }
-
-    .bar {
-      width: 80%;
-      height: 16px;
-      background: #333;
-      margin: 10px auto;
-      border-radius: 10px;
-      overflow: hidden;
-    }
-
-    .hp {
-      height: 100%;
-      background: #22c55e;
-      width: 100%;
-      transition: width 0.3s;
-    }
-
-    button {
-      margin-top: 20px;
-      padding: 15px 40px;
-      font-size: 18px;
-      background: #22c55e;
-      color: black;
-      border: none;
-      border-radius: 12px;
-      cursor: pointer;
-    }
-
-    button:active {
-      transform: scale(0.95);
-    }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-  <h1>⚔️ Fight Arena</h1>
+<h2>⚔️ Fight Arena</h2>
 
-  <div class="arena">
+<div class="arena">
 
-    <!-- ENEMY -->
-    <div class="fighter">
-      <img id="enemy" src="/images/enemy.png" />
-      <div class="bar"><div id="enemyHP" class="hp"></div></div>
-    </div>
+  <img src="/images/enemy.png" class="fighter" id="enemyImg">
+  <div class="bar"><div id="enemyHP" class="hp"></div></div>
 
-    <!-- PLAYER -->
-    <div class="fighter">
-      <img id="hero" src="/images/hero.png" />
-      <div class="bar"><div id="playerHP" class="hp"></div></div>
-    </div>
+  <img src="/images/hero.png" class="fighter" id="playerImg">
+  <div class="bar"><div id="playerHP" class="hp"></div></div>
 
-    <button onclick="attack()">🔥 ATTACK</button>
-  </div>
+</div>
 
-  <script>
-    let enemyHP = 100;
-    let playerHP = 100;
-    let busy = false;
+<button onclick="attack()">🔥 ATTACK</button>
 
-    function updateBars() {
-      document.getElementById("enemyHP").style.width = enemyHP + "%";
-      document.getElementById("playerHP").style.width = playerHP + "%";
-    }
-
-    function attack() {
-      if (busy) return;
-      busy = true;
-
-      // Enemy takes damage
-      enemyHP -= Math.floor(Math.random() * 15) + 5;
-      if (enemyHP < 0) enemyHP = 0;
-
-      document.getElementById("enemy").classList.add("hit");
-      updateBars();
-
-      setTimeout(() => {
-        document.getElementById("enemy").classList.remove("hit");
-
-        if (enemyHP <= 0) {
-          alert("🎉 YOU WIN!");
-          resetGame();
-          return;
-        }
-
-        // Player takes damage
-        playerHP -= Math.floor(Math.random() * 10) + 5;
-        if (playerHP < 0) playerHP = 0;
-
-        document.getElementById("hero").classList.add("hit");
-        updateBars();
-
-        setTimeout(() => {
-          document.getElementById("hero").classList.remove("hit");
-
-          if (playerHP <= 0) {
-            alert("💀 YOU LOSE!");
-            resetGame();
-          }
-
-          busy = false;
-        }, 300);
-
-      }, 300);
-    }
-
-    function resetGame() {
-      enemyHP = 100;
-      playerHP = 100;
-      updateBars();
-      busy = false;
-    }
-
-    updateBars();
-  </script>
-
+<script src="fight.js"></script>
 </body>
 </html>
