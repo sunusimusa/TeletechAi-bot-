@@ -104,3 +104,12 @@ body {
   50%  { transform: scale(1.2) rotate(5deg); }
   100% { transform: scale(1); }
 }
+
+.daily-btn {
+  margin-top: 15px;
+  padding: 12px 20px;
+  background: gold;
+  border: none;
+  border-radius: 10px;
+  font-weight: bold;
+}
