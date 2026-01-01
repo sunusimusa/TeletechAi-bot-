@@ -33,10 +33,19 @@
   </button>
   <p id="convertMsg" style="margin-top:10px; color:#ff4d4d;"></p>
 
+  
 <button class="daily-btn" 
     onclick="claimDaily()">
   🎁 Daily Bonus
 </button>
+
+  <div class="withdraw-box">
+  <h3>Withdraw Tokens</h3>
+  <input id="wallet" placeholder="Your Wallet Address" />
+  <input id="amount" type="number" placeholder="Amount" />
+  <button onclick="withdraw()">Withdraw</button>
+  <p id="withdrawMsg"></p>
+  </div>
   
   <p id="msg"></p>
 
