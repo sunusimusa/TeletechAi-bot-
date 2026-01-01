@@ -61,3 +61,40 @@ router.post("/open", async (req, res) => {
 });
 
 export default router;
+
+// DAILY BONUS
+router.post("/daily", async (req, res) => {
+  const { telegramId } = req.body;
+
+  let user = await User.findOne({ telegramId });
+  if (!user) user = await User.create({ telegramId });
+
+  const now = Date.now();
+  const ONE_DAY = 24 * 60 * 60 * 1000;
+
+  if (now - user.lastDaily < ONE_DAY) {
+    const remaining = ONE_DAY - (now - user.lastDaily);
+    const hours = Math.ceil(remaining / 3600000);
+
+    return res.json({
+      error: `Come back in ${hours} hours`
+    });
+  }
+
+  // ✅ GIVE BONUS
+  user.balance += 500;      // coins
+  user.energy += 20;        // energy
+  user.lastDaily = now;
+
+  await user.save();
+
+  res.json({
+    success: true,
+    reward: {
+      balance: 500,
+      energy: 20
+    },
+    balance: user.balance,
+    energy: user.energy
+  });
+});
