@@ -119,6 +119,43 @@ app.post("/api/convert", async (req, res) => {
   });
 });
 
+app.post("/api/withdraw", async (req, res) => {
+  const { telegramId, amount, wallet } = req.body;
+
+  if (!telegramId || !amount || !wallet) {
+    return res.json({ error: "Missing data" });
+  }
+
+  const user = await User.findOne({ telegramId });
+  if (!user) return res.json({ error: "User not found" });
+
+  if (amount < 1) {
+    return res.json({ error: "Minimum withdraw is 1 token" });
+  }
+
+  if (user.tokens < amount) {
+    return res.json({ error: "Not enough tokens" });
+  }
+
+  // subtract tokens
+  user.tokens -= amount;
+
+  // save withdraw request
+  user.withdrawals.push({
+    amount,
+    wallet,
+    status: "pending"
+  });
+
+  await user.save();
+
+  res.json({
+    success: true,
+    message: "Withdraw request submitted",
+    tokens: user.tokens
+  });
+});
+
 // ================= START SERVER =================
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
