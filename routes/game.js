@@ -3,24 +3,21 @@ import User from "../models/User.js";
 
 const router = express.Router();
 
+// ================= OPEN BOX =================
 router.post("/open", async (req, res) => {
   const { telegramId } = req.body;
 
   let user = await User.findOne({ telegramId });
-
-  if (!user) {
-    user = await User.create({ telegramId });
-  }
+  if (!user) user = await User.create({ telegramId });
 
   const now = Date.now();
-  const diff = Math.floor((now - user.lastEnergy) / 300000); // 5 mins
+  const diff = Math.floor((now - user.lastEnergy) / 300000); // 5 min
 
   if (diff > 0) {
     user.energy = Math.min(100, user.energy + diff * 5);
     user.lastEnergy = now;
   }
 
-  // ====== CHECK ENERGY ======
   if (user.freeTries > 0) {
     user.freeTries--;
   } else if (user.energy >= 10) {
@@ -36,7 +33,6 @@ router.post("/open", async (req, res) => {
     });
   }
 
-  // ====== REWARD ======
   const rewards = [
     { type: "coin", value: 100 },
     { type: "coin", value: 200 },
@@ -60,9 +56,8 @@ router.post("/open", async (req, res) => {
   });
 });
 
-export default router;
 
-// DAILY BONUS
+// ================= DAILY BONUS =================
 router.post("/daily", async (req, res) => {
   const { telegramId } = req.body;
 
@@ -81,9 +76,8 @@ router.post("/daily", async (req, res) => {
     });
   }
 
-  // ✅ GIVE BONUS
-  user.balance += 500;      // coins
-  user.energy += 20;        // energy
+  user.balance += 500;
+  user.energy += 20;
   user.lastDaily = now;
 
   await user.save();
@@ -98,3 +92,5 @@ router.post("/daily", async (req, res) => {
     energy: user.energy
   });
 });
+
+export default router;
