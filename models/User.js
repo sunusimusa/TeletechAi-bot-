@@ -1,12 +1,21 @@
-import mongoose from "mongoose";
+const userSchema = new mongoose.Schema({
+  telegramId: { type: String, unique: true },
 
-const UserSchema = new mongoose.Schema({
-  telegramId: String,
   balance: { type: Number, default: 0 },
+  tokens: { type: Number, default: 0 },
+
   energy: { type: Number, default: 100 },
   freeTries: { type: Number, default: 3 },
-  tokens: { type: Number, default: 0 },
-  lastEnergy: { type: Number, default: Date.now }
-});
 
-export default mongoose.model("User", UserSchema);
+  lastDaily: { type: Number, default: 0 },
+
+  // 🧾 withdraw history
+  withdrawals: [
+    {
+      amount: Number,
+      wallet: String,
+      status: { type: String, default: "pending" },
+      date: { type: Date, default: Date.now }
+    }
+  ]
+});
