@@ -22,17 +22,6 @@ app.listen(PORT, () => {
   console.log("🚀 Server running on port", PORT);
 });
 
-/* ================== USER MODEL ================== */
-const UserSchema = new mongoose.Schema({
-  telegramId: { type: String, unique: true },
-  balance: { type: Number, default: 0 },
-  energy: { type: Number, default: 100 },
-  freeTries: { type: Number, default: 3 },
-  tokens: { type: Number, default: 0 }
-});
-
-const User = mongoose.model("User", UserSchema);
-
 /* ================== API ================== */
 
 // Get or create user
