@@ -2,7 +2,6 @@ import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
-import gameRoutes from "./routes/game.js";
 
 dotenv.config();
 
@@ -11,37 +10,63 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static("public"));
 
+// ================= DATABASE =================
 mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log("✅ MongoDB connected"))
-  .catch(err => console.log(err));
+  .then(() => console.log("✅ MongoDB Connected"))
+  .catch(err => console.error("❌ Mongo Error:", err));
 
-app.use("/api", gameRoutes);
+// ================= USER MODEL =================
+const UserSchema = new mongoose.Schema({
+  telegramId: { type: String, unique: true },
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log("🚀 Server running on port", PORT);
+  balance: { type: Number, default: 0 },
+  energy: { type: Number, default: 100 },
+  freeTries: { type: Number, default: 3 },
+  tokens: { type: Number, default: 0 },
+
+  lastEnergy: { type: Number, default: Date.now }
 });
 
-/* ================== API ================== */
+const User = mongoose.model("User", UserSchema);
 
-// Get or create user
+// ================= ENERGY REGEN =================
+function regenEnergy(user) {
+  const now = Date.now();
+  const diff = Math.floor((now - user.lastEnergy) / 300000); // 5 min
+
+  if (diff > 0) {
+    user.energy = Math.min(100, user.energy + diff * 5);
+    user.lastEnergy = now;
+  }
+}
+
+// ================= CREATE / LOAD USER =================
 app.post("/api/user", async (req, res) => {
   const { telegramId } = req.body;
+  if (!telegramId) return res.json({ error: "NO_USER" });
 
   let user = await User.findOne({ telegramId });
-  if (!user) {
-    user = await User.create({ telegramId });
-  }
+  if (!user) user = await User.create({ telegramId });
 
-  res.json(user);
+  regenEnergy(user);
+  await user.save();
+
+  res.json({
+    balance: user.balance,
+    energy: user.energy,
+    freeTries: user.freeTries,
+    tokens: user.tokens
+  });
 });
 
-// Open box
+// ================= OPEN BOX =================
 app.post("/api/open", async (req, res) => {
   const { telegramId } = req.body;
   const user = await User.findOne({ telegramId });
 
-  if (!user) return res.json({ error: "User not found" });
+  if (!user) return res.json({ error: "USER_NOT_FOUND" });
+
+  regenEnergy(user);
 
   if (user.freeTries > 0) {
     user.freeTries--;
@@ -51,10 +76,18 @@ app.post("/api/open", async (req, res) => {
     return res.json({ error: "NO_ENERGY" });
   }
 
-  const rewards = [0, 100, 200];
+  const rewards = [
+    { type: "coin", value: 100 },
+    { type: "coin", value: 200 },
+    { type: "nothing", value: 0 }
+  ];
+
   const reward = rewards[Math.floor(Math.random() * rewards.length)];
 
-  user.balance += reward;
+  if (reward.type === "coin") {
+    user.balance += reward.value;
+  }
+
   await user.save();
 
   res.json({
@@ -65,17 +98,19 @@ app.post("/api/open", async (req, res) => {
   });
 });
 
-// Convert to token
+// ================= CONVERT TO TOKEN =================
 app.post("/api/convert", async (req, res) => {
   const { telegramId } = req.body;
   const user = await User.findOne({ telegramId });
 
-  if (user.balance < 10000) {
+  if (!user) return res.json({ error: "USER_NOT_FOUND" });
+
+  if (user.balance < 10000)
     return res.json({ error: "NOT_ENOUGH_POINTS" });
-  }
 
   user.balance -= 10000;
   user.tokens += 1;
+
   await user.save();
 
   res.json({
@@ -84,6 +119,8 @@ app.post("/api/convert", async (req, res) => {
   });
 });
 
-app.listen(3000, () => {
-  console.log("🚀 Server running on port 3000");
+// ================= START SERVER =================
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log("🚀 Server running on port", PORT);
 });
