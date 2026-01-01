@@ -152,18 +152,33 @@ document.addEventListener("DOMContentLoaded", () => {
   checkDaily();
 });
 
-function checkDaily() {
-  fetch("/api/daily", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ telegramId: TELEGRAM_ID })
-  })
-  .then(res => res.json())
-  .then(data => {
-    if (data.success) {
-      balance = data.balance;
-      energy = data.energy;
-      updateUI();
-    }
+router.post("/daily", async (req, res) => {
+  const { initData } = req.body;
+
+  const data = verifyTelegram(initData);
+  if (!data) return res.json({ error: "INVALID_USER" });
+
+  const telegramId = data.user.id;
+
+  let user = await User.findOne({ telegramId });
+  if (!user) user = await User.create({ telegramId });
+
+  const now = Date.now();
+  const ONE_DAY = 24 * 60 * 60 * 1000;
+
+  if (now - user.lastDaily < ONE_DAY) {
+    return res.json({ error: "COME_BACK_LATER" });
+  }
+
+  user.lastDaily = now;
+  user.balance += 500;
+  user.energy += 20;
+
+  await user.save();
+
+  res.json({
+    success: true,
+    balance: user.balance,
+    energy: user.energy
   });
-}
+});
