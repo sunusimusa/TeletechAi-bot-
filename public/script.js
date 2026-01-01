@@ -40,19 +40,21 @@ function openBox(box) {
 
   const reward = rewards[Math.floor(Math.random() * rewards.length)];
 
-  if (reward.type === "coin") {
-    balance += reward.value;
-    box.innerText = "💰 " + reward.value;
-  } else {
-    box.innerText = "😢";
-  }
-
   box.classList.add("opened");
+
+  setTimeout(() => {
+    if (reward.type === "coin") {
+      balance += reward.value;
+      box.innerText = "💰 " + reward.value;
+    } else {
+      box.innerText = "😢";
+    }
+
+    updateUI();
+  }, 300); // animation delay
+
   openedCount++;
 
-  updateUI();
-
-  // idan an bude duka
   if (openedCount === 6) {
     setTimeout(resetBoxes, 2000);
   }
