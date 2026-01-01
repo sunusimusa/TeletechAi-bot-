@@ -78,3 +78,14 @@ function convertToToken() {
 
   updateUI();
 }
+
+function saveGame() {
+  const data = {
+    balance,
+    energy,
+    freeTries,
+    tokens
+  };
+
+  localStorage.setItem("luckyBoxGame", JSON.stringify(data));
+}
