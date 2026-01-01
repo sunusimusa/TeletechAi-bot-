@@ -124,4 +124,25 @@ function loadGame() {
     freeTries = data.freeTries ?? 3;
     tokens = data.tokens ?? 0;
   }
-                                            }
+  async function claimDaily() {
+  const res = await fetch("/api/daily", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ telegramId: TELEGRAM_ID })
+  });
+
+  const data = await res.json();
+
+  if (data.error) {
+    document.getElementById("dailyMsg").innerText = "❌ " + data.error;
+    return;
+  }
+
+  balance = data.balance;
+  energy = data.energy;
+
+  document.getElementById("dailyMsg").innerText =
+    "🎉 Daily reward claimed! +500 coins +20 energy";
+
+  updateUI();
+  }                                          }
