@@ -1,88 +1,90 @@
+require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
+const path = require("path");
 
 const app = express();
 app.use(express.json());
 app.use(express.static("public"));
 
-const PORT = process.env.PORT || 3000;
+/* ================== DATABASE ================== */
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log("✅ MongoDB Connected"))
+  .catch(err => console.log(err));
 
-// ================= DATABASE =================
-mongoose.connect(process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/luckybox")
-  .then(() => console.log("✅ MongoDB connected"))
-  .catch(err => console.log("❌ Mongo error:", err));
-
-// ================= USER MODEL =================
-const userSchema = new mongoose.Schema({
-  userId: {
-    type: String,
-    required: true,
-    unique: true
-  },
-
-  balance: {
-    type: Number,
-    default: 0
-  },
-
-  energy: {
-    type: Number,
-    default: 100
-  },
-
-  lastEnergyUpdate: {
-    type: Number,
-    default: Date.now
-  }
+/* ================== USER MODEL ================== */
+const UserSchema = new mongoose.Schema({
+  telegramId: { type: String, unique: true },
+  balance: { type: Number, default: 0 },
+  energy: { type: Number, default: 100 },
+  freeTries: { type: Number, default: 3 },
+  tokens: { type: Number, default: 0 }
 });
-// ================= ENERGY SYSTEM =================
-function regenEnergy(user) {
-  const now = Date.now();
-  const diff = Math.floor((now - user.lastEnergyUpdate) / 10000); // 10s
 
-  if (diff > 0) {
-    user.energy = Math.min(100, user.energy + diff);
-    user.lastEnergyUpdate = now;
+const User = mongoose.model("User", UserSchema);
+
+/* ================== API ================== */
+
+// Get or create user
+app.post("/api/user", async (req, res) => {
+  const { telegramId } = req.body;
+
+  let user = await User.findOne({ telegramId });
+  if (!user) {
+    user = await User.create({ telegramId });
   }
-}
 
-// ================= OPEN BOX =================
-app.post("/api/open-box", async (req, res) => {
-  const { userId } = req.body;
-  if (!userId) return res.json({ error: "NO_USER" });
+  res.json(user);
+});
 
-  let user = await User.findOne({ userId });
-  if (!user) user = await User.create({ userId });
+// Open box
+app.post("/api/open", async (req, res) => {
+  const { telegramId } = req.body;
+  const user = await User.findOne({ telegramId });
 
-  regenEnergy(user);
+  if (!user) return res.json({ error: "User not found" });
 
-  if (user.energy < 10) {
+  if (user.freeTries > 0) {
+    user.freeTries--;
+  } else if (user.energy >= 10) {
+    user.energy -= 10;
+  } else {
     return res.json({ error: "NO_ENERGY" });
   }
 
-  user.energy -= 10;
-
-  const rewards = [
-    { type: "coins", value: 100 },
-    { type: "coins", value: 300 },
-    { type: "token", value: 1 },
-    { type: "nothing", value: 0 }
-  ];
-
+  const rewards = [0, 100, 200];
   const reward = rewards[Math.floor(Math.random() * rewards.length)];
 
-  if (reward.type === "coins") user.balance += reward.value;
-
+  user.balance += reward;
   await user.save();
 
   res.json({
-    reward: reward.type === "nothing" ? "Nothing 😢" : `${reward.value} ${reward.type}`,
+    reward,
+    balance: user.balance,
     energy: user.energy,
+    freeTries: user.freeTries
+  });
+});
+
+// Convert to token
+app.post("/api/convert", async (req, res) => {
+  const { telegramId } = req.body;
+  const user = await User.findOne({ telegramId });
+
+  if (user.balance < 10000) {
+    return res.json({ error: "NOT_ENOUGH_POINTS" });
+  }
+
+  user.balance -= 10000;
+  user.tokens += 1;
+  await user.save();
+
+  res.json({
+    tokens: user.tokens,
     balance: user.balance
   });
 });
 
-// ================= START SERVER =================
-app.listen(PORT, () => {
-  console.log("🚀 Server running on port", PORT);
+app.listen(3000, () => {
+  console.log("🚀 Server running on port 3000");
 });
