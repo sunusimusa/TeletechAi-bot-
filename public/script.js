@@ -52,3 +52,25 @@ function updateStats() {
   document.getElementById("balance").innerText = "Balance: " + balance;
   document.getElementById("free").innerText = "Free tries: " + freeTries;
 }
+
+let balance = 2650;
+let energy = 0;
+let freeTries = 0;
+let tokens = 0;
+
+function convertToToken() {
+  if (balance < 10000) {
+    document.getElementById("convertMsg").innerText =
+      "❌ Need 10,000 points to convert!";
+    return;
+  }
+
+  balance -= 10000;
+  tokens += 1;
+
+  document.getElementById("balance").innerText = "Balance: " + balance;
+  document.getElementById("tokens").innerText = "Tokens: " + tokens;
+
+  document.getElementById("convertMsg").innerText =
+    "✅ Converted to 1 TTECH!";
+}
