@@ -39,3 +39,45 @@ body {
   background: #2563eb;
   color: white;
 }
+
+body {
+  background: #0e1621;
+  color: white;
+  text-align: center;
+  font-family: sans-serif;
+}
+
+.arena {
+  margin-top: 20px;
+}
+
+.fighter {
+  width: 150px;
+  margin: 10px auto;
+}
+
+.bar {
+  width: 80%;
+  height: 18px;
+  background: #333;
+  border-radius: 10px;
+  margin: 8px auto;
+}
+
+.hp {
+  height: 100%;
+  background: #00ff6a;
+  border-radius: 10px;
+  width: 100%;
+  transition: 0.3s;
+}
+
+button {
+  margin-top: 20px;
+  padding: 14px 30px;
+  font-size: 18px;
+  background: #1db954;
+  color: white;
+  border: none;
+  border-radius: 10px;
+}
