@@ -1,20 +1,31 @@
 const express = require("express");
 const mongoose = require("mongoose");
-const app = express();
 
+const app = express();
 app.use(express.json());
 app.use(express.static("public"));
 
-mongoose.connect("mongodb://127.0.0.1:27017/luckybox");
+const PORT = process.env.PORT || 3000;
 
-const User = mongoose.model("User", {
+// ================= DATABASE =================
+mongoose.connect(process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/luckybox")
+  .then(() => console.log("✅ MongoDB connected"))
+  .catch(err => console.log("❌ Mongo error:", err));
+
+// ================= USER MODEL =================
+const userSchema = new mongoose.Schema({
   userId: String,
-  balance: { type: Number, default: 0 }
+  balance: { type: Number, default: 0 },
+  energy: { type: Number, default: 100 },
+  lastEnergyUpdate: { type: Number, default: Date.now }
 });
 
+const User = mongoose.model("User", userSchema);
+
+// ================= ENERGY SYSTEM =================
 function regenEnergy(user) {
   const now = Date.now();
-  const diff = Math.floor((now - user.lastEnergyUpdate) / 10000); // 10 sec
+  const diff = Math.floor((now - user.lastEnergyUpdate) / 10000); // 10s
 
   if (diff > 0) {
     user.energy = Math.min(100, user.energy + diff);
@@ -22,14 +33,14 @@ function regenEnergy(user) {
   }
 }
 
-// 🎁 OPEN BOX
+// ================= OPEN BOX =================
 app.post("/api/open-box", async (req, res) => {
   const { userId } = req.body;
+  if (!userId) return res.json({ error: "NO_USER" });
 
   let user = await User.findOne({ userId });
   if (!user) user = await User.create({ userId });
 
-  // 🔋 energy regen
   regenEnergy(user);
 
   if (user.energy < 10) {
@@ -52,13 +63,13 @@ app.post("/api/open-box", async (req, res) => {
   await user.save();
 
   res.json({
-    reward:
-      reward.type === "nothing"
-        ? "Nothing 😢"
-        : `${reward.value} ${reward.type}`,
+    reward: reward.type === "nothing" ? "Nothing 😢" : `${reward.value} ${reward.type}`,
     energy: user.energy,
     balance: user.balance
   });
 });
 
-app.listen(3000, () => console.log("🚀 Server running"));
+// ================= START SERVER =================
+app.listen(PORT, () => {
+  console.log("🚀 Server running on port", PORT);
+});
