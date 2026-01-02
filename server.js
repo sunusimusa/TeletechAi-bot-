@@ -155,18 +155,30 @@ app.post("/api/convert", async (req, res) => {
 // ================= BUY ENERGY =================
 app.post("/api/buy-energy", async (req, res) => {
   const { telegramId, amount } = req.body;
-  const user = await User.findOne({ telegramId });
 
-  const cost = amount * 100;
+  const user = await User.findOne({ telegramId });
+  if (!user) return res.json({ error: "USER_NOT_FOUND" });
+
+  let cost = 0;
+
+  if (amount === 100) cost = 500;
+  else if (amount === 500) cost = 2000;
+  else return res.json({ error: "INVALID_AMOUNT" });
+
   if (user.balance < cost)
-    return res.json({ error: "NOT_ENOUGH_BALANCE" });
+    return res.json({ error: "NOT_ENOUGH_COINS" });
 
   user.balance -= cost;
   user.energy += amount;
 
   await user.save();
-  res.json({ energy: user.energy, balance: user.balance });
+
+  res.json({
+    energy: user.energy,
+    balance: user.balance
+  });
 });
+
 
 // ================= START =================
 const PORT = process.env.PORT || 3000;
