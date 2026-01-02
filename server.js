@@ -77,7 +77,6 @@ app.post("/api/user", async (req, res) => {
   });
 });
 
-
 // ================= DAILY BONUS =================
 app.post("/api/daily", async (req, res) => {
   const { telegramId } = req.body;
@@ -233,6 +232,51 @@ app.post("/api/task/channel", async (req, res) => {
   });
 });
 
+// ================= MARKET BUY TOKEN =================
+app.post("/api/market/buy", async (req, res) => {
+  const { telegramId, amount } = req.body; // amount = token count
+
+  const user = await User.findOne({ telegramId });
+  if (!user) return res.json({ error: "USER_NOT_FOUND" });
+
+  const price = amount * 10000; // 1 token = 10k coins
+
+  if (user.balance < price)
+    return res.json({ error: "NOT_ENOUGH_COINS" });
+
+  user.balance -= price;
+  user.tokens += amount;
+
+  await user.save();
+
+  res.json({
+    balance: user.balance,
+    tokens: user.tokens
+  });
+});
+
+// ================= MARKET SELL TOKEN =================
+app.post("/api/market/sell", async (req, res) => {
+  const { telegramId, amount } = req.body;
+
+  const user = await User.findOne({ telegramId });
+  if (!user) return res.json({ error: "USER_NOT_FOUND" });
+
+  if (user.tokens < amount)
+    return res.json({ error: "NOT_ENOUGH_TOKENS" });
+
+  const coins = amount * 10000;
+
+  user.tokens -= amount;
+  user.balance += coins;
+
+  await user.save();
+
+  res.json({
+    balance: user.balance,
+    tokens: user.tokens
+  });
+});
 // ================= START =================
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log("🚀 Server running"));
