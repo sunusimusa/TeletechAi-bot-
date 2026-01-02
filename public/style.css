@@ -119,3 +119,17 @@ body {
   border-radius: 12px;
   margin-top: 15px;
 }
+
+button {
+  pointer-events: auto !important;
+  z-index: 9999;
+  position: relative;
+}
+
+.box {
+  pointer-events: auto;
+}
+
+body {
+  overflow-x: hidden;
+}
