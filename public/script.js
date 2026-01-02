@@ -72,6 +72,7 @@ async function openBox(box) {
 
   balance = data.balance;
   energy = data.energy;
+  freeTries = data.freeTries;
 
   box.classList.add("opened");
 
@@ -82,6 +83,12 @@ async function openBox(box) {
   }
 
   updateUI();
+
+  // 🔥 AUTO CLOSE AFTER 5 SECONDS
+  setTimeout(() => {
+    box.classList.remove("opened");
+    box.innerText = "";
+  }, 5000);
 }
 
 // ================== DAILY BONUS ==================
