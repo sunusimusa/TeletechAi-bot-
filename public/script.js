@@ -7,8 +7,12 @@ let tokens = 0;
 let referralsCount = 0;
 let referralCode = "";
 
-document.addEventListener("DOMContentLoaded", loadUser);
+// ========== LOAD USER ==========
+document.addEventListener("DOMContentLoaded", async () => {
+  await loadUser();
+});
 
+// ========== LOAD USER ==========
 async function loadUser() {
   const res = await fetch("/api/user", {
     method: "POST",
@@ -21,27 +25,74 @@ async function loadUser() {
   balance = data.balance;
   energy = data.energy;
   tokens = data.tokens;
-  referralsCount = data.referralsCount;
+  referralsCount = data.referralsCount || 0;
   referralCode = data.referralCode;
 
   document.getElementById("refLink").value =
     `https://t.me/teletechai_bot?start=${referralCode}`;
 
-  document.getElementById("refCount").innerText =
-    "👥 Referrals: " + referralsCount;
-
   updateUI();
 }
 
+// ========== UI ==========
 function updateUI() {
   document.getElementById("balance").innerText = `Balance: ${balance}`;
   document.getElementById("energy").innerText = `Energy: ${energy}`;
   document.getElementById("tokens").innerText = `Tokens: ${tokens}`;
+  document.getElementById("refCount").innerText =
+    "👥 Referrals: " + referralsCount;
 }
 
+// ========== COPY REF ==========
 function copyRef() {
   navigator.clipboard.writeText(
     document.getElementById("refLink").value
   );
-  alert("Copied!");
+  alert("Referral link copied!");
+}
+
+// ========== YOUTUBE ==========
+function joinYouTube() {
+  Telegram.WebApp.openLink("https://youtube.com/@Sunusicrypto");
+
+  setTimeout(async () => {
+    const res = await fetch("/api/youtube", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ telegramId: TELEGRAM_ID })
+    });
+
+    const data = await res.json();
+
+    document.getElementById("ytMsg").innerText =
+      data.error ? "❌ Already claimed" : "✅ Reward added!";
+
+    if (!data.error) {
+      balance = data.balance;
+      updateUI();
+    }
+  }, 4000);
+}
+
+// ========== GROUP ==========
+function joinGroup() {
+  Telegram.WebApp.openLink("https://t.me/tele_tap_ai");
+
+  setTimeout(async () => {
+    const res = await fetch("/api/group", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ telegramId: TELEGRAM_ID })
+    });
+
+    const data = await res.json();
+
+    document.getElementById("groupMsg").innerText =
+      data.error ? "❌ Already claimed" : "🎉 Reward added!";
+
+    if (!data.error) {
+      balance = data.balance;
+      updateUI();
+    }
+  }, 4000);
 }
