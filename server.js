@@ -15,13 +15,25 @@ mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log("✅ MongoDB Connected"))
   .catch(err => console.log(err));
 
+// ================= UTILS =================
 function generateCode() {
   return Math.random().toString(36).substring(2, 8).toUpperCase();
+}
+
+function regenEnergy(user) {
+  const now = Date.now();
+  const diff = Math.floor((now - user.lastEnergy) / 300000); // 5 min
+
+  if (diff > 0) {
+    user.energy = Math.min(100, user.energy + diff * 5);
+    user.lastEnergy = now;
+  }
 }
 
 // ================= USER =================
 app.post("/api/user", async (req, res) => {
   const { telegramId, ref } = req.body;
+  if (!telegramId) return res.json({ error: "NO_USER" });
 
   let user = await User.findOne({ telegramId });
 
@@ -29,26 +41,48 @@ app.post("/api/user", async (req, res) => {
     user = await User.create({
       telegramId,
       referralCode: generateCode(),
-      referredBy: ref || null
+      referredBy: ref || null,
+      referralsCount: 0,
+      balance: 0,
+      energy: 100,
+      freeTries: 3,
+      tokens: 0,
+      lastDaily: 0,
+      lastEnergy: Date.now()
     });
 
+    // reward referrer
     if (ref) {
       const refUser = await User.findOne({ referralCode: ref });
       if (refUser) {
         refUser.balance += 500;
+        refUser.energy += 20;
         refUser.referralsCount += 1;
         await refUser.save();
       }
     }
   }
 
-  res.json(user);
+  regenEnergy(user);
+  await user.save();
+
+  res.json({
+    telegramId: user.telegramId,
+    balance: user.balance,
+    energy: user.energy,
+    freeTries: user.freeTries,
+    tokens: user.tokens,
+    referralsCount: user.referralsCount,
+    referralCode: user.referralCode
+  });
 });
 
-// ================= DAILY =================
+
+// ================= DAILY BONUS =================
 app.post("/api/daily", async (req, res) => {
   const { telegramId } = req.body;
   const user = await User.findOne({ telegramId });
+  if (!user) return res.json({ error: "USER_NOT_FOUND" });
 
   const now = Date.now();
   const DAY = 86400000;
@@ -62,19 +96,18 @@ app.post("/api/daily", async (req, res) => {
     user.dailyStreak = 1;
   }
 
-  user.lastDaily = now;
   const reward = 100 * user.dailyStreak;
-
+  user.lastDaily = now;
   user.balance += reward;
   user.energy += 10;
 
   await user.save();
 
   res.json({
-    balance: user.balance,
-    energy: user.energy,
+    reward,
     streak: user.dailyStreak,
-    reward
+    balance: user.balance,
+    energy: user.energy
   });
 });
 
@@ -84,6 +117,8 @@ app.post("/api/open", async (req, res) => {
   const user = await User.findOne({ telegramId });
 
   if (!user) return res.json({ error: "USER_NOT_FOUND" });
+
+  regenEnergy(user);
 
   if (user.freeTries > 0) user.freeTries--;
   else if (user.energy >= 10) user.energy -= 10;
@@ -102,5 +137,37 @@ app.post("/api/open", async (req, res) => {
   });
 });
 
+// ================= CONVERT =================
+app.post("/api/convert", async (req, res) => {
+  const { telegramId } = req.body;
+  const user = await User.findOne({ telegramId });
+
+  if (!user) return res.json({ error: "USER_NOT_FOUND" });
+  if (user.balance < 10000) return res.json({ error: "NOT_ENOUGH_POINTS" });
+
+  user.balance -= 10000;
+  user.tokens += 1;
+  await user.save();
+
+  res.json({ tokens: user.tokens, balance: user.balance });
+});
+
+// ================= BUY ENERGY =================
+app.post("/api/buy-energy", async (req, res) => {
+  const { telegramId, amount } = req.body;
+  const user = await User.findOne({ telegramId });
+
+  const cost = amount * 100;
+  if (user.balance < cost)
+    return res.json({ error: "NOT_ENOUGH_BALANCE" });
+
+  user.balance -= cost;
+  user.energy += amount;
+
+  await user.save();
+  res.json({ energy: user.energy, balance: user.balance });
+});
+
+// ================= START =================
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log("🚀 Server running"));
