@@ -130,3 +130,49 @@ async function convertToToken() {
   document.getElementById("convertMsg").innerText = "✅ Converted to 1 TTECH";
   updateUI();
     }
+
+function joinYouTube() {
+  window.open("https://youtube.com/@Sunusicrypto", "_blank");
+
+  setTimeout(async () => {
+    const res = await fetch("/api/youtube", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ telegramId: TELEGRAM_ID })
+    });
+
+    const data = await res.json();
+
+    if (data.error) {
+      document.getElementById("ytMsg").innerText = "❌ Already claimed";
+    } else {
+      document.getElementById("ytMsg").innerText = "✅ YouTube reward added!";
+      balance = data.balance;
+      updateUI();
+    }
+  }, 4000);
+}
+
+
+function joinGroup() {
+  window.open("https://t.me/tele_tap_ai", "_blank");
+
+  setTimeout(async () => {
+    const res = await fetch("/api/group", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ telegramId: TELEGRAM_ID })
+    });
+
+    const data = await res.json();
+
+    if (data.error) {
+      document.getElementById("groupMsg").innerText = "❌ Already claimed";
+    } else {
+      document.getElementById("groupMsg").innerText = "🎉 Group reward added!";
+      balance = data.balance;
+      updateUI();
+    }
+  }, 4000);
+}
+
