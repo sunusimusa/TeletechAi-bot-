@@ -46,20 +46,22 @@ function updateUI() {
 }
 
 function playSound(type) {
+  if (!soundEnabled) return;
+
   let sound;
 
-  if (type === "click") sound = 
+  if (type === "click") sound =
     document.getElementById("clickSound");
   if (type === "win") sound =
     document.getElementById("winSound");
-  if (type === "lose") sound = 
+  if (type === "lose") sound =
     document.getElementById("loseSound");
-  if (type === "error") sound = 
+  if (type === "error") sound =
     document.getElementById("errorSound");
 
   if (sound) {
     sound.currentTime = 0;
-    sound.play();
+    sound.play().catch(() => {});
   }
 }
 
