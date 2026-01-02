@@ -108,6 +108,27 @@ function resetBoxes() {
   document.getElementById("msg").innerText = "";
 }
 
+function joinYouTube() {
+  window.open("https://youtube.com/@YOUR_CHANNEL", "_blank");
+
+  setTimeout(() => {
+    fetch("/api/youtube", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ telegramId: TELEGRAM_ID })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.error) {
+        document.getElementById("ytMsg").innerText = "❌ Already claimed";
+      } else {
+        document.getElementById("ytMsg").innerText = "✅ Reward received!";
+        balance = data.balance;
+        updateUI();
+      }
+    });
+  }, 5000);
+}
 // ================== CONVERT TOKEN ==================
 async function convertToToken() {
   const res = await fetch("/api/convert", {
