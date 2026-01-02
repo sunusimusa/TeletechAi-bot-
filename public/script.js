@@ -26,6 +26,8 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // ================== LOAD USER ==================
+let referralCode = "";
+
 async function loadUser() {
   const res = await fetch("/api/user", {
     method: "POST",
@@ -39,8 +41,10 @@ async function loadUser() {
   energy = data.energy;
   freeTries = data.freeTries;
   tokens = data.tokens;
+  referralCode = data.referralCode;
 
   updateUI();
+  showReferral();
 }
 
 // ================== UI ==================
