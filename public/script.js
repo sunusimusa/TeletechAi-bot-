@@ -175,7 +175,7 @@ function joinYouTube() {
   Telegram.WebApp.openLink("https://youtube.com/@Sunusicrypto");
 
   setTimeout(async () => {
-    const res = await fetch("/api/youtube", {
+    const res = await fetch("/api/task/youtube", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ telegramId: TELEGRAM_ID })
@@ -183,12 +183,12 @@ function joinYouTube() {
 
     const data = await res.json();
 
-    document.getElementById("ytMsg").innerText =
-      data.error ? "❌ Already claimed" : "🎉 Reward added";
-
-    if (!data.error) {
-      balance = data.balance;
+    if (data.error) {
+      alert("Already claimed!");
+    } else {
+      tokens = data.tokens;
       updateUI();
+      alert("🎉 You earned 10 TOKEN!");
     }
   }, 4000);
 }
@@ -198,7 +198,7 @@ function joinGroup() {
   Telegram.WebApp.openLink("https://t.me/tele_tap_ai");
 
   setTimeout(async () => {
-    const res = await fetch("/api/group", {
+    const res = await fetch("/api/task/group", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ telegramId: TELEGRAM_ID })
@@ -206,12 +206,34 @@ function joinGroup() {
 
     const data = await res.json();
 
-    document.getElementById("groupMsg").innerText =
-      data.error ? "❌ Already claimed" : "🎉 Reward added";
-
-    if (!data.error) {
-      balance = data.balance;
+    if (data.error) {
+      alert("Already claimed!");
+    } else {
+      tokens = data.tokens;
       updateUI();
+      alert("🎉 +5 TOKEN added!");
+    }
+  }, 4000);
+}
+
+function joinChannel() {
+  Telegram.WebApp.openLink("https://t.me/TeleAIupdates");
+
+  setTimeout(async () => {
+    const res = await fetch("/api/task/channel", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ telegramId: TELEGRAM_ID })
+    });
+
+    const data = await res.json();
+
+    if (data.error) {
+      alert("Already claimed!");
+    } else {
+      tokens = data.tokens;
+      updateUI();
+      alert("🎉 +5 TOKEN added!");
     }
   }, 4000);
 }
