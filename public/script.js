@@ -109,7 +109,7 @@ function resetBoxes() {
 }
 
 function joinYouTube() {
-  window.open("https://youtube.com/@YOUR_CHANNEL", "_blank");
+  window.open("https://youtube.com/@Sunusicrypto", "_blank");
 
   setTimeout(() => {
     fetch("/api/youtube", {
@@ -131,7 +131,7 @@ function joinYouTube() {
 }
 
 function joinGroup() {
-  window.open("https://t.me/your_public_group", "_blank");
+  window.open("https://t.me/tele_tap_ai", "_blank");
 
   setTimeout(async () => {
     const res = await fetch("/api/group", {
