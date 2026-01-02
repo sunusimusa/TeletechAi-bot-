@@ -1,18 +1,20 @@
+// ================== TELEGRAM ==================
 const TELEGRAM_ID =
   window.Telegram?.WebApp?.initDataUnsafe?.user?.id || "guest";
 
+// ================== GLOBAL STATE ==================
 let balance = 0;
 let energy = 0;
 let tokens = 0;
 let referralsCount = 0;
 let referralCode = "";
 
-// ========== LOAD USER ==========
+// ================== INIT ==================
 document.addEventListener("DOMContentLoaded", async () => {
   await loadUser();
 });
 
-// ========== LOAD USER ==========
+// ================== LOAD USER ==================
 async function loadUser() {
   const res = await fetch("/api/user", {
     method: "POST",
@@ -34,24 +36,95 @@ async function loadUser() {
   updateUI();
 }
 
-// ========== UI ==========
+// ================== UPDATE UI ==================
 function updateUI() {
   document.getElementById("balance").innerText = `Balance: ${balance}`;
   document.getElementById("energy").innerText = `Energy: ${energy}`;
   document.getElementById("tokens").innerText = `Tokens: ${tokens}`;
   document.getElementById("refCount").innerText =
-    "👥 Referrals: " + referralsCount;
+    `👥 Referrals: ${referralsCount}`;
 }
 
-// ========== COPY REF ==========
+// ================== COPY REF ==================
 function copyRef() {
   navigator.clipboard.writeText(
     document.getElementById("refLink").value
   );
-  alert("Referral link copied!");
+  alert("✅ Referral link copied!");
 }
 
-// ========== YOUTUBE ==========
+// ================== OPEN BOX ==================
+async function openBox(box) {
+  if (box.classList.contains("opened")) return;
+
+  const res = await fetch("/api/open", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ telegramId: TELEGRAM_ID })
+  });
+
+  const data = await res.json();
+
+  if (data.error) {
+    document.getElementById("msg").innerText = "❌ " + data.error;
+    return;
+  }
+
+  balance = data.balance;
+  energy = data.energy;
+
+  box.classList.add("opened");
+
+  if (data.reward === 0) {
+    box.innerText = "😢";
+  } else {
+    box.innerText = "💰 " + data.reward;
+  }
+
+  updateUI();
+}
+
+// ================== DAILY BONUS ==================
+async function claimDaily() {
+  const res = await fetch("/api/daily", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ telegramId: TELEGRAM_ID })
+  });
+
+  const data = await res.json();
+
+  if (data.error) {
+    document.getElementById("dailyMsg").innerText = "❌ " + data.error;
+    return;
+  }
+
+  balance = data.balance;
+  energy = data.energy;
+
+  document.getElementById("dailyMsg").innerText =
+    `🎉 Daily reward +${data.reward}`;
+
+  updateUI();
+}
+
+// ================== BUY ENERGY ==================
+async function buyEnergy(amount) {
+  const res = await fetch("/api/buy-energy", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ telegramId: TELEGRAM_ID, amount })
+  });
+
+  const data = await res.json();
+  if (data.error) return alert(data.error);
+
+  balance = data.balance;
+  energy = data.energy;
+  updateUI();
+}
+
+// ================== JOIN YOUTUBE ==================
 function joinYouTube() {
   Telegram.WebApp.openLink("https://youtube.com/@Sunusicrypto");
 
@@ -65,7 +138,7 @@ function joinYouTube() {
     const data = await res.json();
 
     document.getElementById("ytMsg").innerText =
-      data.error ? "❌ Already claimed" : "✅ Reward added!";
+      data.error ? "❌ Already claimed" : "🎉 Reward added";
 
     if (!data.error) {
       balance = data.balance;
@@ -74,7 +147,7 @@ function joinYouTube() {
   }, 4000);
 }
 
-// ========== GROUP ==========
+// ================== JOIN GROUP ==================
 function joinGroup() {
   Telegram.WebApp.openLink("https://t.me/tele_tap_ai");
 
@@ -88,7 +161,7 @@ function joinGroup() {
     const data = await res.json();
 
     document.getElementById("groupMsg").innerText =
-      data.error ? "❌ Already claimed" : "🎉 Reward added!";
+      data.error ? "❌ Already claimed" : "🎉 Reward added";
 
     if (!data.error) {
       balance = data.balance;
