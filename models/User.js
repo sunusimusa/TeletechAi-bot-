@@ -8,6 +8,8 @@ const UserSchema = new mongoose.Schema({
   freeTries: { type: Number, default: 3 },
   tokens: { type: Number, default: 0 },
 
+  joinedYoutube: { type: Boolean, default: false },
+
   referralCode: { type: String, unique: true },
   referredBy: { type: String, default: null },
   referralsCount: { type: Number, default: 0 },
