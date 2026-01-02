@@ -170,6 +170,33 @@ function copyRef() {
   alert("✅ Referral link copied!");
 }
 
+// ================== CONVERT POINTS TO TOKEN ==================
+async function convertPoints() {
+  const res = await fetch("/api/convert", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      telegramId: TELEGRAM_ID
+    })
+  });
+
+  const data = await res.json();
+
+  if (data.error) {
+    document.getElementById("convertMsg").innerText = "❌ " + data.error;
+    return;
+  }
+
+  // update values
+  balance = data.balance;
+  tokens = data.tokens;
+
+  document.getElementById("convertMsg").innerText =
+    "✅ Converted successfully!";
+
+  updateUI();
+}
+
 // ================== JOIN YOUTUBE ==================
 function joinYouTube() {
   Telegram.WebApp.openLink("https://youtube.com/@Sunusicrypto");
