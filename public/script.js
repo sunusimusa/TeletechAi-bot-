@@ -57,6 +57,8 @@ async function loadUser() {
 
 // ================== UI ==================
 function updateUI() {
+  document.getElementById("refCount").innerText =
+  "👥 Referrals: " + referralsCount;
   document.getElementById("balance").innerText = `Balance: ${balance}`;
   document.getElementById("energy").innerText = `Energy: ${energy}`;
   document.getElementById("freeTries").innerText = `Free tries: ${freeTries}`;
