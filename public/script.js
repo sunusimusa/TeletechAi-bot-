@@ -2,6 +2,17 @@
 const TELEGRAM_ID =
   window.Telegram?.WebApp?.initDataUnsafe?.user?.id || "guest";
 
+const ref = Telegram.WebApp.initDataUnsafe?.start_param;
+
+fetch("/api/user", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    telegramId: TELEGRAM_ID,
+    ref: ref
+  })
+});
+
 // ================== GAME STATE ==================
 let balance = 0;
 let energy = 100;
