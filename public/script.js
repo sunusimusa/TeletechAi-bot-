@@ -34,10 +34,10 @@ async function loadUser() {
 
 // ================== UI ==================
 function updateUI() {
-  document.getElementById("balance").innerText = "Balance: " + balance;
-  document.getElementById("energy").innerText = "Energy: " + energy;
-  document.getElementById("freeTries").innerText = "Free tries: " + freeTries;
-  document.getElementById("tokens").innerText = "Tokens: " + tokens;
+  document.getElementById("balance").innerText = `Balance: ${balance}`;
+  document.getElementById("energy").innerText = `Energy: ${energy}`;
+  document.getElementById("freeTries").innerText = `Free tries: ${freeTries}`;
+  document.getElementById("tokens").innerText = `Tokens: ${tokens}`;
 }
 
 // ================== OPEN BOX ==================
@@ -63,13 +63,29 @@ async function openBox(box) {
 
   box.classList.add("opened");
 
-  if (data.reward?.type === "coin") {
-    box.innerText = "💰 " + data.reward.value;
-  } else {
+  if (data.reward === 0) {
     box.innerText = "😢";
+  } else {
+    box.innerText = "💰 " + data.reward;
   }
 
+  openedCount++;
   updateUI();
+
+  if (openedCount === 6) {
+    setTimeout(resetBoxes, 2000);
+  }
+}
+
+// ================== RESET BOXES ==================
+function resetBoxes() {
+  document.querySelectorAll(".box").forEach(b => {
+    b.classList.remove("opened");
+    b.innerText = "";
+  });
+
+  openedCount = 0;
+  document.getElementById("msg").innerText = "";
 }
 
 // ================== CONVERT TOKEN ==================
@@ -90,13 +106,11 @@ async function convertToToken() {
   tokens = data.tokens;
   balance = data.balance;
 
-  document.getElementById("convertMsg").innerText =
-    "✅ Converted to 1 TTECH";
-
+  document.getElementById("convertMsg").innerText = "✅ Converted to 1 TTECH";
   updateUI();
 }
 
-// ================== DAILY ==================
+// ================== DAILY BONUS ==================
 async function claimDaily() {
   const res = await fetch("/api/daily", {
     method: "POST",
@@ -114,8 +128,6 @@ async function claimDaily() {
   balance = data.balance;
   energy = data.energy;
 
-  document.getElementById("dailyMsg").innerText =
-    "🎉 Daily bonus received!";
-
+  document.getElementById("dailyMsg").innerText = "🎉 Daily reward claimed!";
   updateUI();
       }
