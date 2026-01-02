@@ -7,7 +7,8 @@ const UserSchema = new mongoose.Schema({
   energy: { type: Number, default: 100 },
   freeTries: { type: Number, default: 3 },
   tokens: { type: Number, default: 0 },
-
+  
+joinedGroup: { type: Boolean, default: false },
   joinedYoutube: { type: Boolean, default: false },
 
   referralCode: { type: String, unique: true },
