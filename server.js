@@ -11,26 +11,15 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static("public"));
 
-// ================= DB =================
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log("✅ MongoDB Connected"))
-  .catch(err => console.error("❌ Mongo Error:", err));
+  .catch(err => console.log(err));
 
-// ================= UTILS =================
 function generateCode() {
   return Math.random().toString(36).substring(2, 8).toUpperCase();
 }
 
-function regenEnergy(user) {
-  const now = Date.now();
-  const diff = Math.floor((now - user.lastEnergy) / 300000); // 5 min
-  if (diff > 0) {
-    user.energy = Math.min(100, user.energy + diff * 5);
-    user.lastEnergy = now;
-  }
-}
-
-// ================= CREATE / LOAD USER =================
+// ================= USER =================
 app.post("/api/user", async (req, res) => {
   const { telegramId, ref } = req.body;
 
@@ -47,21 +36,45 @@ app.post("/api/user", async (req, res) => {
       const refUser = await User.findOne({ referralCode: ref });
       if (refUser) {
         refUser.balance += 500;
-        refUser.energy += 20;
         refUser.referralsCount += 1;
         await refUser.save();
       }
     }
   }
 
+  res.json(user);
+});
+
+// ================= DAILY =================
+app.post("/api/daily", async (req, res) => {
+  const { telegramId } = req.body;
+  const user = await User.findOne({ telegramId });
+
+  const now = Date.now();
+  const DAY = 86400000;
+
+  if (now - user.lastDaily < DAY)
+    return res.json({ error: "COME_BACK_LATER" });
+
+  if (now - user.lastDaily < DAY * 2) {
+    user.dailyStreak += 1;
+  } else {
+    user.dailyStreak = 1;
+  }
+
+  user.lastDaily = now;
+  const reward = 100 * user.dailyStreak;
+
+  user.balance += reward;
+  user.energy += 10;
+
+  await user.save();
+
   res.json({
-    telegramId: user.telegramId,
     balance: user.balance,
     energy: user.energy,
-    freeTries: user.freeTries,
-    tokens: user.tokens,
-    referralCode: user.referralCode,
-    referralsCount: user.referralsCount
+    streak: user.dailyStreak,
+    reward
   });
 });
 
@@ -72,16 +85,13 @@ app.post("/api/open", async (req, res) => {
 
   if (!user) return res.json({ error: "USER_NOT_FOUND" });
 
-  regenEnergy(user);
-
   if (user.freeTries > 0) user.freeTries--;
   else if (user.energy >= 10) user.energy -= 10;
   else return res.json({ error: "NO_ENERGY" });
 
-  const rewards = [0, 100, 200];
-  const reward = rewards[Math.floor(Math.random() * rewards.length)];
-
+  const reward = [0, 100, 200][Math.floor(Math.random() * 3)];
   user.balance += reward;
+
   await user.save();
 
   res.json({
@@ -92,80 +102,5 @@ app.post("/api/open", async (req, res) => {
   });
 });
 
-// ================= CONVERT =================
-app.post("/api/convert", async (req, res) => {
-  const { telegramId } = req.body;
-  const user = await User.findOne({ telegramId });
-
-  if (!user) return res.json({ error: "USER_NOT_FOUND" });
-  if (user.balance < 10000)
-    return res.json({ error: "NOT_ENOUGH_POINTS" });
-
-  user.balance -= 10000;
-  user.tokens += 1;
-
-  await user.save();
-  res.json({ tokens: user.tokens, balance: user.balance });
-});
-
-// ================= DAILY BONUS =================
-app.post("/api/daily", async (req, res) => {
-  const { telegramId } = req.body;
-  const user = await User.findOne({ telegramId });
-
-  if (!user) return res.json({ error: "USER_NOT_FOUND" });
-
-  const now = Date.now();
-  const DAY = 86400000;
-
-  if (now - user.lastDaily < DAY)
-    return res.json({ error: "COME_BACK_LATER" });
-
-  user.lastDaily = now;
-  user.balance += 500;
-  user.energy += 20;
-
-  await user.save();
-
-  res.json({
-    balance: user.balance,
-    energy: user.energy
-  });
-});
-
-app.post("/api/youtube", async (req, res) => {
-  const { telegramId } = req.body;
-  const user = await User.findOne({ telegramId });
-
-  if (!user) return res.json({ error: "USER_NOT_FOUND" });
-
-  if (user.joinedYoutube) {
-    return res.json({ error: "ALREADY_CLAIMED" });
-  }
-
-  user.joinedYoutube = true;
-  user.balance += 300; // reward
-
-  await user.save();
-
-  res.json({ success: true, balance: user.balance });
-});
-
-app.post("/api/group", async (req, res) => {
-  const { telegramId } = req.body;
-  const user = await User.findOne({ telegramId });
-
-  if (user.joinedGroup) return res.json({ error: "ALREADY" });
-
-  user.joinedGroup = true;
-  user.balance += 300;
-  await user.save();
-
-  res.json({ balance: user.balance });
-});
-
-// ================= START =================
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log("🚀 Server running on port", PORT);
-});
+app.listen(PORT, () => console.log("🚀 Server running"));
