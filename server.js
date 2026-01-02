@@ -61,7 +61,8 @@ app.post("/api/user", async (req, res) => {
     energy: user.energy,
     freeTries: user.freeTries,
     tokens: user.tokens,
-    referralCode: user.referralCode   // 🔥 THIS IS IMPORTANT
+    referralCode: user.referralCode
+    referralsCount: user.referralsCount// 🔥 THIS IS IMPORTANT
   });
 });
 
