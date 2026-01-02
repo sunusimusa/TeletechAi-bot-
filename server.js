@@ -179,6 +179,59 @@ app.post("/api/buy-energy", async (req, res) => {
   });
 });
 
+app.post("/api/task/youtube", async (req, res) => {
+  const { telegramId } = req.body;
+  const user = await User.findOne({ telegramId });
+
+  if (!user) return res.json({ error: "USER_NOT_FOUND" });
+  if (user.joinedYoutube) return res.json({ error: "ALREADY_DONE" });
+
+  user.joinedYoutube = true;
+  user.tokens += 10;
+
+  await user.save();
+
+  res.json({
+    success: true,
+    tokens: user.tokens
+  });
+});
+
+app.post("/api/task/group", async (req, res) => {
+  const { telegramId } = req.body;
+  const user = await User.findOne({ telegramId });
+
+  if (!user) return res.json({ error: "USER_NOT_FOUND" });
+  if (user.joinedGroup) return res.json({ error: "ALREADY_DONE" });
+
+  user.joinedGroup = true;
+  user.tokens += 5;
+
+  await user.save();
+
+  res.json({
+    success: true,
+    tokens: user.tokens
+  });
+});
+
+app.post("/api/task/channel", async (req, res) => {
+  const { telegramId } = req.body;
+  const user = await User.findOne({ telegramId });
+
+  if (!user) return res.json({ error: "USER_NOT_FOUND" });
+  if (user.joinedChannel) return res.json({ error: "ALREADY_DONE" });
+
+  user.joinedChannel = true;
+  user.tokens += 5;
+
+  await user.save();
+
+  res.json({
+    success: true,
+    tokens: user.tokens
+  });
+});
 
 // ================= START =================
 const PORT = process.env.PORT || 3000;
