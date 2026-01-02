@@ -7,16 +7,16 @@ const UserSchema = new mongoose.Schema({
   energy: { type: Number, default: 100 },
   freeTries: { type: Number, default: 3 },
   tokens: { type: Number, default: 0 },
-  
-joinedGroup: { type: Boolean, default: false },
-  joinedYoutube: { type: Boolean, default: false },
 
-  referralCode: { type: String, unique: true },
+  referralCode: { type: String },
   referredBy: { type: String, default: null },
   referralsCount: { type: Number, default: 0 },
 
-  lastEnergy: { type: Number, default: Date.now },
-  lastDaily: { type: Number, default: 0 }
+  dailyStreak: { type: Number, default: 0 },
+  lastDaily: { type: Number, default: 0 },
+
+  joinedYoutube: { type: Boolean, default: false },
+  joinedGroup: { type: Boolean, default: false }
 });
 
 export default mongoose.model("User", UserSchema);
