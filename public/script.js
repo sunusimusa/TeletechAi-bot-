@@ -3,11 +3,14 @@ const TELEGRAM_ID =
   window.Telegram?.WebApp?.initDataUnsafe?.user?.id || "guest";
 
 // ================== GLOBAL STATE ==================
+
 let balance = 0;
 let energy = 0;
 let tokens = 0;
 let referralsCount = 0;
 let referralCode = "";
+let freeTries = 0;
+let soundEnabled = true;
 
 // ================== INIT ==================
 document.addEventListener("DOMContentLoaded", async () => {
@@ -109,7 +112,6 @@ async function openBox(box) {
 
   updateUI();
 
-  // ⏱️ close box after 3 seconds
   setTimeout(() => {
     box.classList.remove("opened");
     box.innerHTML = "";
@@ -158,10 +160,12 @@ async function buyEnergy(amount) {
     return;
   }
 
-  energy = data.energy;
-  balance = data.balance;
-  updateUI();
-}
+setInterval(() => {
+  if (energy < 100) {
+    energy += 1;
+    updateUI();
+  }
+}, 60000); // every 1 minute
 
 // ================== JOIN YOUTUBE ==================
 function joinYouTube() {
@@ -207,4 +211,23 @@ function joinGroup() {
       updateUI();
     }
   }, 4000);
+}
+
+async function convertPoints() {
+  const res = await fetch("/api/convert", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ telegramId: TELEGRAM_ID })
+  });
+
+  const data = await res.json();
+
+  if (data.error) {
+    alert("❌ " + data.error);
+    return;
+  }
+
+  balance = data.balance;
+  tokens = data.tokens;
+  updateUI();
 }
