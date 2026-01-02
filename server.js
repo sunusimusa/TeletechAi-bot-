@@ -56,14 +56,13 @@ app.post("/api/user", async (req, res) => {
   }
 
   res.json({
-    telegramId: user.telegramId,
-    balance: user.balance,
-    energy: user.energy,
-    freeTries: user.freeTries,
-    tokens: user.tokens,
-    referralCode: user.referralCode
-    referralsCount: user.referralsCount// 🔥 THIS IS IMPORTANT
-  });
+  telegramId: user.telegramId,
+  balance: user.balance,
+  energy: user.energy,
+  freeTries: user.freeTries,
+  tokens: user.tokens,
+  referralCode: user.referralCode,
+  referralsCount: user.referralsCount
 });
 
 // ================= OPEN BOX =================
