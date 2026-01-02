@@ -133,6 +133,23 @@ app.post("/api/daily", async (req, res) => {
   });
 });
 
+app.post("/api/youtube", async (req, res) => {
+  const { telegramId } = req.body;
+  const user = await User.findOne({ telegramId });
+
+  if (!user) return res.json({ error: "USER_NOT_FOUND" });
+
+  if (user.joinedYoutube) {
+    return res.json({ error: "ALREADY_CLAIMED" });
+  }
+
+  user.joinedYoutube = true;
+  user.balance += 300; // reward
+
+  await user.save();
+
+  res.json({ success: true, balance: user.balance });
+});
 // ================= START =================
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
