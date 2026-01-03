@@ -209,3 +209,25 @@ button:disabled {
 html {
   scroll-behavior: smooth;
   }
+
+.pro-badge {
+  display: inline-block;
+  margin: 10px auto;
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 13px;
+  color: #000;
+  background: linear-gradient(135deg, #facc15, #f59e0b);
+  box-shadow: 0 0 25px rgba(250, 204, 21, 0.6);
+  animation: glow 2s infinite alternate;
+}
+
+@keyframes glow {
+  from { box-shadow: 0 0 10px rgba(250,204,21,.5); }
+  to   { box-shadow: 0 0 25px rgba(250,204,21,1); }
+}
+
+.hidden {
+  display: none;
+}
