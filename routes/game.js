@@ -177,4 +177,19 @@ async function withdrawJetton() {
   updateUI();
 }
 
+async function buyToken(amount) {
+  const res = await fetch("/api/market/buy", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ telegramId: TELEGRAM_ID, amount })
+  });
+
+  const data = await res.json();
+  if (data.error) return alert(data.error);
+
+  balance = data.balance;
+  tokens = data.tokens;
+  updateUI();
+}
+
 export default router;
