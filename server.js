@@ -31,10 +31,21 @@ function generateCode() {
 
 function regenEnergy(user) {
   const now = Date.now();
-  const ENERGY_TIME = user.isPro
-  ? 2 * 60 * 1000   // 2 minutes (PRO)
-  : 5 * 60 * 1000;  // 5 minutes (FREE)
-  const ENERGY_GAIN = user.isPro ? 8 : 5;
+  let ENERGY_TIME = 5 * 60 * 1000;
+let ENERGY_GAIN = 5;
+
+if (user.proLevel === 1) {
+  ENERGY_TIME = 3 * 60 * 1000;
+  ENERGY_GAIN = 7;
+}
+if (user.proLevel === 2) {
+  ENERGY_TIME = 2 * 60 * 1000;
+  ENERGY_GAIN = 10;
+}
+if (user.proLevel === 3) {
+  ENERGY_TIME = 60 * 1000; // 1 minute
+  ENERGY_GAIN = 15;
+}
   const MAX_ENERGY = 100;
 
   if (!user.lastEnergy) user.lastEnergy = now;
@@ -104,9 +115,13 @@ app.post("/api/daily", async (req, res) => {
   user.dailyStreak =
     now - user.lastDaily < DAY * 2 ? user.dailyStreak + 1 : 1;
 
-  const reward = user.isPro
-  ? Math.floor(baseReward * 1.5)
-  : baseReward;
+  let reward = baseReward;
+
+if (user.proLevel === 1) reward *= 1.3;
+if (user.proLevel === 2) reward *= 1.7;
+if (user.proLevel === 3) reward *= 2;
+
+reward = Math.floor(reward);
   user.lastDaily = now;
   user.balance += reward;
   user.energy = Math.min(100, user.energy + 10);
@@ -133,8 +148,20 @@ app.post("/api/open", async (req, res) => {
   else if (user.energy >= 10) user.energy -= 10;
   else return res.json({ error: "NO_ENERGY" });
 
-  const reward = [0, 100, 200][Math.floor(Math.random() * 3)];
+  let rewards = [0, 100, 200];
+
+if (user.proLevel === 2) rewards = [100, 200, 500];
+if (user.proLevel === 3) rewards = [200, 500, 1000];
+
+const reward = rewards[Math.floor(Math.random() * rewards.length)];
   user.balance += reward;
+
+  if (user.proLevel === 2 && user.freeTries < 5) {
+  user.freeTries = 5;
+}
+if (user.proLevel === 3 && user.freeTries < 7) {
+  user.freeTries = 7;
+}
 
   await user.save();
 
@@ -232,27 +259,35 @@ app.post("/api/task/channel", async (req, res) => {
 });
 
 app.post("/api/pro/upgrade", async (req, res) => {
-  const { telegramId } = req.body;
+  const { telegramId, level } = req.body; // level = 1 | 2 | 3
   const user = await User.findOne({ telegramId });
 
   if (!user) return res.json({ error: "USER_NOT_FOUND" });
-  if (user.isPro) return res.json({ error: "ALREADY_PRO" });
+  if (level <= user.proLevel)
+    return res.json({ error: "ALREADY_THIS_LEVEL" });
 
-  const PRO_PRICE = 5; // 5 tokens
+  const prices = {
+    1: 5,
+    2: 10,
+    3: 20
+  };
 
-  if (user.tokens < PRO_PRICE)
+  const price = prices[level];
+  if (!price) return res.json({ error: "INVALID_LEVEL" });
+
+  if (user.tokens < price)
     return res.json({ error: "NOT_ENOUGH_TOKENS" });
 
-  user.tokens -= PRO_PRICE;
-  user.isPro = true;
+  user.tokens -= price;
+  user.proLevel = level;
   user.proSince = Date.now();
 
   await user.save();
 
   res.json({
     success: true,
-    tokens: user.tokens,
-    isPro: true
+    proLevel: user.proLevel,
+    tokens: user.tokens
   });
 });
 
