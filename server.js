@@ -150,7 +150,11 @@ app.post("/api/open", async (req, res) => {
 });
 
 // ================= CONVERT =================
+const mongoose = require("mongoose");
+
 app.post("/api/convert", async (req, res) => {
+  const session = await mongoose.startSession();
+
   try {
     const { telegramId } = req.body;
 
@@ -158,20 +162,27 @@ app.post("/api/convert", async (req, res) => {
       return res.status(400).json({ error: "TELEGRAM_ID_REQUIRED" });
     }
 
-    const user = await User.findOne({ telegramId });
+    session.startTransaction();
+
+    const user = await User.findOne({ telegramId }).session(session);
 
     if (!user) {
+      await session.abortTransaction();
       return res.status(404).json({ error: "USER_NOT_FOUND" });
     }
 
     if (user.balance < 10000) {
+      await session.abortTransaction();
       return res.status(400).json({ error: "NOT_ENOUGH_POINTS" });
     }
 
     user.balance -= 10000;
     user.tokens = (user.tokens || 0) + 1;
 
-    await user.save();
+    await user.save({ session });
+
+    await session.commitTransaction();
+    session.endSession();
 
     return res.status(200).json({
       success: true,
@@ -180,7 +191,10 @@ app.post("/api/convert", async (req, res) => {
     });
 
   } catch (err) {
-    console.error("Convert error:", err);
+    await session.abortTransaction();
+    session.endSession();
+
+    console.error("Atomic convert error:", err);
     return res.status(500).json({ error: "SERVER_ERROR" });
   }
 });
