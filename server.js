@@ -2,8 +2,12 @@ import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
+
 import User from "./models/User.js";
 import Market from "./models/Market.js";
+
+// ROUTES (separate)
+import withdrawRoutes from "./routes/withdraw.routes.js";
 
 dotenv.config();
 
@@ -24,6 +28,7 @@ function generateCode() {
 
 function regenEnergy(user) {
   const now = Date.now();
+
   const ENERGY_TIME = 5 * 60 * 1000; // 5 min
   const ENERGY_GAIN = 5;
   const MAX_ENERGY = 100;
@@ -31,11 +36,9 @@ function regenEnergy(user) {
   if (!user.lastEnergy) user.lastEnergy = now;
 
   const diff = Math.floor((now - user.lastEnergy) / ENERGY_TIME);
+
   if (diff > 0) {
-    user.energy = Math.min(
-      MAX_ENERGY,
-      user.energy + diff * ENERGY_GAIN
-    );
+    user.energy = Math.min(MAX_ENERGY, user.energy + diff * ENERGY_GAIN);
     user.lastEnergy = now;
   }
 }
@@ -70,9 +73,6 @@ app.post("/api/user", async (req, res) => {
     await user.save();
   }
 
-  regenEnergy(user);
-  await user.save();
-
   res.json({
     telegramId: user.telegramId,
     balance: user.balance,
@@ -98,10 +98,10 @@ app.post("/api/daily", async (req, res) => {
   if (now - user.lastDaily < DAY)
     return res.json({ error: "COME_BACK_LATER" });
 
-  if (now - user.lastDaily < DAY * 2) user.dailyStreak += 1;
-  else user.dailyStreak = 1;
+  user.dailyStreak =
+    now - user.lastDaily < DAY * 2 ? user.dailyStreak + 1 : 1;
 
-  const reward = 100 * user.dailyStreak;
+  const reward = user.dailyStreak * 100;
 
   user.lastDaily = now;
   user.balance += reward;
@@ -142,22 +142,23 @@ app.post("/api/open", async (req, res) => {
   });
 });
 
-// ================= CONVERT POINTS → TOKEN =================
+// ================= CONVERT POINTS =================
 app.post("/api/convert", async (req, res) => {
   const { telegramId } = req.body;
   const user = await User.findOne({ telegramId });
-  if (!user) return res.json({ error: "USER_NOT_FOUND" });
 
+  if (!user) return res.json({ error: "USER_NOT_FOUND" });
   if (user.balance < 10000)
     return res.json({ error: "NOT_ENOUGH_POINTS" });
 
   user.balance -= 10000;
   user.tokens += 1;
+
   await user.save();
 
   res.json({
-    balance: user.balance,
-    tokens: user.tokens
+    tokens: user.tokens,
+    balance: user.balance
   });
 });
 
@@ -167,11 +168,10 @@ app.post("/api/buy-energy", async (req, res) => {
   const user = await User.findOne({ telegramId });
   if (!user) return res.json({ error: "USER_NOT_FOUND" });
 
-  let cost = 0;
-  if (amount === 100) cost = 500;
-  else if (amount === 500) cost = 2000;
-  else return res.json({ error: "INVALID_AMOUNT" });
+  const priceMap = { 100: 500, 500: 2000 };
+  const cost = priceMap[amount];
 
+  if (!cost) return res.json({ error: "INVALID_AMOUNT" });
   if (user.balance < cost)
     return res.json({ error: "NOT_ENOUGH_COINS" });
 
@@ -181,12 +181,12 @@ app.post("/api/buy-energy", async (req, res) => {
   await user.save();
 
   res.json({
-    energy: user.energy,
-    balance: user.balance
+    balance: user.balance,
+    energy: user.energy
   });
 });
 
-// ================= TASKS =================
+// ================= TASK SYSTEM =================
 app.post("/api/task/youtube", async (req, res) => {
   const user = await User.findOne(req.body);
   if (!user || user.joinedYoutube)
@@ -223,14 +223,13 @@ app.post("/api/task/channel", async (req, res) => {
   res.json({ tokens: user.tokens });
 });
 
-// ================= MARKET (SIMPLE) =================
+// ================= MARKET =================
 app.post("/api/market/buy", async (req, res) => {
   const { telegramId, amount } = req.body;
   const user = await User.findOne({ telegramId });
-  if (!user) return res.json({ error: "USER_NOT_FOUND" });
 
   const cost = amount * 10000;
-  if (user.balance < cost)
+  if (!user || user.balance < cost)
     return res.json({ error: "NOT_ENOUGH_COINS" });
 
   user.balance -= cost;
@@ -243,17 +242,22 @@ app.post("/api/market/buy", async (req, res) => {
 app.post("/api/market/sell", async (req, res) => {
   const { telegramId, amount } = req.body;
   const user = await User.findOne({ telegramId });
+
   if (!user || user.tokens < amount)
     return res.json({ error: "NOT_ENOUGH_TOKENS" });
 
-  const coins = amount * 10000;
   user.tokens -= amount;
-  user.balance += coins;
+  user.balance += amount * 10000;
   await user.save();
 
   res.json({ balance: user.balance, tokens: user.tokens });
 });
 
+// ================= WITHDRAW ROUTES =================
+app.use("/api/withdraw", withdrawRoutes);
+
 // ================= START =================
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log("🚀 Server running on port", PORT));
+app.listen(PORT, () =>
+  console.log(`🚀 Server running on port ${PORT}`)
+);
