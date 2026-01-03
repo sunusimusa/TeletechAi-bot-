@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
 import User from "./models/User.js";
+import Market from "./models/Market.js";
 
 dotenv.config();
 
@@ -504,6 +505,67 @@ app.post("/api/withdraw/jetton", async (req, res) => {
     console.error(e);
     res.json({ error: "JETTON_WITHDRAW_FAILED" });
   }
+});
+
+app.post("/api/market/buy", async (req, res) => {
+  const { telegramId, amount } = req.body;
+  const user = await User.findOne({ telegramId });
+  const market = await Market.findOne();
+
+  if (!user) return res.json({ error: "USER_NOT_FOUND" });
+  if (!market) return res.json({ error: "MARKET_NOT_READY" });
+
+  const price = market.reservePoints / market.reserveJetton;
+  const cost = Math.ceil(amount * price);
+
+  if (user.balance < cost)
+    return res.json({ error: "NOT_ENOUGH_POINTS" });
+
+  user.balance -= cost;
+  user.tokens += amount;
+
+  market.reservePoints += cost;
+  market.reserveJetton -= amount;
+
+  await user.save();
+  await market.save();
+
+  res.json({
+    balance: user.balance,
+    tokens: user.tokens,
+    price
+  });
+});
+
+app.post("/api/market/sell", async (req, res) => {
+  const { telegramId, amount } = req.body;
+  const user = await User.findOne({ telegramId });
+  const market = await Market.findOne();
+
+  if (!user) return res.json({ error: "USER_NOT_FOUND" });
+  if (user.tokens < amount)
+    return res.json({ error: "NOT_ENOUGH_TOKENS" });
+
+  const price = market.reservePoints / market.reserveJetton;
+  const payout = Math.floor(amount * price);
+
+  if (market.reservePoints < payout)
+    return res.json({ error: "POOL_LOW_LIQUIDITY" });
+
+  user.tokens -= amount;
+  user.balance += payout;
+
+  market.reserveJetton += amount;
+  market.reservePoints -= payout;
+
+  await user.save();
+  await market.save();
+
+  res.json({
+    balance: user.balance,
+    tokens: user.tokens,
+    price
+  });
 });
 
 // ================= START =================
