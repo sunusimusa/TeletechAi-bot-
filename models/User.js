@@ -16,6 +16,8 @@ const UserSchema = new mongoose.Schema({
   referralsCount: { type: Number, default: 0 },
   isPro: { type: Boolean, default: false },
 proSince: { type: Number, default: null },
+  proLevel: { type: Number, default: 0 }, // 0=FREE, 1=PRO, 2=PRO+, 3=PRO MAX
+proSince: { type: Number, default: 0 },
 
   // ===== DAILY =====
   dailyStreak: { type: Number, default: 0 },
