@@ -231,3 +231,41 @@ html {
 .hidden {
   display: none;
 }
+
+.pro-upgrade-box {
+  margin: 20px 0;
+  text-align: center;
+}
+
+.pro-upgrade-box button {
+  width: 90%;
+  margin: 8px auto;
+  padding: 14px;
+  font-size: 15px;
+  font-weight: bold;
+  border-radius: 14px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+/* PRO LEVEL 2 */
+#proLv2Btn {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: #fff;
+  box-shadow: 0 0 15px rgba(34,197,94,0.6);
+}
+
+/* PRO LEVEL 3 */
+#proLv3Btn {
+  background: linear-gradient(135deg, #facc15, #f59e0b);
+  color: #000;
+  box-shadow: 0 0 25px rgba(250,204,21,0.9);
+  animation: proGlow 2s infinite;
+}
+
+@keyframes proGlow {
+  0% { box-shadow: 0 0 10px rgba(250,204,21,0.5); }
+  50% { box-shadow: 0 0 30px rgba(250,204,21,1); }
+  100% { box-shadow: 0 0 10px rgba(250,204,21,0.5); }
+}
