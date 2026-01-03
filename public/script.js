@@ -60,6 +60,13 @@ if (data.isPro) {
   upgradeBtn.style.display = "none";
 }
 
+if (data.proLevel >= 2) {
+  document.getElementById("proLv2Btn").style.display = "none";
+}
+if (data.proLevel >= 3) {
+  document.getElementById("proLv3Btn").style.display = "none";
+}
+
 // ================== UI UPDATE ==================
 function updateUI() {
   document.getElementById("balance").innerText = `Balance: ${balance}`;
