@@ -67,6 +67,10 @@ if (data.proLevel >= 3) {
   document.getElementById("proLv3Btn").style.display = "none";
 }
 
+function openRoadmap() {
+  window.location.href = "/roadmap.html";
+}
+
 // ================== UI UPDATE ==================
 function updateUI() {
   document.getElementById("balance").innerText = `Balance: ${balance}`;
