@@ -18,6 +18,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 // ================== LOAD USER ==================
+let referralCode = "";
+let referralsCount = 0;
+
 async function loadUser() {
   const res = await fetch("/api/user", {
     method: "POST",
@@ -27,16 +30,18 @@ async function loadUser() {
 
   const data = await res.json();
 
-  balance = data.balance;
-  energy = data.energy;
-  tokens = data.tokens;
-  referralsCount = data.referralsCount || 0;
   referralCode = data.referralCode;
+  referralsCount = data.referralsCount || 0;
 
-  document.getElementById("refLink").value =
-    `https://t.me/teletechai_bot?start=${referralCode}`;
+  if (referralCode) {
+    document.getElementById("refLink").value =
+      `https://t.me/teletechai_bot?start=${referralCode}`;
+  } else {
+    document.getElementById("refLink").value = "Loading...";
+  }
 
-  updateUI();
+  document.getElementById("refCount").innerText =
+    `👥 Referrals: ${referralsCount}`;
 }
 
 // ================== UPDATE UI ==================
