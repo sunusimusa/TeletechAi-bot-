@@ -1,213 +1,119 @@
+/* ================= RESET ================= */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
 body {
-  background: #0f172a;
-  color: white;
+  background: radial-gradient(circle at top, #0f172a, #020617);
+  color: #ffffff;
+  font-family: "Inter", system-ui, sans-serif;
   text-align: center;
-  font-family: sans-serif;
-}
-
-.boxes {
-  display: grid;
-  grid-template-columns: repeat(3, 100px);
-  gap: 15px;
-  justify-content: center;
-  margin-top: 40px;
-}
-
-.box {
-  width: 100px;
-  height: 100px;
-  background: gold;
-  border-radius: 12px;
-  font-size: 40px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-.box:hover {
-  transform: scale(1.1);
-}
-
-.box {
-  width: 90px;
-  height: 90px;
-  background: gold;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 22px;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-.box:hover {
-  transform: scale(1.05);
-}
-
-.opened {
-  background: #333;
-  color: white;
-}
-
-.box.opened {
-  background: #333;
-  color: white;
-  font-size: 22px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.convert-btn {
-  margin-top: 15px;
-  padding: 12px 25px;
-  background: #ffaa00;
-  border: none;
-  border-radius: 10px;
-  font-size: 16px;
-  font-weight: bold;
-  color: #000;
-}
-
-.convert-btn:disabled {
-  background: gray;
-}
-
-.box {
-  width: 90px;
-  height: 90px;
-  background: #ffcc00;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 26px;
-  cursor: pointer;
-  transition: transform 0.3s ease, background 0.3s;
-}
-
-.box:hover {
-  transform: scale(1.05);
-}
-
-.box.opened {
-  background: #333;
-  color: white;
-  animation: openBoxAnim 0.4s ease;
-}
-
-@keyframes openBoxAnim {
-  0%   { transform: scale(1); }
-  50%  { transform: scale(1.2) rotate(5deg); }
-  100% { transform: scale(1); }
-}
-
-.daily-btn {
-  margin-top: 15px;
-  padding: 12px 20px;
-  background: gold;
-  border: none;
-  border-radius: 10px;
-  font-weight: bold;
-}
-
-.ad-banner img {
-  width: 100%;
-  border-radius: 12px;
-  margin-top: 15px;
-}
-
-button {
-  pointer-events: auto !important;
-  z-index: 9999;
-  position: relative;
-}
-
-button {
-  border: none;
-  border-radius: 12px;
-  padding: 12px 16px;
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-button:active {
-  transform: scale(0.97);
-}
-
-.box {
-  pointer-events: auto;
-}
-
-body {
+  padding: 16px;
   overflow-x: hidden;
 }
 
+/* ================= HEADINGS ================= */
+h2, h3 {
+  margin: 12px 0;
+  font-weight: 700;
+}
+
+/* ================= GAME BOXES ================= */
+.boxes {
+  display: grid;
+  grid-template-columns: repeat(3, 90px);
+  gap: 14px;
+  justify-content: center;
+  margin: 32px 0;
+}
+
 .box {
   width: 90px;
   height: 90px;
-  background: #f6c90e;
-  border-radius: 12px;
+  background: linear-gradient(135deg, #facc15, #f59e0b);
+  border-radius: 14px;
+  font-size: 26px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 28px;
   cursor: pointer;
-  transition: 0.3s;
+  user-select: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 10px 25px rgba(250, 204, 21, 0.35);
 }
 
 .box:hover {
-  transform: scale(1.05);
-}
-
-.box.opened {
-  animation: openBox 0.6s ease forwards;
-  pointer-events: none;
-}
-
-.box.disabled {
-  pointer-events: none;
-  opacity: 0.5;
-}
-
-@keyframes openBox {
-  0% {
-    transform: scale(1);
-  }
-  30% {
-    transform: scale(1.2) rotate(5deg);
-  }
-  60% {
-    transform: scale(0.9);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-
-.box {
-  cursor: pointer;
-  pointer-events: auto;
-  transition: transform 0.2s ease;
+  transform: translateY(-4px) scale(1.05);
 }
 
 .box:active {
   transform: scale(0.95);
 }
 
+.box.opened {
+  background: #020617;
+  color: #ffffff;
+  pointer-events: none;
+  animation: boxOpen 0.6s ease forwards;
+}
+
+@keyframes boxOpen {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.2) rotate(6deg); }
+  70%  { transform: scale(0.9); }
+  100% { transform: scale(1); }
+}
+
+/* ================= STATS ================= */
+p {
+  margin: 6px 0;
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+/* ================= BUTTONS ================= */
+button {
+  border: none;
+  border-radius: 14px;
+  padding: 12px 16px;
+  margin: 6px 0;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  background: #1e293b;
+  color: #ffffff;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s;
+}
+
+button:hover {
+  background: #334155;
+}
+
+button:active {
+  transform: scale(0.97);
+}
+
+button:disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* ================= DAILY BONUS ================= */
+.daily-btn {
+  background: linear-gradient(135deg, #facc15, #f59e0b);
+  color: #000;
+  box-shadow: 0 8px 20px rgba(250, 204, 21, 0.45);
+}
+
+/* ================= TOKEN MARKET ================= */
 .token-market {
   margin: 20px 0;
-  text-align: center;
 }
 
 .token-market h3 {
-  color: #f5c542;
-  margin-bottom: 10px;
+  color: #facc15;
 }
 
 .market-buttons {
@@ -216,76 +122,90 @@ body {
   justify-content: center;
 }
 
-.market-buttons button {
-  background: #1e293b;
-  color: #fff;
-  border: 1px solid #334155;
-}
-
+/* ================= CONVERT ================= */
 .convert-btn {
+  width: 100%;
   background: linear-gradient(135deg, #facc15, #f59e0b);
   color: #000;
-  width: 100%;
-  margin: 15px 0;
-  font-size: 16px;
-  box-shadow: 0 8px 20px rgba(250, 204, 21, 0.4);
+  box-shadow: 0 10px 25px rgba(250, 204, 21, 0.4);
+  margin: 14px 0;
 }
 
-.energy-box {
+/* ================= ENERGY SHOP ================= */
+.energy-shop {
   margin: 20px 0;
-  text-align: center;
 }
 
-.energy-box h3 {
+.energy-shop h3 {
   color: #22c55e;
-  margin-bottom: 10px;
 }
 
-.energy-box button {
-  background: #0f172a;
+.energy-shop button {
+  width: 90%;
+  background: #020617;
   color: #22c55e;
   border: 1px solid #22c55e;
-  width: 90%;
-  margin: 6px auto;
 }
 
+/* ================= WITHDRAW ================= */
 .withdraw-box {
   background: #020617;
-  padding: 15px;
-  border-radius: 14px;
+  padding: 16px;
+  border-radius: 16px;
   margin: 20px 0;
+  box-shadow: 0 0 0 1px #1e293b;
 }
 
 .withdraw-box input {
   width: 100%;
-  padding: 10px;
+  padding: 12px;
   margin: 6px 0;
-  border-radius: 8px;
+  border-radius: 10px;
   border: none;
   background: #0f172a;
-  color: #fff;
+  color: #ffffff;
+  outline: none;
+}
+
+.withdraw-box input::placeholder {
+  color: #94a3b8;
 }
 
 .withdraw-box button {
-  background: #ef4444;
-  color: #fff;
-  width: 100%;
-  margin-top: 10px;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  box-shadow: 0 8px 20px rgba(239, 68, 68, 0.4);
 }
 
-.referral-box {
-  margin: 20px 0;
-  text-align: center;
-}
-
-.referral-box input {
+/* ================= REFERRAL ================= */
+#refLink {
   width: 70%;
-  padding: 8px;
-  border-radius: 8px;
+  padding: 10px;
+  border-radius: 10px;
   border: none;
+  background: #0f172a;
+  color: #ffffff;
+  margin-top: 6px;
 }
 
-.referral-box button {
+.copy-btn {
   background: #3b82f6;
-  color: #fff;
 }
+
+/* ================= TASK BUTTONS ================= */
+.task-btn {
+  width: 90%;
+  background: #020617;
+  border: 1px solid #334155;
+}
+
+/* ================= ADS ================= */
+.ad-banner img {
+  width: 100%;
+  border-radius: 14px;
+  margin-top: 16px;
+}
+
+/* ================= SMOOTH FEEL ================= */
+html {
+  scroll-behavior: smooth;
+  }
