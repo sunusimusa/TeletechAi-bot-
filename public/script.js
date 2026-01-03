@@ -6,21 +6,17 @@ const TELEGRAM_ID =
 let balance = 0;
 let energy = 0;
 let tokens = 0;
-let referralsCount = 0;
-let referralCode = "";
 let freeTries = 0;
+let referralCode = "";
+let referralsCount = 0;
 let soundEnabled = true;
 
 // ================== INIT ==================
-document.addEventListener("DOMContentLoaded", async () => {
-  await loadUser();
-  startEnergyRegen();
+document.addEventListener("DOMContentLoaded", () => {
+  loadUser();
 });
 
 // ================== LOAD USER ==================
-let referralCode = "";
-let referralsCount = 0;
-
 async function loadUser() {
   const res = await fetch("/api/user", {
     method: "POST",
@@ -30,18 +26,24 @@ async function loadUser() {
 
   const data = await res.json();
 
-  referralCode = data.referralCode;
-  referralsCount = data.referralsCount || 0;
+  if (data.error) {
+    alert("Failed to load user");
+    return;
+  }
+
+  balance = data.balance ?? 0;
+  energy = data.energy ?? 0;
+  tokens = data.tokens ?? 0;
+  freeTries = data.freeTries ?? 0;
+  referralCode = data.referralCode ?? "";
+  referralsCount = data.referralsCount ?? 0;
 
   if (referralCode) {
     document.getElementById("refLink").value =
       `https://t.me/teletechai_bot?start=${referralCode}`;
-  } else {
-    document.getElementById("refLink").value = "Loading...";
   }
 
-  document.getElementById("refCount").innerText =
-    `👥 Referrals: ${referralsCount}`;
+  updateUI();
 }
 
 // ================== UPDATE UI ==================
@@ -57,18 +59,18 @@ function updateUI() {
 function playSound(type) {
   if (!soundEnabled) return;
 
-  const sounds = {
-    click: document.getElementById("clickSound"),
-    win: document.getElementById("winSound"),
-    lose: document.getElementById("loseSound"),
-    error: document.getElementById("errorSound")
+  const map = {
+    click: "clickSound",
+    win: "winSound",
+    lose: "loseSound",
+    error: "errorSound"
   };
 
-  const s = sounds[type];
-  if (!s) return;
+  const el = document.getElementById(map[type]);
+  if (!el) return;
 
-  s.currentTime = 0;
-  s.play().catch(() => {});
+  el.currentTime = 0;
+  el.play().catch(() => {});
 }
 
 // ================== OPEN BOX ==================
@@ -87,17 +89,17 @@ async function openBox(box) {
 
   if (data.error) {
     playSound("error");
-    document.getElementById("msg").innerText = "❌ " + data.error;
+    document.getElementById("msg").innerText = data.error;
     return;
   }
 
   box.classList.add("opened");
 
   if (data.reward === 0) {
-    box.innerHTML = "😢";
+    box.innerText = "😢";
     playSound("lose");
   } else {
-    box.innerHTML = "💰 " + data.reward;
+    box.innerText = `💰 ${data.reward}`;
     playSound("win");
   }
 
@@ -109,7 +111,7 @@ async function openBox(box) {
 
   setTimeout(() => {
     box.classList.remove("opened");
-    box.innerHTML = "";
+    box.innerText = "";
   }, 3000);
 }
 
@@ -124,7 +126,7 @@ async function claimDaily() {
   const data = await res.json();
 
   if (data.error) {
-    document.getElementById("dailyMsg").innerText = "❌ " + data.error;
+    document.getElementById("dailyMsg").innerText = data.error;
     return;
   }
 
@@ -132,174 +134,35 @@ async function claimDaily() {
   energy = data.energy;
 
   document.getElementById("dailyMsg").innerText =
-    `🎉 Daily reward +${data.reward}`;
+    `🎉 +${data.reward}`;
 
   updateUI();
 }
 
-// ================== BUY ENERGY ==================
-async function buyEnergy(amount) {
-  const res = await fetch("/api/buy-energy", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ telegramId: TELEGRAM_ID, amount })
-  });
-
-  const data = await res.json();
-
-  if (data.error) {
-    alert("❌ " + data.error);
-    return;
-  }
-
-  balance = data.balance;
-  energy = data.energy;
-  updateUI();
-}
-
-async function buyToken(amount) {
-  const res = await fetch("/api/market/buy", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      telegramId: TELEGRAM_ID,
-      amount
-    })
-  });
-
-  const data = await res.json();
-
-  if (data.error) {
-    alert("❌ " + data.error);
-    return;
-  }
-
-  balance = data.balance;
-  tokens = data.tokens;
-  updateUI();
-}
-
-async function sellToken(amount) {
-  const res = await fetch("/api/market/sell", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      telegramId: TELEGRAM_ID,
-      amount
-    })
-  });
-
-  const data = await res.json();
-
-  if (data.error) {
-    alert("❌ " + data.error);
-    return;
-  }
-
-  balance = data.balance;
-  tokens = data.tokens;
-  updateUI();
-}
-
-// ================== REFERRAL COPY ==================
-function copyRef() {
-  navigator.clipboard.writeText(
-    document.getElementById("refLink").value
-  );
-  alert("✅ Referral link copied!");
-}
-
-// ================== CONVERT POINTS TO TOKEN ==================
+// ================== CONVERT POINTS ==================
 async function convertPoints() {
   const res = await fetch("/api/convert", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      telegramId: TELEGRAM_ID
-    })
+    body: JSON.stringify({ telegramId: TELEGRAM_ID })
   });
 
   const data = await res.json();
 
   if (data.error) {
-    document.getElementById("convertMsg").innerText = "❌ " + data.error;
+    alert(data.error);
     return;
   }
 
-  // update values
   balance = data.balance;
   tokens = data.tokens;
-
-  document.getElementById("convertMsg").innerText =
-    "✅ Converted successfully!";
-
   updateUI();
 }
 
-// ================== JOIN YOUTUBE ==================
-function joinYouTube() {
-  Telegram.WebApp.openLink("https://youtube.com/@Sunusicrypto");
-
-  setTimeout(async () => {
-    const res = await fetch("/api/task/youtube", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ telegramId: TELEGRAM_ID })
-    });
-
-    const data = await res.json();
-
-    if (data.error) {
-      alert("Already claimed!");
-    } else {
-      tokens = data.tokens;
-      updateUI();
-      alert("🎉 You earned 10 TOKEN!");
-    }
-  }, 4000);
-}
-
-// ================== JOIN GROUP ==================
-function joinGroup() {
-  Telegram.WebApp.openLink("https://t.me/tele_tap_ai");
-
-  setTimeout(async () => {
-    const res = await fetch("/api/task/group", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ telegramId: TELEGRAM_ID })
-    });
-
-    const data = await res.json();
-
-    if (data.error) {
-      alert("Already claimed!");
-    } else {
-      tokens = data.tokens;
-      updateUI();
-      alert("🎉 +5 TOKEN added!");
-    }
-  }, 4000);
-}
-
-function joinChannel() {
-  Telegram.WebApp.openLink("https://t.me/TeleAIupdates");
-
-  setTimeout(async () => {
-    const res = await fetch("/api/task/channel", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ telegramId: TELEGRAM_ID })
-    });
-
-    const data = await res.json();
-
-    if (data.error) {
-      alert("Already claimed!");
-    } else {
-      tokens = data.tokens;
-      updateUI();
-      alert("🎉 +5 TOKEN added!");
-    }
-  }, 4000);
+// ================== COPY REF ==================
+function copyRef() {
+  navigator.clipboard.writeText(
+    document.getElementById("refLink").value
+  );
+  alert("Referral link copied");
 }
