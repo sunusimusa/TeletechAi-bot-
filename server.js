@@ -31,8 +31,10 @@ function generateCode() {
 
 function regenEnergy(user) {
   const now = Date.now();
-  const ENERGY_TIME = 5 * 60 * 1000;
-  const ENERGY_GAIN = 5;
+  const ENERGY_TIME = user.isPro
+  ? 2 * 60 * 1000   // 2 minutes (PRO)
+  : 5 * 60 * 1000;  // 5 minutes (FREE)
+  const ENERGY_GAIN = user.isPro ? 8 : 5;
   const MAX_ENERGY = 100;
 
   if (!user.lastEnergy) user.lastEnergy = now;
@@ -102,7 +104,9 @@ app.post("/api/daily", async (req, res) => {
   user.dailyStreak =
     now - user.lastDaily < DAY * 2 ? user.dailyStreak + 1 : 1;
 
-  const reward = user.dailyStreak * 100;
+  const reward = user.isPro
+  ? Math.floor(baseReward * 1.5)
+  : baseReward;
   user.lastDaily = now;
   user.balance += reward;
   user.energy = Math.min(100, user.energy + 10);
@@ -225,6 +229,31 @@ app.post("/api/task/channel", async (req, res) => {
   await user.save();
 
   res.json({ tokens: user.tokens });
+});
+
+app.post("/api/pro/upgrade", async (req, res) => {
+  const { telegramId } = req.body;
+  const user = await User.findOne({ telegramId });
+
+  if (!user) return res.json({ error: "USER_NOT_FOUND" });
+  if (user.isPro) return res.json({ error: "ALREADY_PRO" });
+
+  const PRO_PRICE = 5; // 5 tokens
+
+  if (user.tokens < PRO_PRICE)
+    return res.json({ error: "NOT_ENOUGH_TOKENS" });
+
+  user.tokens -= PRO_PRICE;
+  user.isPro = true;
+  user.proSince = Date.now();
+
+  await user.save();
+
+  res.json({
+    success: true,
+    tokens: user.tokens,
+    isPro: true
+  });
 });
 
 /* ================= ROUTES ================= */
