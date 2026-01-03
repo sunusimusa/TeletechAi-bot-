@@ -166,3 +166,114 @@ function copyRef() {
   );
   alert("Referral link copied");
 }
+
+async function buyToken(amount = 1) {
+  const res = await fetch("/api/market/buy", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ telegramId: TELEGRAM_ID, amount })
+  });
+
+  const data = await res.json();
+  if (data.error) return alert(data.error);
+
+  balance = data.balance;
+  tokens = data.tokens;
+  updateUI();
+}
+
+async function sellToken(amount = 1) {
+  const res = await fetch("/api/market/sell", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ telegramId: TELEGRAM_ID, amount })
+  });
+
+  const data = await res.json();
+  if (data.error) return alert(data.error);
+
+  balance = data.balance;
+  tokens = data.tokens;
+  updateUI();
+}
+
+async function convertPoints() {
+  const res = await fetch("/api/convert", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ telegramId: TELEGRAM_ID })
+  });
+
+  const data = await res.json();
+  if (data.error) return alert(data.error);
+
+  balance = data.balance;
+  tokens = data.tokens;
+  updateUI();
+}
+
+async function buyEnergy(amount) {
+  const res = await fetch("/api/buy-energy", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ telegramId: TELEGRAM_ID, amount })
+  });
+
+  const data = await res.json();
+  if (data.error) return alert(data.error);
+
+  balance = data.balance;
+  energy = data.energy;
+  updateUI();
+}
+
+function joinYouTube() {
+  Telegram.WebApp.openLink("https://youtube.com/@Sunusicrypto");
+  setTimeout(async () => {
+    const res = await fetch("/api/task/youtube", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ telegramId: TELEGRAM_ID })
+    });
+    const data = await res.json();
+    if (!data.error) {
+      tokens = data.tokens;
+      updateUI();
+      alert("+10 TOKEN");
+    }
+  }, 4000);
+}
+
+function joinGroup() {
+  Telegram.WebApp.openLink("https://t.me/tele_tap_ai");
+  setTimeout(async () => {
+    const res = await fetch("/api/task/group", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ telegramId: TELEGRAM_ID })
+    });
+    const data = await res.json();
+    if (!data.error) {
+      tokens = data.tokens;
+      updateUI();
+      alert("+5 TOKEN");
+    }
+  }, 4000);
+}
+
+function joinChannel() {
+  Telegram.WebApp.openLink("https://t.me/TeleAIupdates");
+  setTimeout(async () => {
+    const res = await fetch("/api/task/channel", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ telegramId: TELEGRAM_ID })
+    });
+    const data = await res.json();
+    if (!data.error) {
+      tokens = data.tokens;
+      updateUI();
+      alert("+5 TOKEN");
+    }
+  }, 4000);
+}
