@@ -196,16 +196,6 @@ async function sellToken(amount) {
   updateUI();
 }
 
-// ================== ENERGY AUTO REGEN ==================
-function startEnergyRegen() {
-  setInterval(() => {
-    if (energy < 100) {
-      energy += 1;
-      updateUI();
-    }
-  }, 60000); // 1 minute
-}
-
 // ================== REFERRAL COPY ==================
 function copyRef() {
   navigator.clipboard.writeText(
