@@ -314,3 +314,29 @@ async function upgradePro() {
   updateUI();
   alert("🎉 You are now PRO!");
 }
+
+async function upgradePro(level) {
+  const res = await fetch("/api/pro/upgrade", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      telegramId: TELEGRAM_ID,
+      level
+    })
+  });
+
+  const data = await res.json();
+
+  if (data.error) {
+    document.getElementById("proMsg").innerText =
+      "❌ " + data.error;
+    return;
+  }
+
+  tokens = data.tokens;
+
+  document.getElementById("proMsg").innerText =
+    `✅ PRO Level ${data.proLevel} activated!`;
+
+  updateUI();
+}
