@@ -115,4 +115,35 @@ router.post("/daily", async (req, res) => {
   });
 });
 
+async function withdrawTokens() {
+  const address = document.getElementById("wallet").value;
+  const amount = Number(document.getElementById("amount").value);
+
+  if (!address || !amount) {
+    alert("Fill wallet & amount");
+    return;
+  }
+
+  const res = await fetch("/api/withdraw", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      telegramId: TELEGRAM_ID,
+      address,
+      amount
+    })
+  });
+
+  const data = await res.json();
+
+  if (data.error) {
+    alert("❌ " + data.error);
+    return;
+  }
+
+  alert("✅ Withdraw sent!");
+  tokens -= amount;
+  updateUI();
+}
+
 export default router;
