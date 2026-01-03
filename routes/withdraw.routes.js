@@ -4,51 +4,40 @@ import User from "../models/User.js";
 const router = express.Router();
 
 // ===== TON WITHDRAW =====
-router.post("/ton", async (req, res) => {
-  const { telegramId, address, amount } = req.body;
+router.post("/withdraw", async (req, res) => {
+  const { telegramId, wallet, amount } = req.body;
+
+  if (!telegramId || !wallet || !amount) {
+    return res.json({ error: "MISSING_FIELDS" });
+  }
 
   const user = await User.findOne({ telegramId });
   if (!user) return res.json({ error: "USER_NOT_FOUND" });
-  if (user.tokens < amount)
-    return res.json({ error: "NOT_ENOUGH_TOKENS" });
 
-  try {
-    await sendTON(address, amount * 0.1); // example rate
-
-    user.tokens -= amount;
-    await user.save();
-
-    res.json({ success: true });
-  } catch (e) {
-    console.error(e);
-    res.json({ error: "TON_FAILED" });
+  if (amount <= 0) {
+    return res.json({ error: "INVALID_AMOUNT" });
   }
-});
 
-// ===== JETTON WITHDRAW =====
-router.post("/jetton", async (req, res) => {
-  const { telegramId, address, amount } = req.body;
-
-  const user = await User.findOne({ telegramId });
-  if (!user) return res.json({ error: "USER_NOT_FOUND" });
-  if (user.tokens < amount)
+  if (user.tokens < amount) {
     return res.json({ error: "NOT_ENOUGH_TOKENS" });
-
-  try {
-    await sendJetton({
-      jettonMaster: process.env.JETTON_MASTER,
-      toAddress: address,
-      amount
-    });
-
-    user.tokens -= amount;
-    await user.save();
-
-    res.json({ success: true });
-  } catch (e) {
-    console.error(e);
-    res.json({ error: "JETTON_FAILED" });
   }
-});
 
+  // 🔒 CIRE TOKENS
+  user.tokens -= amount;
+
+  // 🧾 AJIYE REQUEST
+  user.withdrawals.push({
+    amount,
+    wallet,
+    status: "pending",
+    date: new Date()
+  });
+
+  await user.save();
+
+  res.json({
+    success: true,
+    message: "Withdraw request submitted. Pending approval."
+  });
+});
 export default router;
