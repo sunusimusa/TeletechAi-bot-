@@ -1,27 +1,42 @@
 // ===== TELEGRAM INIT =====
 const tg = window.Telegram.WebApp;
 tg.expand();
-const TELEGRAM_ID = tg.initDataUnsafe?.user?.id;
-const tg = Telegram.WebApp;
-const params = new URLSearchParams(tg.initDataUnsafe.start_param);
-const referral = params.get("ref");
 
-// ===== GAME STATE =====
+const TELEGRAM_ID = tg.initDataUnsafe?.user?.id || "guest";
+const referral = tg.initDataUnsafe?.start_param || null;
+
+// ===== GAME STATE (DISPLAY ONLY) =====
 let balance = 0;
-let energy = 100;
-let freeTries = 3;
+let energy = 0;
+let freeTries = 0;
 let tokens = 0;
 let openedCount = 0;
 
-const MAX_ENERGY = 100;
-const ENERGY_REGEN = 5;
-const ENERGY_TIME = 300000; // 5 minutes
-
-// ===== LOAD GAME =====
+// ===== INIT =====
 document.addEventListener("DOMContentLoaded", () => {
-  loadGame();
-  setInterval(autoEnergy, ENERGY_TIME);
+  loadUser();
 });
+
+// ===== LOAD USER FROM SERVER =====
+async function loadUser() {
+  const res = await fetch("/api/user", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      telegramId: TELEGRAM_ID,
+      ref: referral
+    })
+  });
+
+  const data = await res.json();
+
+  balance = data.balance;
+  energy = data.energy;
+  freeTries = data.freeTries;
+  tokens = data.tokens;
+
+  updateUI();
+}
 
 // ===== UI UPDATE =====
 function updateUI() {
@@ -31,7 +46,7 @@ function updateUI() {
   document.getElementById("tokens").innerText = tokens;
 }
 
-// ===== OPEN BOX =====
+// ===== OPEN BOX (SERVER CONTROLS ENERGY) =====
 async function openBox(box) {
   if (box.classList.contains("opened")) return;
 
@@ -42,17 +57,18 @@ async function openBox(box) {
   });
 
   const data = await res.json();
+
   if (data.error) {
-    document.getElementById("msg").innerText = data.error;
+    document.getElementById("msg").innerText = "❌ " + data.error;
     return;
   }
 
   box.classList.add("opened");
 
-  if (data.reward.type === "coin") {
-    box.innerText = "💰 " + data.reward.value;
-  } else {
+  if (data.reward === 0) {
     box.innerText = "😢";
+  } else {
+    box.innerText = "💰 " + data.reward;
   }
 
   balance = data.balance;
@@ -61,8 +77,15 @@ async function openBox(box) {
 
   updateUI();
 
+  setTimeout(() => {
+    box.classList.remove("opened");
+    box.innerText = "";
+  }, 3000);
+
   openedCount++;
-  if (openedCount === 6) setTimeout(resetBoxes, 2000);
+  if (openedCount === 6) {
+    setTimeout(resetBoxes, 2000);
+  }
 }
 
 // ===== RESET BOXES =====
@@ -74,41 +97,26 @@ function resetBoxes() {
   openedCount = 0;
 }
 
-// ===== AUTO ENERGY =====
-function autoEnergy() {
-  if (energy < MAX_ENERGY) {
-    energy += ENERGY_REGEN;
-    if (energy > MAX_ENERGY) energy = MAX_ENERGY;
-    updateUI();
-  }
-}
-
-// ===== CONVERT TOKEN =====
-function convertToToken() {
-  if (balance < 10000) {
-    document.getElementById("convertMsg").innerText =
-      "❌ Need 10,000 points";
-    return;
-  }
-
-  balance -= 10000;
-  tokens += 1;
-  updateUI();
-}
-
-// ===== LOAD FROM SERVER =====
-function loadGame() {
-  fetch("/api/user", {
+// ===== CONVERT POINTS → TOKEN (SERVER) =====
+async function convertToToken() {
+  const res = await fetch("/api/convert", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ telegramId: TELEGRAM_ID })
-  })
-    .then(r => r.json())
-    .then(data => {
-      balance = data.balance;
-      energy = data.energy;
-      freeTries = data.freeTries;
-      tokens = data.tokens;
-      updateUI();
-    });
-    }
+  });
+
+  const data = await res.json();
+
+  if (data.error) {
+    document.getElementById("convertMsg").innerText = "❌ " + data.error;
+    return;
+  }
+
+  balance = data.balance;
+  tokens = data.tokens;
+
+  document.getElementById("convertMsg").innerText =
+    "✅ Converted successfully";
+
+  updateUI();
+}
