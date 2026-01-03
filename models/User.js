@@ -11,7 +11,8 @@ const UserSchema = new mongoose.Schema({
   referralCode: { type: String },
   referredBy: { type: String, default: null },
   referralsCount: { type: Number, default: 0 },
-
+  
+withdrawn: { type: Number, default: 0 },
   dailyStreak: { type: Number, default: 0 },
   lastDaily: { type: Number, default: 0 },
   
