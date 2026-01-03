@@ -199,6 +199,47 @@ app.post("/api/convert", async (req, res) => {
   }
 });
 
+app.post("/api/withdraw", async (req, res) => {
+  const session = await mongoose.startSession();
+
+  try {
+    const { telegramId, wallet, amount } = req.body;
+
+    if (!telegramId || !wallet || !amount) {
+      return res.status(400).json({ error: "MISSING_FIELDS" });
+    }
+
+    session.startTransaction();
+
+    const user = await User.findOne({ telegramId }).session(session);
+
+    if (!user || user.tokens < amount) {
+      await session.abortTransaction();
+      return res.status(400).json({ error: "NOT_ENOUGH_TOKENS" });
+    }
+
+    user.tokens -= amount;
+    await user.save({ session });
+
+    await Withdraw.create([{
+      telegramId,
+      wallet,
+      amount
+    }], { session });
+
+    await session.commitTransaction();
+    session.endSession();
+
+    res.json({ success: true, status: "pending" });
+
+  } catch (err) {
+    await session.abortTransaction();
+    session.endSession();
+    console.error("Withdraw error:", err);
+    res.status(500).json({ error: "SERVER_ERROR" });
+  }
+});
+
 // ================= BUY ENERGY =================
 app.post("/api/buy-energy", async (req, res) => {
   const { telegramId, amount } = req.body;
