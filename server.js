@@ -42,38 +42,38 @@ function regenEnergy(user) {
 // ================= USER =================
 app.post("/api/user", async (req, res) => {
   const { telegramId, ref } = req.body;
-  if (!telegramId) return res.json({ error: "NO_USER" });
+
+  if (!telegramId) {
+    return res.json({ error: "NO_TELEGRAM_ID" });
+  }
 
   let user = await User.findOne({ telegramId });
 
+  // CREATE USER
   if (!user) {
     user = await User.create({
       telegramId,
       referralCode: generateCode(),
-      referredBy: ref || null,
-      referralsCount: 0,
-      balance: 0,
-      energy: 100,
-      freeTries: 3,
-      tokens: 0,
-      lastDaily: 0,
-      lastEnergy: Date.now()
+      referredBy: ref || null
     });
 
-    // reward referrer
+    // REWARD REFERRER
     if (ref) {
       const refUser = await User.findOne({ referralCode: ref });
       if (refUser) {
         refUser.balance += 500;
-        refUser.energy += 20;
+        refUser.energy = Math.min(100, refUser.energy + 20);
         refUser.referralsCount += 1;
         await refUser.save();
       }
     }
   }
 
-  regenEnergy(user);
-  await user.save();
+  // ⚠️ SAFETY: idan tsohon user bashi da code
+  if (!user.referralCode) {
+    user.referralCode = generateCode();
+    await user.save();
+  }
 
   res.json({
     telegramId: user.telegramId,
@@ -81,8 +81,8 @@ app.post("/api/user", async (req, res) => {
     energy: user.energy,
     freeTries: user.freeTries,
     tokens: user.tokens,
-    referralsCount: user.referralsCount,
-    referralCode: user.referralCode
+    referralCode: user.referralCode,
+    referralsCount: user.referralsCount
   });
 });
 
