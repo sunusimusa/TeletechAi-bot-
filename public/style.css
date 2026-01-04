@@ -336,45 +336,102 @@ html {
 
 /* ===== ROADMAP PAGE ===== */
 .roadmap-page {
-  background: #020617;
+  background: linear-gradient(180deg, #020617, #020617);
   color: white;
   padding: 20px;
   text-align: center;
 }
 
+/* ===== HEADER ===== */
 .roadmap-title {
-  animation: fadeDown 0.6s ease;
+  font-size: 24px;
+  font-weight: 800;
+  margin-bottom: 6px;
+  animation: fadeDown 0.8s ease;
 }
 
 .roadmap-sub {
   color: #94a3b8;
-  margin-bottom: 20px;
-  animation: fadeDown 0.8s ease;
+  margin-bottom: 25px;
+  font-size: 14px;
+  animation: fadeDown 1.2s ease;
 }
 
+/* ===== ROADMAP CARD ===== */
 .roadmap-card {
-  background: #0f172a;
-  border-radius: 14px;
-  padding: 15px;
-  margin: 15px 0;
+  background: linear-gradient(160deg, #0f172a, #020617);
+  border-radius: 16px;
+  padding: 18px;
+  margin: 18px 0;
   text-align: left;
   opacity: 0;
-  animation: bounceIn 0.6s ease forwards;
+  transform: translateY(40px);
+  animation: roadmapEnter 0.9s ease forwards;
 }
 
-.completed { border-left: 5px solid #22c55e; }
-.active { border-left: 5px solid #facc15; }
-.upcoming { border-left: 5px solid #64748b; opacity: 0.8; }
+/* ===== STATUS COLORS ===== */
+.completed {
+  border-left: 5px solid #22c55e;
+  box-shadow: 0 0 15px rgba(34, 197, 94, 0.15);
+}
+
+.active {
+  border-left: 5px solid #facc15;
+  box-shadow: 0 0 18px rgba(250, 204, 21, 0.25);
+}
+
+.upcoming {
+  border-left: 5px solid #64748b;
+  opacity: 0.75;
+}
+
+/* ===== LIST ===== */
+.roadmap-card ul {
+  padding-left: 18px;
+}
+
+.roadmap-card li {
+  margin: 6px 0;
+  font-size: 14px;
+  color: #e5e7eb;
+}
+
+/* ===== PROGRESS TEXT ===== */
+.roadmap-progress {
+  margin: 12px 0 20px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #22c55e;
+}
+
+/* ===== BUTTON ===== */
+.back-btn {
+  width: 100%;
+  margin-top: 25px;
+  padding: 14px;
+  border-radius: 14px;
+  border: none;
+  background: linear-gradient(135deg, #facc15, #f59e0b);
+  font-weight: bold;
+  font-size: 15px;
+  color: #000;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.back-btn:active {
+  transform: scale(0.97);
+}
 
 /* ===== ANIMATIONS ===== */
-@keyframes bounceIn {
+@keyframes roadmapEnter {
   0% {
-    transform: translateY(30px) scale(0.95);
     opacity: 0;
+    transform: translateY(40px) scale(0.95);
   }
   60% {
-    transform: translateY(-5px) scale(1.02);
     opacity: 1;
+    transform: translateY(-6px) scale(1.02);
   }
   100% {
     transform: translateY(0) scale(1);
@@ -384,21 +441,10 @@ html {
 @keyframes fadeDown {
   from {
     opacity: 0;
-    transform: translateY(-15px);
+    transform: translateY(-18px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
   }
-}
-
-.back-btn {
-  width: 100%;
-  margin-top: 20px;
-  padding: 12px;
-  border-radius: 12px;
-  border: none;
-  background: linear-gradient(135deg, #facc15, #f59e0b);
-  font-weight: bold;
-  color: #000;
 }
