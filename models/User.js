@@ -22,6 +22,7 @@ proSince: { type: Number, default: 0 },
   // ===== DAILY =====
   dailyStreak: { type: Number, default: 0 },
   lastDaily: { type: Number, default: 0 },
+  lastAd: { type: Number, default: 0 },
 
   // ===== TASKS =====
   joinedChannel: { type: Boolean, default: false },
