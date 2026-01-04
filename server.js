@@ -10,16 +10,21 @@ import withdrawRoutes from "./routes/withdraw.routes.js";
 import marketRoutes from "./routes/market.routes.js";
 import roadmapRoutes from "./routes/roadmap.routes.js";
 
+
 dotenv.config();
 
 const app = express();
 
-/* ================= MIDDLEWARE ================= */
+/* ===== MIDDLEWARE ===== */
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use("/api/roadmap", roadmapRoutes);
 app.use(express.static("public"));
+
+/* ===== ROUTES ===== */
+app.use("/api/roadmap", roadmapRoutes);
+app.use("/api/market", marketRoutes);
+app.use("/api/withdraw", withdrawRoutes);
 
 /* ================= DATABASE ================= */
 mongoose.connect(process.env.MONGODB_URI)
