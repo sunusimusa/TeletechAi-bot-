@@ -75,6 +75,8 @@ function openRoadmap() {
 function updateUI() {
   document.getElementById("balance").innerText = `Balance: ${balance}`;
   document.getElementById("energy").innerText = `Energy: ${energy}`;
+  document.getElementById("energy").innerText =
+  `Energy: ${energy} / ${maxEnergy}`;
   document.getElementById("tokens").innerText = `Tokens: ${tokens}`;
   document.getElementById("refCount").innerText =
     `👥 Referrals: ${referralsCount}`;
