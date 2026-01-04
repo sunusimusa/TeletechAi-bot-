@@ -502,3 +502,60 @@ html {
   border: 1px solid #475569;
   color: #94a3b8;
 }
+
+/* ===== ADS PAGE BUTTONS ===== */
+.ads-actions {
+  position: fixed;
+  bottom: 20px;
+  left: 0;
+  width: 100%;
+  padding: 0 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* CLAIM BUTTON */
+.ads-btn {
+  width: 100%;
+  padding: 16px;
+  border-radius: 16px;
+  border: none;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: #000;
+  box-shadow: 0 10px 25px rgba(34, 197, 94, 0.4);
+  transition: all 0.2s ease;
+}
+
+.ads-btn:active {
+  transform: scale(0.97);
+}
+
+.ads-btn.disabled,
+.ads-btn:disabled {
+  background: #334155;
+  color: #94a3b8;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+/* BACK BUTTON */
+.back-btn {
+  width: 100%;
+  padding: 14px;
+  border-radius: 14px;
+  background: transparent;
+  border: 1px solid #475569;
+  color: #94a3b8;
+  font-weight: 600;
+    }
+
+if (seconds <= 0) {
+  clearInterval(interval);
+  btn.disabled = false;
+  btn.classList.remove("disabled");
+  btn.innerText = "⚡ Claim Free Energy";
+}
